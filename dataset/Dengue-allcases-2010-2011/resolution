@@ -1,0 +1,8 @@
+As for bandwidth:
+- spatially: 250m - 2500m
+- temporally: 1day - 14days
+
+Resolution:
+- high: 50m*50m*1day
+- low: 100m*100m*1day
+
