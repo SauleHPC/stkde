@@ -1,0 +1,5 @@
+{
+    "resolution": [100, 100, 1],
+    "spatial_bandwidth": 500,
+    "temporal_bandwidth": 7
+}
