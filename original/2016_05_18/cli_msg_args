@@ -1,0 +1,8 @@
+I need specific arguments to continue.
+Usage: python file.py [resolution|bandwidth]
+                00 - 0 -> low resolution, low bandwidth
+                01 - 1 -> low resolution, high bandwidth
+                10 - 2 -> high resolution, low bandwidth
+                11 - 3 -> high resolution, high bandwidth
+                example: python script.py 0 will run the script in low bandwidth, low resolution
+                         python script.py 123 will run the script for [low, high], [high, low], [high, low] bandwidth, resolution

@@ -1,7 +1,7 @@
 import numpy as np
 import sys, os, glob, re
 from math import pi
-
+import json
 
 gDir = "scratch/ahohl/d2010_11/decomp2/buf_500_7"
 
@@ -69,7 +69,6 @@ for bd, pt in zip(glob.glob(gDir + os.sep + "boundaryFiles" + os.sep + "*"),
 				for zi in np.arange(za, zb, zres):
 					if (hs * hs) >= pow(xc - xi, 2) + pow(yc - yi, 2):
 						computations += 1
-						assert ht >= abs(zc - zi)
 						if ht >= abs(zc - zi):
 							computations += 1
 							x_index = int((xi - xa) // xres)
