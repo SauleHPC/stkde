@@ -1,15 +1,20 @@
 #include<math.h>
 #include<stdio.h>
 #include<iostream>
+#include<ctime>
+#include<chrono>
+#include<sys/time.h>
 using namespace std;
 
 float constant = 0;
 int hs = 0, ht = 0;
 
-float densityf(float x, float y, int z, float xc, float yc, int zc) {
+inline float densityf(float x, float y, int z, float xc, float yc, int zc) {
   float u = (x - xc) / hs, v = (y - yc) / hs, w = (z - zc) / ht;
   return constant * (1 - u * u - v * v) * (1 - w * w);
 }
+
+
 
 int main(int argc, char** argv) {
   int hslow = 250, hshigh = 2500;
@@ -17,7 +22,8 @@ int main(int argc, char** argv) {
   int xreslow = 100, yreslow = 100, zreslow = 1;
   int xreshigh = 50, yreshigh = 50, zreshigh = 1;
   
-  string names[] = {"LOW RESOLUTION, LOW BANDWIDTH", "LOW RESOLUTION, HIGH BANDWIDTH", "HIGH RESOLUTION, LOW BANDWIDTH", "HIGH RESOLUTION, HIGH BANDWIDTH" };
+  string names[] = {"LOW RESOLUTION, LOW BANDWIDTH",
+    "LOW RESOLUTION, HIGH BANDWIDTH", "HIGH RESOLUTION, LOW BANDWIDTH", "HIGH RESOLUTION, HIGH BANDWIDTH" };
   
   if(argc < 3) {
     cout << "I need resolution/bandwidth and iterations ." << endl
@@ -39,19 +45,22 @@ int main(int argc, char** argv) {
       float x = 1058021.234, y = 864864.7112, z = 60.0;
       int hs_sq = hs * hs;
       constant = pow(10.0, 10) / (0.0 + n * hs_sq * ht) * (0.5 * 0.75 * M_PI);
+      double result = 0.0;
+      auto start = chrono::system_clock::now();
       for(int j = 0; j < iterations; j++) {
         for(int i = -hs; i <= hs; i += xres) {
           for(int j = -hs; j <= hs; j += yres) {
             if(hs_sq >= (i * i + j * j)) {
               for(int k = -ht; k <= ht; k += zres) {
-                densityf(x, y, z, i, j, k);
+                result += densityf(x, y, z, i, j, k);
               }
             }
           }
         }
-        
       }
-      cout << names[runtype] << endl;
+      chrono::duration<double> diff = chrono::system_clock::now() - start;
+      cout << names[runtype] << " : " << diff.count() << "s" << endl;
+      cout << result << endl;
     }
   }
   return 0;
