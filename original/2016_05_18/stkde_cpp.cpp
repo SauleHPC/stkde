@@ -19,7 +19,8 @@ int main(int argc, char** argv) {
   int xreslow = 100, yreslow = 100, zreslow = 1;
   int xreshigh = 50, yreshigh = 50, zreshigh = 1;
   
-  string names[] = {"LOW RESOLUTION, LOW BANDWIDTH", "LOW RESOLUTION, HIGH BANDWIDTH", "HIGH RESOLUTION, LOW BANDWIDTH", "HIGH RESOLUTION, HIGH BANDWIDTH" };
+  string names[] = {"LOW RESOLUTION, LOW BANDWIDTH",
+    "LOW RESOLUTION, HIGH BANDWIDTH", "HIGH RESOLUTION, LOW BANDWIDTH", "HIGH RESOLUTION, HIGH BANDWIDTH" };
   
   if(argc < 3) {
     cout << "I need resolution/bandwidth and iterations ." << endl
@@ -49,7 +50,6 @@ int main(int argc, char** argv) {
             if(hs_sq >= (i * i + j * j)) {
               for(int k = -ht; k <= ht; k += zres) {
                 result += densityf(x, y, z, i, j, k);
-                densityf(x, y, z, i, j, k);
               }
             }
           }
@@ -58,9 +58,6 @@ int main(int argc, char** argv) {
       chrono::duration<double> diff = chrono::system_clock::now() - start;
       cout << names[runtype] << " : " << diff.count() << "s" << endl;
       cout << result << endl;
-
-      }
-      cout << names[runtype] << endl;
     }
   }
   return 0;
