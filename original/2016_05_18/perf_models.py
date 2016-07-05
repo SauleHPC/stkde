@@ -21,10 +21,10 @@ class Task:
 		y = diff_y / res[1]
 		z = diff_z / res[2]
 
-		gp_in_cuboid = (8 * hs / res[0] * hs / res[1] * ht / res[2])
-		gp_in_disk = 4 * hs * hs / res[0] / res[1]
-		gp_in_bar = 2 * ht / res[2]
-		gp_in_xz_plane = (hs / res[1] * ht / res[2] * 4) 
+		self.gp_in_cuboid = (8 * hs / res[0] * hs / res[1] * ht / res[2])
+		self.gp_in_disk = 4 * hs * hs / res[0] / res[1]
+		self.gp_in_bar = 2 * ht / res[2]
+		self.gp_in_xz_plane = (hs / res[1] * ht / res[2] * 4) 
 
 
 		self.grid_points = x * y * z
