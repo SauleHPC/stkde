@@ -38,7 +38,7 @@ class Task:
 
 	def flops_impvd(self):
 		func = 3.14 / 4 * 14 + 3 #3 for distance + 14 in density
-		return self.sources * gp_in_cuboid * func / 10 ** 9.0
+		return self.sources * self.gp_in_cuboid * func / 10 ** 9.0
 
 	def flops_bar(self):
 		pre_func = 3
@@ -51,9 +51,9 @@ class Task:
 	def flops_disk(self):
 		func = 4 + 3.14 / 4 * 5 #5 for density for points in circle + 4 for deciding if in circle
 
-		return self.sources * ( gp_in_cuboid * func #for all gp
-					+ gp_in_xz_plane * 4 # 4 flops per x,z plane
-					+ gp_in_bar * 5 #5 flops per bar computation
+		return self.sources * ( self.gp_in_cuboid * func #for all gp
+					+ self.gp_in_xz_plane * 4 # 4 flops per x,z plane
+					+ self.gp_in_bar * 5 #5 flops per bar computation
 		                       ) / 10 ** 9.0
 
 	def flops_cube(self):
