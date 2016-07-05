@@ -25,7 +25,9 @@ def densityF(x, y, t, xi, yi, ti, n, hs, ht):
     u = (x-xi) / hs
     v = (y-yi) / hs
     w = (t-ti) / ht
-    
+
+    4 + 1 + (1 + 1 + 1) + 1 + 1 + (1 + 1+ 1+1) + 1 + (1 + 1) + 2
+
     constantTerm = pow(10.0, 10) / (n * pow(hs, 2) * ht)
     Ks = (0.5 * math.pi) * (1 - pow(u, 2) - pow(v, 2))
     Kt = 0.75 * (1 - pow(w, 2))

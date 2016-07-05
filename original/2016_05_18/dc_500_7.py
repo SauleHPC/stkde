@@ -11,15 +11,16 @@ sdNum = 0
 xyB = sys.argv[0].split(os.sep)[-1].split("_")[1]     # spatial buffer in meters
 zB = sys.argv[0].split(os.sep)[-1].split("_")[2][:-3]     # temporal buffer in days
 
-xRes = 100        # x resolution in meters
-yRes = 100        # y resolution in meters
+xRes = 50        # x resolution in meters
+yRes = 50        # y resolution in meters
 zRes = 1            # z resolution in days
 
-mdir = "/scratch/ahohl/d2010_11/decomp2/buf_"
+mdir = "scratch/ahohl/d2010_11/decomp2/buf_"
 
-dir1 = mdir + xyB + "_" + zB + os.sep + "pointFiles"
-dir2 = mdir + xyB + "_" + zB + os.sep + "boundaryFiles"
-tdir = mdir + xyB + "_" + zB + os.sep + "timeFiles"
+dir1 = mdir + xyB + "_" + zB + os.sep + "pointFiles" + ("_hres" if [xRes, yRes, zRes] != [100, 100, 1] else '_lres')
+dir2 = mdir + xyB + "_" + zB + os.sep + "boundaryFiles" + ("_hres" if [xRes, yRes, zRes] != [100, 100, 1] else '_lres')
+tdir = mdir + xyB + "_" + zB + os.sep + "timeFiles" + ("_hres" if [xRes, yRes, zRes] != [100, 100, 1] else '_lres')
+
 
 if not os.path.exists(dir1):
     os.makedirs(dir1)
@@ -207,7 +208,7 @@ def decompose(inXd, inYd, inZd, xmind, xmaxd, ymind, ymaxd, zmind, zmaxd, mnpd, 
 		fn2 = open(fb, "w")
 		fn2. write(str(xmind) + ", " + str(xmaxd) + ", " + str(ymind) + ", " + str(ymaxd) + ", " + str(zmind) + ", " + str(zmaxd))
 		fn2.close()
-            
+
     else:   # if number of points in subdomain is higher than threshold, keep decomposing.
         sdXYZ = assign(inXd, inYd, inZd, xmaxd, xmind, ymaxd, ymind, zmaxd, zmind, xybufd, zbufd)        
         decompose(sdXYZ[0], sdXYZ[1], sdXYZ[2], xmind, sdXYZ[-3], ymind, sdXYZ[-2], zmind, sdXYZ[-1], mnpd, xybufd, zbufd)      # recursive function call 1
@@ -222,8 +223,8 @@ def decompose(inXd, inYd, inZd, xmind, xmaxd, ymind, ymaxd, zmind, zmaxd, mnpd, 
 #---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-pFile = "/scratch/ahohl/d2010_11/Data/AllCases2010_11_clip.txt"
-bFile = "/scratch/ahohl/d2010_11/Data/AllCases2010_11_clip_bds.txt"
+pFile = "scratch/ahohl/d2010_11/Data/AllCases2010_11_clip.txt"
+bFile = "scratch/ahohl/d2010_11/Data/AllCases2010_11_clip_bds.txt"
 
 pFile_i = open(pFile, "r")
 inX, inY, inZ = [], [], []

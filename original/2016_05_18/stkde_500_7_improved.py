@@ -68,9 +68,7 @@ for bd, pt in zip(glob.glob(gDir + os.sep + "boundaryFiles" + os.sep + "*"),
 			for yi in np.arange(ya, yb, yres):
 				for zi in np.arange(za, zb, zres):
 					if (hs * hs) >= pow(xc - xi, 2) + pow(yc - yi, 2):
-						computations += 1
 						if ht >= abs(zc - zi):
-							computations += 1
 							x_index = int((xi - xa) // xres)
 							y_index = int((yi - ya) // yres)
 							z_index = int((zi - za) // zres)
