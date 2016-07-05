@@ -35,7 +35,7 @@ class Task:
 		func = 14
 		return self.sources * (8 * hs / res[0] * hs / res[1] * ht / res[2]) * sum([func, pre_func]) / 10 ** 9.0
 
-	def flops_disk(self):
+	def flops_bar(self):
 		pre_func = 3
 		func = 4
 		return self.sources * ((8 * hs / res[0] * hs / res[1] * ht / res[2]) * func
@@ -43,12 +43,14 @@ class Task:
 		                       + (2 * hs * 2)
 		                       ) / 10 ** 9.0
 
-	def flops_bar(self):
-		pre_func = 3
-		func = 5
-		return self.sources * ((8 * hs / res[0] * hs / res[1] * ht / res[2]) * func
-		                       + (4 * hs * hs / res[0] / res[1] * (1 + 4))
-		                       + (2 * ht * 2)
+	def flops_disk(self):
+		func = 4 + 3.14 / 4 * 5 #5 for density for points in circle + 4 for deciding if in circle
+		gp_in_cuboid = (8 * hs / res[0] * hs / res[1] * ht / res[2])
+		gp_in_disk = 4 * hs * hs / res[0] / res[1]
+		gp_in_bar = 2 * ht / res[2]
+		return self.sources * ( gp_in_cuboid * func #for all gp
+					+ (hs / res[1] * ht / res[2] * 4) * 4 # 4 flops per x,z plane
+					+ gp_in_bar * 5 #5 flops per bar computation
 		                       ) / 10 ** 9.0
 
 	def flops_cube(self):
@@ -90,7 +92,7 @@ with open("constants.json") as f:
 			for i in range(len(naive_flops)):
 				naive_flops[i] += naive_flops_file[i] / 10 ** 9.0
 
-	TABLE_HEADS = ["FLOPS_COUNT_DIFFERENT_SCENARIOS[in GFLOPS]", "NAIVE", "IMPVD", "REUSE_DISK", "REUSE_BAR"]
+	TABLE_HEADS = ["FLOPS_COUNT_DIFFERENT_SCENARIOS[in GFLOPs]", "NAIVE", "IMPVD", "REUSE_DISK", "REUSE_BAR"]
 	ROW_HEADS = []
 	for res in ["LOW_RESOLUTION", "HIGH_RESOLUTION"]:
 		for hs in ["LOW_SPATIAL_BANDWIDTH", "HIGH_SPATIAL_BANDWIDTH"]:
