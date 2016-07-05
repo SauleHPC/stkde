@@ -21,6 +21,12 @@ class Task:
 		y = diff_y / res[1]
 		z = diff_z / res[2]
 
+		gp_in_cuboid = (8 * hs / res[0] * hs / res[1] * ht / res[2])
+		gp_in_disk = 4 * hs * hs / res[0] / res[1]
+		gp_in_bar = 2 * ht / res[2]
+		gp_in_xz_plane = (hs / res[1] * ht / res[2] * 4) 
+
+
 		self.grid_points = x * y * z
 
 	def flops_naive(self):
@@ -31,9 +37,8 @@ class Task:
 		return self.grid_points * self.sources * sum([adds, subs, func, func_calls]) / 10 ** 9.0
 
 	def flops_impvd(self):
-		pre_func = 3
-		func = 14
-		return self.sources * (8 * hs / res[0] * hs / res[1] * ht / res[2]) * sum([func, pre_func]) / 10 ** 9.0
+		func = 3.14 / 4 * 14 + 3 #3 for distance + 14 in density
+		return self.sources * gp_in_cuboid * func / 10 ** 9.0
 
 	def flops_bar(self):
 		pre_func = 3
@@ -45,11 +50,9 @@ class Task:
 
 	def flops_disk(self):
 		func = 4 + 3.14 / 4 * 5 #5 for density for points in circle + 4 for deciding if in circle
-		gp_in_cuboid = (8 * hs / res[0] * hs / res[1] * ht / res[2])
-		gp_in_disk = 4 * hs * hs / res[0] / res[1]
-		gp_in_bar = 2 * ht / res[2]
+
 		return self.sources * ( gp_in_cuboid * func #for all gp
-					+ (hs / res[1] * ht / res[2] * 4) * 4 # 4 flops per x,z plane
+					+ gp_in_xz_plane * 4 # 4 flops per x,z plane
 					+ gp_in_bar * 5 #5 flops per bar computation
 		                       ) / 10 ** 9.0
 
