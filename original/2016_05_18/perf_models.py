@@ -21,7 +21,7 @@ class Task:
 		y = diff_y / res[1]
 		z = diff_z / res[2]
 
-		self.gp_in_cuboid = (8 * hs / res[0] * hs / res[1] * ht / res[2])
+		self.gp_in_cuboid = (2 * hs / res[0] * 2 * hs / res[1] * 2 * ht / res[2])
 		self.gp_in_xy_plane = 4 * hs * hs / res[0] / res[1]
 		self.gp_in_bar = 2 * ht / res[2]
 		self.gp_in_xz_plane = (hs / res[1] * ht / res[2] * 4) 
