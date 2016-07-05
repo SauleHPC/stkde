@@ -90,12 +90,13 @@ with open("constants.json") as f:
 					for k, res in enumerate([res_low, res_high]):
 						size_of_box = ceil(x1 - x0) * ceil(y1 - y0) * ceil(z1 - z0) / (res[0] * res[1] * res[2])
 						func = 4 + 1 + (1 + 1 + 1) + 1 + 1 + (1 + 1 + 1 + 1) + 1 + (1 + 1) + 2
-						naive_flops_file[k * 4 + j * 2 + i * 1] += (size_of_box * file_points * 7 + file_points * 2 * pi * hs * hs * ht * func)
+						naive_flops_file[k * 4 + j * 2 + i * 1] += (size_of_box * file_points * (5 + 2 * pi / 4)  # check in cylinder
+											    + file_points * 2 * pi * hs * hs * ht * func) #cost of all cylinders
 
 			for i in range(len(naive_flops)):
 				naive_flops[i] += naive_flops_file[i] / 10 ** 9.0
 
-	TABLE_HEADS = ["FLOPS_COUNT_DIFFERENT_SCENARIOS[in GFLOPs]", "NAIVE", "IMPVD", "REUSE_DISK", "REUSE_BAR"]
+	TABLE_HEADS = ["FLOP_COUNT_DIFFERENT_SCENARIOS[in GFLOPs]", "NAIVE", "IMPVD", "REUSE_DISK", "REUSE_BAR"]
 	ROW_HEADS = []
 	for res in ["LOW_RESOLUTION", "HIGH_RESOLUTION"]:
 		for hs in ["LOW_SPATIAL_BANDWIDTH", "HIGH_SPATIAL_BANDWIDTH"]:
