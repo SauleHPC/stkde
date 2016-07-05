@@ -86,8 +86,8 @@ with open("constants.json") as f:
 			for i, hs in enumerate([hs_low, hs_high]):
 				for j, ht in enumerate([ht_low, ht_high]):
 					for k, res in enumerate([res_low, res_high]):
-						size_of_box = ceil(x1 - x0) * ceil(y1 - y0) * ceil(z1 - z0) / (res[0] * res[1] * res[2])
-						gp_in_cylinder = 2 * pi * hs * hs * ht / (res[0] * res[1] * res[2])
+						size_of_box = (x1 - x0)/res[0] * (y1 - y0)/res[1] * (z1 - z0)/res[2]
+						gp_in_cylinder =  (pi * hs * hs) * (2 * ht) / (res[0] * res[1] * res[2])
 						func = 4 + 1 + (1 + 1 + 1) + 1 + 1 + (1 + 1 + 1 + 1) + 1 + (1 + 1) + 2
 						naive_flops_file[k * 4 + j * 2 + i * 1] += (size_of_box * file_points * (5 + 2 * pi / 4)  # check in cylinder
 											    + file_points * gp_in_cylinder * func) #cost of all cylinders
