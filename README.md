@@ -1,12 +1,12 @@
-`+----------------------------------------------------------------+----------+------+----------+---------+
-|                      FLOPS_COUNT_DIFFERENT_SCENARIOS[in GFLOPS]|     NAIVE| IMPVD|REUSE_DISK|REUSE_BAR|
-+----------------------------------------------------------------+----------+------+----------+---------+
-|   LOW_RESOLUTION, LOW_SPATIAL_BANDWIDTH, LOW_TEMPORAL_BANDWIDTH|   1532.49|  0.17|      0.29|     0.08|
-|  LOW_RESOLUTION, LOW_SPATIAL_BANDWIDTH, HIGH_TEMPORAL_BANDWIDTH| 153002.06|  2.44|      0.82|     0.75|
-|  LOW_RESOLUTION, HIGH_SPATIAL_BANDWIDTH, LOW_TEMPORAL_BANDWIDTH|  21422.43| 17.43|     10.25|     7.69|
-| LOW_RESOLUTION, HIGH_SPATIAL_BANDWIDTH, HIGH_TEMPORAL_BANDWIDTH|2141996.44|244.02|     63.57|    74.35|
-|  HIGH_RESOLUTION, LOW_SPATIAL_BANDWIDTH, LOW_TEMPORAL_BANDWIDTH|   1539.95|  0.70|      0.53|     0.31|
-| HIGH_RESOLUTION, LOW_SPATIAL_BANDWIDTH, HIGH_TEMPORAL_BANDWIDTH| 153009.53|  9.76|      2.67|     2.98|
-| HIGH_RESOLUTION, HIGH_SPATIAL_BANDWIDTH, LOW_TEMPORAL_BANDWIDTH|  21429.90| 69.72|     34.86|    30.76|
-|HIGH_RESOLUTION, HIGH_SPATIAL_BANDWIDTH, HIGH_TEMPORAL_BANDWIDTH|2142003.91|976.08|    248.12|   297.35|
-+----------------------------------------------------------------+----------+------+----------+---------+`
++----------------------------------------------------------------+--------+--------+----------+---------+
+|                       FLOP_COUNT_DIFFERENT_SCENARIOS[in GFLOPs]|   NAIVE|   IMPVD|REUSE_DISK|REUSE_BAR|
++----------------------------------------------------------------+--------+--------+----------+---------+
+|   LOW_RESOLUTION, LOW_SPATIAL_BANDWIDTH, LOW_TEMPORAL_BANDWIDTH|    2.02|    0.02|      0.01|     0.01|
+|  LOW_RESOLUTION, LOW_SPATIAL_BANDWIDTH, HIGH_TEMPORAL_BANDWIDTH|    3.05|    0.93|      0.57|     0.25|
+|  LOW_RESOLUTION, HIGH_SPATIAL_BANDWIDTH, LOW_TEMPORAL_BANDWIDTH|   96.65|   96.24|     54.21|    59.96|
+| LOW_RESOLUTION, HIGH_SPATIAL_BANDWIDTH, HIGH_TEMPORAL_BANDWIDTH| 2655.66| 2832.99|   1595.79|   772.12|
+|  HIGH_RESOLUTION, LOW_SPATIAL_BANDWIDTH, LOW_TEMPORAL_BANDWIDTH|    8.09|    0.09|      0.05|     0.06|
+| HIGH_RESOLUTION, LOW_SPATIAL_BANDWIDTH, HIGH_TEMPORAL_BANDWIDTH|   12.21|    3.71|      2.18|     1.01|
+| HIGH_RESOLUTION, HIGH_SPATIAL_BANDWIDTH, LOW_TEMPORAL_BANDWIDTH|  386.63|  384.97|    215.85|   239.83|
+|HIGH_RESOLUTION, HIGH_SPATIAL_BANDWIDTH, HIGH_TEMPORAL_BANDWIDTH|10622.70|11331.96|   6353.77|  3088.48|
++----------------------------------------------------------------+--------+--------+----------+---------+
