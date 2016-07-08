@@ -3,8 +3,31 @@ import json
 from math import ceil, pi
 import glob
 import table
+import dc_generic
 
-boundaries = []
+total_points_cache = {}
+points_cache_name = "total_points_cache.txt"
+if not os.path.exists(points_cache_name):
+	with open(points_cache_name, "w") as f:
+		f.write(json.dumps({}))
+
+with open(points_cache_name) as tp:
+	total_points_cache = json.loads(tp.read())
+
+def total_points(hs, ht, res):
+	path = "_".join(map(str, [hs, ht] + res))
+	if unicode(path) in total_points_cache:
+		return total_points_cache[unicode(path)]
+	else:
+		mdir = os.sep.join(["scratch/ahohl/d2010_11/decomp2", "buf_" + path, "pointFiles/pts*"])
+		total_lines = 0
+		for points in glob.glob(mdir):
+			with open(points) as f:
+				total_lines += len(f.readlines())
+		total_points_cache[unicode(path)] = total_lines
+		with open(points_cache_name, "w") as f:
+			f.write(json.dumps(total_points_cache))
+		return total_lines
 
 
 class Task:
@@ -13,28 +36,31 @@ class Task:
 		self.side_length = hs / 10
 		self.sources = source_points
 
-		diff_x = long(ceil(boundaries[0][1] - boundaries[0][0]))
-		diff_y = long(ceil(boundaries[1][1] - boundaries[1][0]))
-		diff_z = long(ceil(boundaries[2][1] - boundaries[2][0]))
-
-		x = diff_x / res[0]
-		y = diff_y / res[1]
-		z = diff_z / res[2]
-
 		self.gp_in_cuboid = (2 * hs / res[0] * 2 * hs / res[1] * 2 * ht / res[2])
 		self.gp_in_xy_plane = 4 * hs * hs / res[0] / res[1]
 		self.gp_in_bar = 2 * ht / res[2]
 		self.gp_in_xz_plane = (hs / res[1] * ht / res[2] * 4) 
 
 
-		self.grid_points = x * y * z
-
 	def flops_naive(self):
-		func_calls = 2 + 1
-		adds = 1
-		subs = 3
-		func = 4 + 1 + (1 + 1 + 1) + 1 + 1 + (1 + 1 + 1 + 1) + 1 + (1 + 1) + 2
-		return self.grid_points * self.sources * sum([adds, subs, func, func_calls]) / 10 ** 9.0
+		# sum over (size of box * no of points)
+		path = "_".join(map(str, [self.hs, self.ht] + self.res))
+		pointFiles = glob.glob(os.sep.join(["scratch/ahohl/d2010_11/decomp2", "buf_" + path, "pointFiles", "pts*"]))
+		boundaryFiles = glob.glob(os.sep.join(["scratch/ahohl/d2010_11/decomp2", "buf_" + path, "boundaryFiles", "bds*"]))
+		xres, yres, zres = self.res
+		gp_in_cylinder = (pi * hs * hs) * (2 * ht) / (xres * yres * zres)
+		naive_flops = 0
+		density_func_flops = 4 + 1 + (1 + 1 + 1) + 1 + 1 + (1 + 1 + 1 + 1) + 1 + (1 + 1) + 2
+		for boundary, points in zip(boundaryFiles, pointFiles):
+			with open(boundary) as b:
+				x0, x1, y0, y1, z0, z1 = map(float, b.read().split(", "))
+				size_of_box = int((x1 - x0) / xres *  (y1 - y0) / yres * (z1 - z0) / zres)
+			with open(points) as p:
+				file_points = len(p.readlines())
+			naive_flops += (size_of_box * file_points * ( 5 + 2 * pi / 4) +
+			                gp_in_cylinder * file_points * density_func_flops)
+		return naive_flops / 10 ** 9.0
+
 
 	def flops_impvd(self):
 		func = 3.14 / 4 * 14 + 5 #5 for distance + 14 in density
@@ -58,7 +84,7 @@ class Task:
 		pass
 
 	def run_all(self):
-		return [self.flops_impvd(), self.flops_disk(), self.flops_bar()]
+		return [self.flops_naive(), self.flops_impvd(), self.flops_disk(), self.flops_bar()]
 
 
 with open("constants.json") as f:
@@ -70,30 +96,7 @@ with open("constants.json") as f:
 	hs_low, hs_high = content[u'spatial_bandwidth']
 	ht_low, ht_high = content[u'temporal_bandwidth']
 	boundaries = content[u'boundaries']
-	boundariesx = glob.glob("scratch/a*/d*/d*/b*/b*Files/*")
-	pointsx = glob.glob("scratch/a*/d*/d*/b*/p*Files/*")
-	total_points = 0
 
-	naive_flops = [0 for _ in range(8)]
-	for boundary, points in zip(boundariesx, pointsx):
-		with open(boundary) as b:
-			tmp = map(float, b.read().split(", "))
-			x0, x1, y0, y1, z0, z1 = tmp  #position of box
-		with open(points) as pointFile:
-			file_points = len(pointFile.readlines())
-			total_points += file_points
-			naive_flops_file = [0 for _ in range(8)]
-			for i, hs in enumerate([hs_low, hs_high]):
-				for j, ht in enumerate([ht_low, ht_high]):
-					for k, res in enumerate([res_low, res_high]):
-						size_of_box = (x1 - x0)/res[0] * (y1 - y0)/res[1] * (z1 - z0)/res[2]
-						gp_in_cylinder =  (pi * hs * hs) * (2 * ht) / (res[0] * res[1] * res[2])
-						func = 4 + 1 + (1 + 1 + 1) + 1 + 1 + (1 + 1 + 1 + 1) + 1 + (1 + 1) + 2
-						naive_flops_file[k * 4 + i * 2 + j * 1] += (size_of_box * file_points * (5 + 2 * pi / 4)  # check in cylinder
-											    + file_points * gp_in_cylinder * func) #cost of all cylinders
-
-			for i in range(len(naive_flops)):
-				naive_flops[i] += naive_flops_file[i] / 10 ** 9.0
 
 	TABLE_HEADS = ["FLOP_COUNT_DIFFERENT_SCENARIOS[in GFLOPs]", "NAIVE", "IMPVD", "REUSE_DISK", "REUSE_BAR"]
 	ROW_HEADS = []
@@ -102,15 +105,11 @@ with open("constants.json") as f:
 			for ht in ["LOW_TEMPORAL_BANDWIDTH", "HIGH_TEMPORAL_BANDWIDTH"]:
 				ROW_HEADS.append([", ".join([res, hs, ht])])
 
-	for i in range(len(naive_flops)):
-		ROW_HEADS[i].append('%0.2f' % naive_flops[i])
-
-
 	for i, hs in enumerate([hs_low, hs_high]):
 		for j, ht in enumerate([ht_low, ht_high]):
 			for k, res in enumerate([res_low, res_high]):
-				task = Task(res, hs, ht, total_points)
+				dc_generic.generate_files_with(hs, ht, res)
+				task = Task(res, hs, ht, total_points(hs, ht, res))
 				ROW_HEADS[k * 4 + i * 2 + j * 1].extend(map(lambda x: "%0.2f" % x, task.run_all()))
-
 	ROW_HEADS.insert(0, TABLE_HEADS)
 	table.Table.print_table(ROW_HEADS)
