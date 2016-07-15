@@ -10,6 +10,7 @@ hs, ht = "500", "7"
 xRes, yRes, zRes = "100", "100", 1
 dir1, dir2, tdir = "", "", ""
 
+
 # ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 def assign(inXf, inYf, inZf, xmaxf, xminf, ymaxf, yminf, zmaxf, zminf, xybuff, zbuff):
@@ -135,7 +136,7 @@ def assign(inXf, inYf, inZf, xmaxf, xminf, ymaxf, yminf, zmaxf, zminf, xybuff, z
 # ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-def decompose(inXd, inYd, inZd, xmind, xmaxd, ymind, ymaxd, zmind, zmaxd, mnpd, xybufd,
+def decompose(inXd, inYd, inZd, xmind, xmaxd, ymind, ymaxd, zmind, zmaxd, mnpd, bufRatio, xybufd,
               zbufd):  # inXd: list of x-coordinates \ inYd: list of y-coordinates \ inZd: list of z-coordinates
 	# xmind: subdomain lower x boundary \ xmaxd: subdomain upper x boundary \ ymind: subdomain lower x boundary
 	# ymaxd: subdomain upper y boundary \ zmind: subdomain lower x boundary \ zmaxd: subdomain upper z boundary
@@ -171,7 +172,7 @@ def decompose(inXd, inYd, inZd, xmind, xmaxd, ymind, ymaxd, zmind, zmaxd, mnpd, 
 
 	sdVolume = xDim * yDim * zDim
 	bufVolume = (xDim + 2 * xybufd) * (yDim + 2 * xybufd) * (zDim + 2 * zbufd)
-	bufRatio = sdVolume / bufVolume
+	ratio = sdVolume / bufVolume
 
 	if len(inXd) is 0:  # if there are no data points or no regular grid points within subdomain, pass
 		pass
@@ -181,7 +182,7 @@ def decompose(inXd, inYd, inZd, xmind, xmaxd, ymind, ymaxd, zmind, zmaxd, mnpd, 
 		pass
 	elif zC is 0:
 		pass
-	elif len(inXd) <= mnpd or bufRatio <= 0.01:
+	elif len(inXd) <= mnpd or ratio <= bufRatio:
 
 		fn = dir1 + os.sep + "pts_" + str(sdNum) + ".txt"
 		fn1 = open(fn, "w")
@@ -197,21 +198,29 @@ def decompose(inXd, inYd, inZd, xmind, xmaxd, ymind, ymaxd, zmind, zmaxd, mnpd, 
 
 	else:  # if number of points in subdomain is higher than threshold, keep decomposing.
 		sdXYZ = assign(inXd, inYd, inZd, xmaxd, xmind, ymaxd, ymind, zmaxd, zmind, xybufd, zbufd)
-		decompose(sdXYZ[0], sdXYZ[1], sdXYZ[2], xmind, sdXYZ[-3], ymind, sdXYZ[-2], zmind, sdXYZ[-1], mnpd, xybufd,
+		decompose(sdXYZ[0], sdXYZ[1], sdXYZ[2], xmind, sdXYZ[-3], ymind, sdXYZ[-2], zmind, sdXYZ[-1], mnpd, bufRatio,
+		          xybufd,
 		          zbufd)  # recursive function call 1
-		decompose(sdXYZ[3], sdXYZ[4], sdXYZ[5], sdXYZ[-3], xmaxd, ymind, sdXYZ[-2], zmind, sdXYZ[-1], mnpd, xybufd,
+		decompose(sdXYZ[3], sdXYZ[4], sdXYZ[5], sdXYZ[-3], xmaxd, ymind, sdXYZ[-2], zmind, sdXYZ[-1], mnpd, bufRatio,
+		          xybufd,
 		          zbufd)  # recursive function call 2
-		decompose(sdXYZ[6], sdXYZ[7], sdXYZ[8], xmind, sdXYZ[-3], sdXYZ[-2], ymaxd, zmind, sdXYZ[-1], mnpd, xybufd,
+		decompose(sdXYZ[6], sdXYZ[7], sdXYZ[8], xmind, sdXYZ[-3], sdXYZ[-2], ymaxd, zmind, sdXYZ[-1], mnpd, bufRatio,
+		          xybufd,
 		          zbufd)  # recursive function call 3
-		decompose(sdXYZ[9], sdXYZ[10], sdXYZ[11], sdXYZ[-3], xmaxd, sdXYZ[-2], ymaxd, zmind, sdXYZ[-1], mnpd, xybufd,
+		decompose(sdXYZ[9], sdXYZ[10], sdXYZ[11], sdXYZ[-3], xmaxd, sdXYZ[-2], ymaxd, zmind, sdXYZ[-1], mnpd, bufRatio,
+		          xybufd,
 		          zbufd)  # recursive function call 4
-		decompose(sdXYZ[12], sdXYZ[13], sdXYZ[14], xmind, sdXYZ[-3], ymind, sdXYZ[-2], sdXYZ[-1], zmaxd, mnpd, xybufd,
+		decompose(sdXYZ[12], sdXYZ[13], sdXYZ[14], xmind, sdXYZ[-3], ymind, sdXYZ[-2], sdXYZ[-1], zmaxd, mnpd, bufRatio,
+		          xybufd,
 		          zbufd)  # recursive function call 5
-		decompose(sdXYZ[15], sdXYZ[16], sdXYZ[17], sdXYZ[-3], xmaxd, ymind, sdXYZ[-2], sdXYZ[-1], zmaxd, mnpd, xybufd,
+		decompose(sdXYZ[15], sdXYZ[16], sdXYZ[17], sdXYZ[-3], xmaxd, ymind, sdXYZ[-2], sdXYZ[-1], zmaxd, mnpd, bufRatio,
+		          xybufd,
 		          zbufd)  # recursive function call 6
-		decompose(sdXYZ[18], sdXYZ[19], sdXYZ[20], xmind, sdXYZ[-3], sdXYZ[-2], ymaxd, sdXYZ[-1], zmaxd, mnpd, xybufd,
+		decompose(sdXYZ[18], sdXYZ[19], sdXYZ[20], xmind, sdXYZ[-3], sdXYZ[-2], ymaxd, sdXYZ[-1], zmaxd, mnpd, bufRatio,
+		          xybufd,
 		          zbufd)  # recursive function call 7
-		decompose(sdXYZ[21], sdXYZ[22], sdXYZ[23], sdXYZ[-3], xmaxd, sdXYZ[-2], ymaxd, sdXYZ[-1], zmaxd, mnpd, xybufd,
+		decompose(sdXYZ[21], sdXYZ[22], sdXYZ[23], sdXYZ[-3], xmaxd, sdXYZ[-2], ymaxd, sdXYZ[-1], zmaxd, mnpd, bufRatio,
+		          xybufd,
 		          zbufd)  # recursive function call 8
 
 
@@ -219,7 +228,7 @@ def decompose(inXd, inYd, inZd, xmind, xmaxd, ymind, ymaxd, zmind, zmaxd, mnpd, 
 # ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-def generate(spatial, temporal, res):
+def generate(spatial, temporal, res, points, bufRatio):
 	# buffer around subdomains
 
 	global hs, ht, xRes, yRes, zRes, dir1, dir2, tdir
@@ -228,12 +237,12 @@ def generate(spatial, temporal, res):
 	xRes = res[0]  # x resolution in meters
 	yRes = res[1]  # y resolution in meters
 	zRes = res[2]  # z resolution in days
-	mdir = "scratch/ahohl/d2010_11/decomp2/buf_"
-	res_str = "_".join(map(str, res))
+	mdir = "scratch/ahohl/d2010_11/decomp2"
+	res_str = "_".join(map(str, [hs, ht] + res + [points, bufRatio]))
 
-	dir1 = mdir + str(hs) + "_" + str(ht) + "_" + res_str + os.sep + "pointFiles"
-	dir2 = mdir + str(hs) + "_" + str(ht) + "_" + res_str + os.sep + "boundaryFiles"
-	tdir = mdir + str(hs) + "_" + str(ht) + "_" + res_str + os.sep + "timeFiles"
+	dir1 = os.sep.join([mdir, "buf_" + res_str, "pointFiles"])
+	dir2 = os.sep.join([mdir, "buf_" + res_str, "boundaryFiles"])
+	tdir = os.sep.join([mdir, "buf_" + res_str, "timeFiles"])
 
 	if not os.path.exists(dir1):
 		os.makedirs(dir1)
@@ -261,7 +270,7 @@ def generate(spatial, temporal, res):
 
 	startTime = datetime.now()
 
-	decompose(inX, inY, inZ, xmin, xmax, ymin, ymax, zmin, zmax, 50, hs, ht)
+	decompose(inX, inY, inZ, xmin, xmax, ymin, ymax, zmin, zmax, points, bufRatio, hs, ht)
 
 	endTime = datetime.now()
 	runTime = endTime - startTime
@@ -272,13 +281,14 @@ def generate(spatial, temporal, res):
 	tFile_i.write(str(runTime))
 	tFile_i.close()
 
-def generate_files_with(hs, ht, res):
+
+def generate_files_with(hs, ht, res, points, bufRatio):
 	mdir = "scratch/ahohl/d2010_11/decomp2"
-	folder = "buf_" + "_".join(map(str, [hs, ht] + res))
+	folder = "buf_" + "_".join(map(str, [hs, ht] + res + [points, bufRatio]))
 	failed = False
 	for files in "pointFiles", "boundaryFiles", "timeFiles":
 		if not os.path.exists(os.sep.join([mdir, folder, files])):
 			failed = True
 			break
 	if failed:
-		generate(hs, ht, res)
+		generate(hs, ht, res, points, bufRatio)

@@ -14,25 +14,29 @@ if not os.path.exists(points_cache_name):
 with open(points_cache_name) as tp:
 	total_points_cache = json.loads(tp.read())
 
-def total_points(hs, ht, res):
-	path = "_".join(map(str, [hs, ht] + res))
+def total_points(hs, ht, res, points, bufRatio):
+	path = "_".join(map(str, [hs, ht] + res + [points, bufRatio]))
 	if unicode(path) in total_points_cache:
 		return total_points_cache[unicode(path)]
 	else:
 		mdir = os.sep.join(["scratch/ahohl/d2010_11/decomp2", "buf_" + path, "pointFiles/pts*"])
-		total_lines = 0
+		total_lines = set()
 		for points in glob.glob(mdir):
 			with open(points) as f:
-				total_lines += len(f.readlines())
-		total_points_cache[unicode(path)] = total_lines
+				for pt in f:
+					total_lines.add(pt)
+		total_points_cache[unicode(path)] = len(total_lines)
 		with open(points_cache_name, "w") as f:
 			f.write(json.dumps(total_points_cache))
-		return total_lines
+		return len(total_lines)
 
 
 class Task:
-	def __init__(self, res, hs, ht, source_points):
+	def __init__(self, res, hs, ht, source_points, pts_box, buf_ratio):
 		self.hs, self.ht, self.res = hs, ht, res
+		self.points_per_box = pts_box
+		self.buf_ratio = buf_ratio
+
 		self.side_length = hs / 10
 		self.sources = source_points
 
@@ -44,7 +48,7 @@ class Task:
 
 	def flops_naive(self):
 		# sum over (size of box * no of points)
-		path = "_".join(map(str, [self.hs, self.ht] + self.res))
+		path = "_".join(map(str, [self.hs, self.ht] + self.res + [self.points_per_box, self.buf_ratio]))
 		pointFiles = glob.glob(os.sep.join(["scratch/ahohl/d2010_11/decomp2", "buf_" + path, "pointFiles", "pts*"]))
 		boundaryFiles = glob.glob(os.sep.join(["scratch/ahohl/d2010_11/decomp2", "buf_" + path, "boundaryFiles", "bds*"]))
 		xres, yres, zres = self.res
@@ -57,8 +61,9 @@ class Task:
 				size_of_box = int((x1 - x0) / xres *  (y1 - y0) / yres * (z1 - z0) / zres)
 			with open(points) as p:
 				file_points = len(p.readlines())
-			naive_flops += (size_of_box * file_points * ( 5 + 2 * pi / 4) +
-			                gp_in_cylinder * file_points * density_func_flops)
+			naive_flops += size_of_box * file_points * ( 5 + 2 )
+
+		naive_flops +=  gp_in_cylinder * self.sources * density_func_flops
 		return naive_flops / 10 ** 9.0
 
 
@@ -87,7 +92,7 @@ class Task:
 		return [self.flops_naive(), self.flops_impvd(), self.flops_disk(), self.flops_bar()]
 
 
-with open("constants.json") as f:
+with open("config.json") as f:
 	content = json.loads(f.read())
 
 	res_low = content[u'resolution_low']
@@ -96,6 +101,10 @@ with open("constants.json") as f:
 	hs_low, hs_high = content[u'spatial_bandwidth']
 	ht_low, ht_high = content[u'temporal_bandwidth']
 	boundaries = content[u'boundaries']
+
+	points_per_box = content[u'points_per_box']
+	buf_ratio = content[u'buf_ratio']
+
 
 
 	TABLE_HEADS = ["FLOP_COUNT_DIFFERENT_SCENARIOS[in GFLOPs]", "NAIVE", "IMPVD", "REUSE_DISK", "REUSE_BAR"]
@@ -108,8 +117,8 @@ with open("constants.json") as f:
 	for i, hs in enumerate([hs_low, hs_high]):
 		for j, ht in enumerate([ht_low, ht_high]):
 			for k, res in enumerate([res_low, res_high]):
-				dc_generic.generate_files_with(hs, ht, res)
-				task = Task(res, hs, ht, total_points(hs, ht, res))
+				dc_generic.generate_files_with(hs, ht, res, points_per_box, buf_ratio)
+				task = Task(res, hs, ht, total_points(hs, ht, res, points_per_box, buf_ratio), points_per_box, buf_ratio)
 				ROW_HEADS[k * 4 + i * 2 + j * 1].extend(map(lambda x: "%0.2f" % x, task.run_all()))
 	ROW_HEADS.insert(0, TABLE_HEADS)
 	table.Table.print_table(ROW_HEADS)
