@@ -1,4 +1,3 @@
-import numpy as np
 import sys
 from math import pi, ceil
 import json
@@ -38,10 +37,10 @@ xres, yres, zres = res
 gDir = "scratch/ahohl/d2010_11/decomp2"
 path = "buf_" + "_".join([str(x) for x in hs, ht, xres, yres, zres, points_per_box, buf_ratio])
 
-stkde_dir = os.sep.join([gDir, path, "stdkeFilesImpvd"])
+stkde_dir = os.sep.join([gDir, path, "stdkeFilesImpvdPyPy"])
 
 if not os.path.exists(stkde_dir):
-	os.makedirs(os.sep.join([gDir, path, "stdkeFilesImpvd"]))
+	os.makedirs(stkde_dir)
 
 for pt, bd in zip(glob.glob(os.sep.join([gDir, path, "pointFiles/pts*"])),
                   glob.glob(os.sep.join([gDir, path, "boundaryFiles/bds*"]))):

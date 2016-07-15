@@ -92,7 +92,7 @@ class Task:
 		return [self.flops_naive(), self.flops_impvd(), self.flops_disk(), self.flops_bar()]
 
 
-with open("config.json") as f:
+with open("perf_models_config.json") as f:
 	content = json.loads(f.read())
 
 	res_low = content[u'resolution_low']
@@ -112,7 +112,8 @@ with open("config.json") as f:
 	for res in ["LOW_RESOLUTION", "HIGH_RESOLUTION"]:
 		for hs in ["LOW_SPATIAL_BANDWIDTH", "HIGH_SPATIAL_BANDWIDTH"]:
 			for ht in ["LOW_TEMPORAL_BANDWIDTH", "HIGH_TEMPORAL_BANDWIDTH"]:
-				ROW_HEADS.append([", ".join([res, hs, ht])])
+				ROW_HEADS.append([", ".join([res, hs, ht, "POINTS_PER_BOX: " + str(points_per_box),
+				                             "RATIO_BOX_VOLUME_TOTAL_VOLUME: " + str(buf_ratio)])])
 
 	for i, hs in enumerate([hs_low, hs_high]):
 		for j, ht in enumerate([ht_low, ht_high]):

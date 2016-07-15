@@ -1,0 +1,12 @@
+{
+    "resolution_low": [100, 100, 1],
+    "resolution_high": [50, 50, 1],
+    "spatial_bandwidth": [500, 2500],
+    "spatial_bandwidth_units": "meter",
+    "temporal_bandwidth": [7, 14],
+    "temporal_bandwidth_units": "day",
+    "boundaries": [[1053872.965, 1068485.726], [860186.8419, 879395.9741], [3, 730]],
+    "points": 11057,
+    "points_per_box": 50,
+    "buf_ratio": 0.01
+}

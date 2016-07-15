@@ -1,6 +1,5 @@
 from datetime import datetime
 import glob, os, sys
-import numpy as np
 
 sys.setrecursionlimit(2000)
 
