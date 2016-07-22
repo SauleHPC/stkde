@@ -1,0 +1,1 @@
+g++ stkde_naive.cpp -o exe
