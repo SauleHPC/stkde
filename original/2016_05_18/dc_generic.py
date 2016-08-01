@@ -152,18 +152,16 @@ def decompose(inXd, inYd, inZd, xmind, xmaxd, ymind, ymaxd, zmind, zmaxd, mnpd, 
 	zminDiff = zmind % zRes
 	zmaxDiff = zmaxd % zRes
 
-	xminP = xmind - xminDiff + xRes
-	xmaxP = xmaxd - xmaxDiff + xRes
-	yminP = ymind - yminDiff + yRes
-	ymaxP = ymaxd - ymaxDiff + yRes
-	zminP = zmind - zminDiff + zRes
-	zmaxP = zmaxd - zmaxDiff + zRes
-
-	xC = len(np.arange(xminP, xmaxP,
-	                   xRes))  # for all possible x-coordinates that are within the subdomain (according to xy resolution)`
-	yC = len(np.arange(yminP, ymaxP,
-	                   yRes))  # for all possible y-coordinates that are within the subdomain (according to xy resolution)
-	zC = len(np.arange(zminP, zmaxP, zRes))
+	xminP = int(xmind - xminDiff + xRes)
+	xmaxP = int(xmaxd - xmaxDiff + xRes)
+	yminP = int(ymind - yminDiff + yRes)
+	ymaxP = int(ymaxd - ymaxDiff + yRes)
+	zminP = int(zmind - zminDiff + zRes)
+	zmaxP = int(zmaxd - zmaxDiff + zRes)
+	
+	xC = len(range(xminP, xmaxP, xRes))  # for all possible x-coordinates that are within the subdomain (according to xy resolution)`
+	yC = len(range(yminP, ymaxP, yRes))  # for all possible y-coordinates that are within the subdomain (according to xy resolution)
+	zC = len(range(zminP, zmaxP, zRes))
 
 	xDim = xmaxd - xmind
 	yDim = ymaxd - ymind
@@ -236,7 +234,7 @@ def generate(spatial, temporal, res, points, bufRatio):
 	xRes = res[0]  # x resolution in meters
 	yRes = res[1]  # y resolution in meters
 	zRes = res[2]  # z resolution in days
-	mdir = "scratch/ahohl/d2010_11/decomp2"
+	mdir = "scratch/dpanchan/d2010_11/decomp2"
 	res_str = "_".join(map(str, [hs, ht] + res + [points, bufRatio]))
 
 	dir1 = os.sep.join([mdir, "buf_" + res_str, "pointFiles"])
@@ -250,8 +248,8 @@ def generate(spatial, temporal, res, points, bufRatio):
 	if not os.path.exists(tdir):
 		os.makedirs(tdir)
 
-	pFile = "scratch/ahohl/d2010_11/Data/AllCases2010_11_clip.txt"
-	bFile = "scratch/ahohl/d2010_11/Data/AllCases2010_11_clip_bds.txt"
+	pFile = "scratch/dpanchan/d2010_11/Data/AllCases2010_11_clip.txt"
+	bFile = "scratch/dpanchan/d2010_11/Data/AllCases2010_11_clip_bds.txt"
 
 	pFile_i = open(pFile, "r")
 	inX, inY, inZ = [], [], []
@@ -282,7 +280,7 @@ def generate(spatial, temporal, res, points, bufRatio):
 
 
 def generate_files_with(hs, ht, res, points, bufRatio):
-	mdir = "scratch/ahohl/d2010_11/decomp2"
+	mdir = "scratch/dpanchan/d2010_11/decomp2"
 	folder = "buf_" + "_".join(map(str, [hs, ht] + res + [points, bufRatio]))
 	failed = False
 	for files in "pointFiles", "boundaryFiles", "timeFiles":
