@@ -1,0 +1,7 @@
+{
+	"hs": 500,
+	"ht": 7,
+	"res": [100, 100, 1],
+	"points_per_box": 50,
+	"volume_ratio": 0.01
+}
