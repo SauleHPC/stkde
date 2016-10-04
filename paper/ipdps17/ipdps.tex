@@ -1,5 +1,24 @@
 \documentclass[10pt, conference, compsocconf]{IEEEtran}
 
+\usepackage{color}
+\usepackage{soul}
+
+%\documentclass[a4paper, UKenglish]{lipics}
+%\usepackage{amsmath}
+%\theoremstyle{plain}
+
+\usepackage[noend]{algorithm2e}
+\usepackage{algorithmicx}
+\usepackage{graphicx}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{times}
+\let\proof\relax % undefine the environment
+\let\endproof\relax
+\usepackage{amsthm}
+
+\newcommand{\todo}[1]{\color{red}\textbf{\hl{\{ #1 \}}}\color{black}\xspace}
+
 
 \begin{document}
 \title{High Performance Space-Time Kernel Density Estimation}
@@ -41,9 +60,45 @@ space-time kernel density; performance; distributed memory; gpu
 
 \IEEEpeerreviewmaketitle
 
-
-
 \section{Introduction}
+
+\section{Space-Time Kernel Density Estimation}
+
+\subsection{Problem Definition}
+
+\subsection{Gold Standard Implementation}
+
+\subsection{Related Works}
+
+\section{Algorithm Design and Engineering}
+
+\subsection{Observation-based Algorithm}
+
+\subsection{Exploiting Symmetries}
+
+\section{Utilizing Modern Hardware}
+\todo{That's a terrible section header...}
+
+\subsection{Spatial Decomposition}
+
+\subsection{Observation Decomposition}
+
+\subsection{Vectorization}
+
+\subsection{Accelerators}
+
+
+\section{Experiments}
+
+\subsection{Experimental Setting}
+
+\paragraph{Machine}
+
+\paragraph{Dataset}
+
+\subsection{Results}
+
+\section{Conclusion}
 
 \section*{Acknowledgment}
 
