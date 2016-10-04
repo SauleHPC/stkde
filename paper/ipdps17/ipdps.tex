@@ -1,0 +1,62 @@
+\documentclass[10pt, conference, compsocconf]{IEEEtran}
+
+
+\begin{document}
+\title{High Performance Space-Time Kernel Density Estimation}
+
+
+\author{\IEEEauthorblockN{Dinesh Panchananam$^\dag$, Alex Hohl$^\ddag$, Wenwu Tang$^\ddag$, Eric Delmelle$^\ddag$, Erik  Saule$^\dag$}
+\IEEEauthorblockA{$^\dag$ Dept. of Computer Science, $^\ddag$Dept. of Geography and Earth Sciences\\
+UNC Charlotte\\
+Charlotte, NC, USA\\
+Email: {dpanchan,ahohl,wtang4,eric.delmelle,esaule}@uncc.edu}
+}
+
+\maketitle
+
+
+\begin{abstract}
+  The exponential growth of available data, caused by the BigData era,
+  increased the interest in interactive exploratory analysis as dataset
+  can no longer be understood by crawling manually through it and
+  looking at a few statistics. In a Geographical Information Systems
+  (GIS), the dataset is often composed of events localized in space
+  and time; and visualizing such a dataset involves building a map of
+  where the events occurred.
+
+  We focus in this paper on events that are localized among three
+  dimensions (latitude, longitude, and time), and on computing the
+  first step of the visualization pipeline, space-time kernel density
+  estimation, which is most computationally expensive.  Starting from
+  a gold standard implementation, we show how algorithm design and
+  engineering, parallel decomposition, and acceleration can be applied
+  to bring real-time computing to space-time kernel density
+  estimation.
+\end{abstract}
+
+\begin{IEEEkeywords}
+space-time kernel density; performance; distributed memory; gpu
+\end{IEEEkeywords}
+
+
+\IEEEpeerreviewmaketitle
+
+
+
+\section{Introduction}
+
+\section*{Acknowledgment}
+
+
+
+
+
+\bibliographystyle{IEEEtran}
+\bibliography{ipdps}
+
+
+
+
+\end{document}
+
+
