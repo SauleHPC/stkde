@@ -33,6 +33,9 @@ int main (int argc, char* argv[]) {
 	     <<obst[i]<<std::endl;
   }
 
-    
+  parameters param = load_param(paramfile);
+
+  
+  
   return 0;
 }

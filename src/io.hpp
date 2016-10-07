@@ -73,7 +73,7 @@ void load_observations (const std::string& filename,
   }
   
   std::cerr<<"read "<<xout.size()<<" observations"<<std::endl;
-  
+
 }
 
 #endif
