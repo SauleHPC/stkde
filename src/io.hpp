@@ -76,4 +76,31 @@ void load_observations (const std::string& filename,
 
 }
 
+//the bounding box file is comma separated in format xres, yres, tres, xbw, ybw, tbw
+parameters load_parameters(std::string filename) {
+  char c;
+  parameters pa;
+
+  std::ifstream in (filename.c_str());
+
+  in >> pa.xres;
+  in >> c;
+  in >> pa.yres;
+  in >> c;
+  in >> pa.tres;
+  in >> c;
+  
+  assert (in.good());
+
+  in >> pa.xbw;
+  in >> c;
+  in >> pa.ybw;
+  in >> c;
+  in >> pa.tbw;
+
+  assert (!in.fail());
+  
+  return pa;
+}
+
 #endif

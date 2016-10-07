@@ -10,6 +10,7 @@ int main (int argc, char* argv[]) {
 
   std::string bbfile = argv[1];
   std::string obsfile = argv[2];
+  std::string paramfile = argv[3];
   
   bounding_box bb = load_bounding_box(bbfile);
 
@@ -33,8 +34,10 @@ int main (int argc, char* argv[]) {
 	     <<obst[i]<<std::endl;
   }
 
-  parameters param = load_param(paramfile);
+  parameters param = load_parameters(paramfile);
 
+  std::cerr<<"res: "<<param.xres<<" "<<param.yres<<" "<<param.tres<<" "
+	   <<"bw: "<<param.xbw<<" "<<param.ybw<<" "<<param.tbw<<std::endl;
   
   
   return 0;
