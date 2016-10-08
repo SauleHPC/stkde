@@ -44,11 +44,13 @@ std::shared_ptr<util::Compact3D<values>> stkde(const bounding_box& bb,
 
   util::Compact3D<values>& co = *p;
 
+  //fill in zeroes
   for (int i=0; i< co.getSizeX(); ++i)
     for (int j=0; j< co.getSizeY(); ++j)
       for (int k=0; k< co.getSizeZ(); ++k)
 	co(i,j,k) = 0;
 
+  //account for observations
   for (int ob=0; ob<inst.obsx.size(); ++ob) {
     //observation
     coordinate ox = inst.obsx[ob];
@@ -62,7 +64,7 @@ std::shared_ptr<util::Compact3D<values>> stkde(const bounding_box& bb,
 
     //std::cerr<<"obsv: "<<obsvx<<" "<<obsvy<<" "<<obsvt<<std::endl;
     
-    //
+    //BW around observation
     for (int i = std::max(obsvx - voxsbw, 0); i< std::min(obsvx + voxsbw, voxX); ++i) {
       for (int j = std::max(obsvy - voxsbw, 0); j< std::min(obsvy + voxsbw, voxY); ++j) {
 	for (int k = std::max(obsvt - voxtbw, 0); k< std::min(obsvt + voxtbw, voxT); ++k) {
@@ -71,7 +73,6 @@ std::shared_ptr<util::Compact3D<values>> stkde(const bounding_box& bb,
 	  coordinate vox_t = bb.tl + k*pa.tres;
 
 	  //std::cerr<<i<<" "<<j<<" "<<k<<std::endl;	   
-	  
 	  if (std::abs(vox_t - ot) <= pa.tbw
 	      && std::sqrt((ox - vox_x)*(ox - vox_x) + (oy - vox_y)*(oy - vox_y)) <= pa.xbw ) {
 	    
@@ -131,8 +132,9 @@ int main (int argc, char* argv[]) {
   util::timestamp beg;
   std::shared_ptr<util::Compact3D<values>> dens = stkde (bb, inst, param);
 
-    std::cerr.precision(2);
+  std::cerr.precision(2);
 
+  //for debugging purpose
   for (int k=8; k< 9; ++k) {
     for (int i=0; i<std::min(dens->getSizeX(), 200); ++i) {
       for (int j=0; j<std::min(dens->getSizeY(), 200); ++j) { 
