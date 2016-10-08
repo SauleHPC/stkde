@@ -5,6 +5,93 @@
 #include "types.hpp"
 #include "io.hpp"
 #include <limits>
+#include "compact.hpp"
+#include <memory>
+#include "timestamp.hpp"
+
+values densityF( coordinate obsX, coordinate obsY, coordinate obsT,
+		 coordinate voxX, coordinate voxY, coordinate voxT,
+		 int nbObs, coordinate xbw, coordinate tbw
+		 ) {
+
+  values u = (obsX-voxX) / xbw;
+  values v = (obsY-voxY) / xbw;
+  values w = (obsT-voxT) / tbw;
+    
+  values constantTerm = std::pow(10.0, 10) / (nbObs * pow(xbw, 2) * tbw);
+  values Ks = (0.5 * M_PI) * (1 - pow(u, 2) - pow(v, 2));
+  values Kt = 0.75 * (1 - pow(w, 2));
+  
+  values spaceTimeKDE = constantTerm * Ks * Kt;
+    
+  return spaceTimeKDE;
+}
+
+std::shared_ptr<util::Compact3D<values>> stkde(const bounding_box& bb,
+					       const instance& inst,
+					       const parameters& pa) {
+  int voxX = std::lround(std::ceil((bb.xh-bb.xl)/pa.xres))+1;
+  int voxY = std::lround(std::ceil((bb.yh-bb.yl)/pa.yres))+1;
+  int voxT = std::lround(std::ceil((bb.th-bb.tl)/pa.tres))+1;
+
+  int voxsbw = std::lround(std::ceil(pa.xbw/pa.xres));
+  int voxtbw = std::lround(std::ceil(pa.tbw/pa.tres));
+  
+  std::cerr<<"voxsize: "<<voxX<<"x"<<voxY<<"x"<<voxT<<std::endl;
+  std::cerr<<"voxBW: "<<voxsbw<<" "<<voxtbw<<std::endl;
+  
+  std::shared_ptr<util::Compact3D<values>> p = std::make_shared<util::Compact3D<values>>(voxX, voxY, voxT);
+
+  util::Compact3D<values>& co = *p;
+
+  for (int i=0; i< co.getSizeX(); ++i)
+    for (int j=0; j< co.getSizeY(); ++j)
+      for (int k=0; k< co.getSizeZ(); ++k)
+	co(i,j,k) = 0;
+
+  for (int ob=0; ob<inst.obsx.size(); ++ob) {
+    //observation
+    coordinate ox = inst.obsx[ob];
+    coordinate oy = inst.obsy[ob];
+    coordinate ot = inst.obst[ob];
+
+    //voxel containing the observation
+    int obsvx = (ox - bb.xl)/pa.xres;
+    int obsvy = (oy - bb.yl)/pa.yres;
+    int obsvt = (ot - bb.tl)/pa.tres;
+
+    //std::cerr<<"obsv: "<<obsvx<<" "<<obsvy<<" "<<obsvt<<std::endl;
+    
+    //
+    for (int i = std::max(obsvx - voxsbw, 0); i< std::min(obsvx + voxsbw, voxX); ++i) {
+      for (int j = std::max(obsvy - voxsbw, 0); j< std::min(obsvy + voxsbw, voxY); ++j) {
+	for (int k = std::max(obsvt - voxtbw, 0); k< std::min(obsvt + voxtbw, voxT); ++k) {
+	  coordinate vox_x = bb.xl + i*pa.xres;
+	  coordinate vox_y = bb.yl + j*pa.yres;
+	  coordinate vox_t = bb.tl + k*pa.tres;
+
+	  //std::cerr<<i<<" "<<j<<" "<<k<<std::endl;	   
+	  
+	  if (std::abs(vox_t - ot) <= pa.tbw
+	      && std::sqrt((ox - vox_x)*(ox - vox_x) + (oy - vox_y)*(oy - vox_y)) <= pa.xbw ) {
+	    
+	    values val = densityF(ox, oy, ot,
+				  vox_x, vox_y, vox_t,
+				  inst.obsx.size(), pa.xbw, pa.tbw);
+	    
+	    //std::cerr<<vox_x<<" "<<vox_y<<" "<<vox_t<<" "<<val<<std::endl;
+	    
+	    co(i,j,k) += val;
+	  }
+	  
+
+	}
+      }
+    }
+  }
+      
+  return p;
+}
 
 int main (int argc, char* argv[]) {
 
@@ -19,26 +106,46 @@ int main (int argc, char* argv[]) {
     	   <<"["<<bb.yl<<";"<<bb.yh<<"]"<<"x"
     	   <<"["<<bb.tl<<";"<<bb.th<<"]"<<std::endl;
 
-  std::vector<coordinate> obsx;
-  std::vector<coordinate> obsy;
-  std::vector<coordinate> obst;
+  instance inst;
 
-  load_observations (obsfile, obsx, obsy, obst);
+  load_observations (obsfile, inst.obsx, inst.obsy, inst.obst);
 
-  //show first 10 observation
-  std::cerr<<"first 10 observation"<<std::endl;
+  //show first 5 observation
+  std::cerr<<"first 5 observations"<<std::endl;
   std::cerr.precision(std::numeric_limits< coordinate > ::max_digits10);
-  for (int i=0; i<std::min((size_t)10, (size_t)obsx.size()); ++i) {
-    std::cerr<<obsx[i]<<" "
-	     <<obsy[i]<<" "
-	     <<obst[i]<<std::endl;
+  for (int i=0; i<std::min((size_t)5, (size_t)inst.obsx.size()); ++i) {
+    std::cerr<<inst.obsx[i]<<" "
+	     <<inst.obsy[i]<<" "
+	     <<inst.obst[i]<<std::endl;
   }
 
   parameters param = load_parameters(paramfile);
 
   std::cerr<<"res: "<<param.xres<<" "<<param.yres<<" "<<param.tres<<" "
 	   <<"bw: "<<param.xbw<<" "<<param.ybw<<" "<<param.tbw<<std::endl;
+
+  assert (param.xres == param.yres);
+  assert (param.xbw == param.ybw);
   
+  //
+  util::timestamp beg;
+  std::shared_ptr<util::Compact3D<values>> dens = stkde (bb, inst, param);
+
+    std::cerr.precision(2);
+
+  for (int k=8; k< 9; ++k) {
+    for (int i=0; i<std::min(dens->getSizeX(), 200); ++i) {
+      for (int j=0; j<std::min(dens->getSizeY(), 200); ++j) { 
+      //      for (int k=0; k<std::min(dens->getSizeZ(), 10); ++k)
+	std::cerr<<(*dens)(i, j, k)<<" ";
+      }
+      std::cerr<<std::endl;
+    }
+    std::cerr<<std::endl;
+  }
+  util::timestamp end;
+
+  std::cerr<<"time: "<<end-beg<<std::endl;
   
   return 0;
 }
