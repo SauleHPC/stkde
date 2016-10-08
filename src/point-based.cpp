@@ -8,24 +8,7 @@
 #include "compact.hpp"
 #include <memory>
 #include "timestamp.hpp"
-
-values densityF( coordinate obsX, coordinate obsY, coordinate obsT,
-		 coordinate voxX, coordinate voxY, coordinate voxT,
-		 int nbObs, coordinate xbw, coordinate tbw
-		 ) {
-
-  values u = (obsX-voxX) / xbw;
-  values v = (obsY-voxY) / xbw;
-  values w = (obsT-voxT) / tbw;
-    
-  values constantTerm = std::pow(10.0, 10) / (nbObs * pow(xbw, 2) * tbw);
-  values Ks = (0.5 * M_PI) * (1 - pow(u, 2) - pow(v, 2));
-  values Kt = 0.75 * (1 - pow(w, 2));
-  
-  values spaceTimeKDE = constantTerm * Ks * Kt;
-    
-  return spaceTimeKDE;
-}
+#include "density.hpp"
 
 std::shared_ptr<util::Compact3D<values>> stkde(const bounding_box& bb,
 					       const instance& inst,
