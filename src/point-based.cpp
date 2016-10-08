@@ -89,8 +89,6 @@ std::shared_ptr<util::Compact3D<values>> stkde(const bounding_box& bb,
 	    co(i,j,k) += val;
 	    eval++;
 	  }
-	  
-
 	}
       }
     }
@@ -155,21 +153,22 @@ int main (int argc, char* argv[]) {
   std::shared_ptr<util::Compact3D<values>> dens = stkde (bb, inst, param);
   util::timestamp end;
 
-  if (0) {
+  if (1) {
+    std::ofstream out ("log");
     //for debugging purpose
-    for (int k=8; k< 9; ++k) {
-      for (int i=0; i<std::min(dens->getSizeX(), 200); ++i) {
-	for (int j=0; j<std::min(dens->getSizeY(), 200); ++j) { 
+    for (int k=15; k< 16; ++k) {
+      for (int i=0; i<std::min(dens->getSizeX(), 400); ++i) {
+	for (int j=0; j<std::min(dens->getSizeY(), 400); ++j) { 
 	  //      for (int k=0; k<std::min(dens->getSizeZ(), 10); ++k)
-	  std::cerr<<(*dens)(i, j, k)<<" ";
+	  out<<(*dens)(i, j, k)<<" ";
 	}
-	std::cerr<<std::endl;
+	out<<std::endl;
       }
-      std::cerr<<std::endl;
+      out<<std::endl;
     }
-    std::cerr.precision(2);
   }
 
+  std::cerr.precision(2);
   std::cerr<<"time: "<<end-beg<<" seconds"<<std::endl;
   
   return 0;
