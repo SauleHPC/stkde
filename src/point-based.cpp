@@ -36,7 +36,9 @@ std::shared_ptr<util::Compact3D<values>> stkde(const bounding_box& bb,
 
   int voxsbw = std::lround(std::ceil(pa.xbw/pa.xres));
   int voxtbw = std::lround(std::ceil(pa.tbw/pa.tres));
-  
+
+  std::cerr.precision(4);
+    
   std::cerr<<"voxsize: "<<voxX<<"x"<<voxY<<"x"<<voxT<<" size:"<<voxX*voxY*voxT*sizeof(values)/1024./1024.<<"MB"<<std::endl;
   std::cerr<<"voxBW: "<<voxsbw<<" "<<voxtbw<<std::endl;
   
@@ -132,9 +134,9 @@ int main (int argc, char* argv[]) {
   util::timestamp beg;
   std::shared_ptr<util::Compact3D<values>> dens = stkde (bb, inst, param);
 
+  //for debugging purpose
   std::cerr.precision(2);
 
-  //for debugging purpose
   for (int k=8; k< 9; ++k) {
     for (int i=0; i<std::min(dens->getSizeX(), 200); ++i) {
       for (int j=0; j<std::min(dens->getSizeY(), 200); ++j) { 
@@ -147,7 +149,7 @@ int main (int argc, char* argv[]) {
   }
   util::timestamp end;
 
-  std::cerr<<"time: "<<end-beg<<std::endl;
+  std::cerr<<"time: "<<end-beg<<" seconds"<<std::endl;
   
   return 0;
 }
