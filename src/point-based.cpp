@@ -37,7 +37,7 @@ std::shared_ptr<util::Compact3D<values>> stkde(const bounding_box& bb,
   int voxsbw = std::lround(std::ceil(pa.xbw/pa.xres));
   int voxtbw = std::lround(std::ceil(pa.tbw/pa.tres));
   
-  std::cerr<<"voxsize: "<<voxX<<"x"<<voxY<<"x"<<voxT<<std::endl;
+  std::cerr<<"voxsize: "<<voxX<<"x"<<voxY<<"x"<<voxT<<" size:"<<voxX*voxY*voxT*sizeof(values)/1024./1024.<<"MB"<<std::endl;
   std::cerr<<"voxBW: "<<voxsbw<<" "<<voxtbw<<std::endl;
   
   std::shared_ptr<util::Compact3D<values>> p = std::make_shared<util::Compact3D<values>>(voxX, voxY, voxT);

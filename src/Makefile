@@ -1,5 +1,5 @@
 LD=g++
-CXXFLAGS = -std=c++14 
+CXXFLAGS = -std=c++14 -O3 -march=native
 
 OBJS = point-based.o
 
@@ -8,6 +8,17 @@ point-based: point-based.o
 
 test: point-based
 	./point-based ../dataset/Dengue-allcases-2010-2011/AllCases2010_11_clip_bds.txt  ../dataset/Dengue-allcases-2010-2011/AllCases2010_11_clip.txt  ../dataset/Dengue-allcases-2010-2011/lowres-lowbw
+
+test-med: point-based
+	./point-based ../dataset/Dengue-allcases-2010-2011/AllCases2010_11_clip_bds.txt  ../dataset/Dengue-allcases-2010-2011/AllCases2010_11_clip.txt  ../dataset/Dengue-allcases-2010-2011/lowres-highbw
+
+
+test-hard: point-based
+	./point-based ../dataset/Dengue-allcases-2010-2011/AllCases2010_11_clip_bds.txt  ../dataset/Dengue-allcases-2010-2011/AllCases2010_11_clip.txt  ../dataset/Dengue-allcases-2010-2011/highres-highbw
+
+clean:
+	-rm $(OBJS)
+	-rm point-based
 
 depend:
 	makedepend -Y -I . *.cpp 
