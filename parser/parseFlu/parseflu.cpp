@@ -77,6 +77,13 @@ int main () {
       getline(ss_line, s_lat, '\t');
       getline(ss_line, s_long, '\t');
 
+      if (s_time.compare("-N/A-") == 0)
+	continue;
+      if (s_long.compare("-N/A-") == 0)
+	continue;
+      if (s_lat.compare("-N/A-") == 0)
+	continue;
+      
       if (! ss_line.fail()) {
 	//parse time
 	{
@@ -108,13 +115,6 @@ int main () {
 		}
 	      }
 
-	      if (s_long.compare("-N/A-") == 0)
-		skip = true;
-	      if (s_lat.compare("-N/A-") == 0)
-		skip = true;
-		  
-	      
-	      
 	      if (!skip)
 		std::cout <<s_lat<<"\t"<<s_long<<"\t"<< time <<std::endl;	      
 	    }
