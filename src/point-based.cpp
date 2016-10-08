@@ -52,6 +52,8 @@ std::shared_ptr<util::Compact3D<values>> stkde(const bounding_box& bb,
       for (int k=0; k< co.getSizeZ(); ++k)
 	co(i,j,k) = 0;
 
+  int eval = 0;
+    
   //account for observations
   for (int ob=0; ob<inst.obsx.size(); ++ob) {
     //observation
@@ -65,7 +67,7 @@ std::shared_ptr<util::Compact3D<values>> stkde(const bounding_box& bb,
     int obsvt = (ot - bb.tl)/pa.tres;
 
     //std::cerr<<"obsv: "<<obsvx<<" "<<obsvy<<" "<<obsvt<<std::endl;
-    
+
     //BW around observation
     for (int i = std::max(obsvx - voxsbw, 0); i< std::min(obsvx + voxsbw, voxX); ++i) {
       for (int j = std::max(obsvy - voxsbw, 0); j< std::min(obsvy + voxsbw, voxY); ++j) {
@@ -85,6 +87,7 @@ std::shared_ptr<util::Compact3D<values>> stkde(const bounding_box& bb,
 	    //std::cerr<<vox_x<<" "<<vox_y<<" "<<vox_t<<" "<<val<<std::endl;
 	    
 	    co(i,j,k) += val;
+	    eval++;
 	  }
 	  
 
@@ -92,7 +95,9 @@ std::shared_ptr<util::Compact3D<values>> stkde(const bounding_box& bb,
       }
     }
   }
-      
+
+  std::cerr<<"evaluations: "<<eval<<std::endl;
+  
   return p;
 }
 
@@ -113,13 +118,28 @@ int main (int argc, char* argv[]) {
 
   load_observations (obsfile, inst.obsx, inst.obsy, inst.obst);
 
-  //show first 5 observation
-  std::cerr<<"first 5 observations"<<std::endl;
-  std::cerr.precision(std::numeric_limits< coordinate > ::max_digits10);
-  for (int i=0; i<std::min((size_t)5, (size_t)inst.obsx.size()); ++i) {
-    std::cerr<<inst.obsx[i]<<" "
-	     <<inst.obsy[i]<<" "
-	     <<inst.obst[i]<<std::endl;
+  if (0) {
+    //randomize the order
+    for (int i=inst.obsx.size()-1; i>1; --i) {
+      int dest = rand()%(i+1);
+      assert (dest>=0);
+      if (dest != i) {
+	std::swap (inst.obsx[i], inst.obsx[dest]);
+	std::swap (inst.obsy[i], inst.obsy[dest]);
+	std::swap (inst.obst[i], inst.obst[dest]);
+      }
+    }
+  }
+  
+  if (0) {
+    //show first 5 observation
+    std::cerr<<"first 5 observations"<<std::endl;
+    std::cerr.precision(std::numeric_limits< coordinate > ::max_digits10);
+    for (int i=0; i<std::min((size_t)5, (size_t)inst.obsx.size()); ++i) {
+      std::cerr<<inst.obsx[i]<<" "
+	       <<inst.obsy[i]<<" "
+	       <<inst.obst[i]<<std::endl;
+    }
   }
 
   parameters param = load_parameters(paramfile);
@@ -133,21 +153,22 @@ int main (int argc, char* argv[]) {
   //
   util::timestamp beg;
   std::shared_ptr<util::Compact3D<values>> dens = stkde (bb, inst, param);
+  util::timestamp end;
 
-  //for debugging purpose
-  std::cerr.precision(2);
-
-  for (int k=8; k< 9; ++k) {
-    for (int i=0; i<std::min(dens->getSizeX(), 200); ++i) {
-      for (int j=0; j<std::min(dens->getSizeY(), 200); ++j) { 
-      //      for (int k=0; k<std::min(dens->getSizeZ(), 10); ++k)
-	std::cerr<<(*dens)(i, j, k)<<" ";
+  if (0) {
+    //for debugging purpose
+    for (int k=8; k< 9; ++k) {
+      for (int i=0; i<std::min(dens->getSizeX(), 200); ++i) {
+	for (int j=0; j<std::min(dens->getSizeY(), 200); ++j) { 
+	  //      for (int k=0; k<std::min(dens->getSizeZ(), 10); ++k)
+	  std::cerr<<(*dens)(i, j, k)<<" ";
+	}
+	std::cerr<<std::endl;
       }
       std::cerr<<std::endl;
     }
-    std::cerr<<std::endl;
+    std::cerr.precision(2);
   }
-  util::timestamp end;
 
   std::cerr<<"time: "<<end-beg<<" seconds"<<std::endl;
   

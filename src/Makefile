@@ -1,4 +1,5 @@
 LD=g++
+#CXXFLAGS = -std=c++14 -O0 -g
 CXXFLAGS = -std=c++14 -O3 -march=native
 
 OBJS = point-based.o
