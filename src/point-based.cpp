@@ -46,13 +46,19 @@ std::shared_ptr<util::Compact3D<values>> stkde(const bounding_box& bb,
 
   util::Compact3D<values>& co = *p;
 
+  util::timestamp init_b;
+  
   //fill in zeroes
   for (index i=0; i< co.getSizeX(); ++i)
     for (index j=0; j< co.getSizeY(); ++j)
       for (index k=0; k< co.getSizeZ(); ++k)
 	co(i,j,k) = 0;
 
-  int eval = 0;
+  util::timestamp init_e;
+
+  std::cerr<<"Initialization time: "<<init_e-init_b<<std::endl;
+  
+  long int eval = 0;
     
   //account for observations
   for (index ob=0; ob<inst.obsx.size(); ++ob) {
@@ -156,7 +162,7 @@ int main (int argc, char* argv[]) {
   if (1) {
     std::ofstream out ("log");
     //for debugging purpose
-    for (int k=15; k< 16; ++k) {
+    for (int k=500; k< 501; ++k) {
       for (int i=0; i<std::min(dens->getSizeX(), (index)400); ++i) {
 	for (int j=0; j<std::min(dens->getSizeY(), (index)400); ++j) { 
 	  //      for (int k=0; k<std::min(dens->getSizeZ(), 10); ++k)
