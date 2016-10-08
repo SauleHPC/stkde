@@ -51,7 +51,10 @@ namespace util
   template <typename T, bool DEBUG=false>
   class Compact2D
   {
-    int sizeX, sizeY;
+  public:
+    typedef long index;
+  private:
+    index sizeX, sizeY;
     T* data;
     
   private:
@@ -64,9 +67,9 @@ namespace util
     
   public:
     ///build an array of size x times y
-    Compact2D(int x, int y);
-    T* operator[] (int x);
-    const T* operator[] (int x) const;
+    Compact2D(index x, index y);
+    T* operator[] (index x);
+    const T* operator[] (index x) const;
     ~Compact2D();
   };
 
@@ -78,11 +81,15 @@ namespace util
   template <typename T>
   class Compact3D
   {
-    int sizeX, sizeY, sizeZ;
+  public:
+    typedef long index;
+
+  private:
+    index sizeX, sizeY, sizeZ;
     T* data;
     
   public:
-    Compact3D(int x, int y, int z)
+    Compact3D(index x, index y, index z)
       :sizeX(x),sizeY(y), sizeZ(z)
     {
       assert (x>0);
@@ -90,13 +97,14 @@ namespace util
       assert (z>0);
       
       data = new T[sizeX*sizeY*sizeZ];
+      assert (data);
     }
 
-    int getSizeX() const {return sizeX;}
-    int getSizeY() const {return sizeY;}
-    int getSizeZ() const {return sizeZ;}
+    index getSizeX() const {return sizeX;}
+    index getSizeY() const {return sizeY;}
+    index getSizeZ() const {return sizeZ;}
     
-    const T& operator() (int x, int y, int z) const
+    const T& operator() (index x, index y, index z) const
     {
       assert (x>=0 && x < sizeX);
       assert (y>=0 && y < sizeY);
@@ -104,7 +112,7 @@ namespace util
       return *(data+sizeY*sizeX*z+sizeX*y+x);
     }
     
-    T& operator() (int x, int y, int z)
+    T& operator() (index x, index y, index z)
     {
       assert (x>=0 && x < sizeX);
       assert (y>=0 && y < sizeY);

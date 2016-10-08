@@ -3,6 +3,7 @@
 
 #include <vector>
 
+typedef long index;
 typedef double coordinate;
 typedef float values;
 

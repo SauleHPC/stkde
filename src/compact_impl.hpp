@@ -35,7 +35,7 @@
 // The full text of the GPL license version 2 is available in "gpl.txt".
 
 template <typename T, bool DEBUG>
-util::Compact2D<T, DEBUG>::Compact2D(int x, int y)
+util::Compact2D<T, DEBUG>::Compact2D(index x, index y)
     :sizeX(x),sizeY(y)
 {
   if (DEBUG)
@@ -45,7 +45,7 @@ util::Compact2D<T, DEBUG>::Compact2D(int x, int y)
 }
 
 template <typename T, bool DEBUG>
-T* util::Compact2D<T, DEBUG>::operator[] (int x)
+T* util::Compact2D<T, DEBUG>::operator[] (index x)
 {
   if (DEBUG)
     assert (!(x<0 || x >=sizeX));
@@ -54,7 +54,7 @@ T* util::Compact2D<T, DEBUG>::operator[] (int x)
 }
 
 template <typename T, bool DEBUG>
-const T* util::Compact2D<T, DEBUG>::operator[] (int x) const
+const T* util::Compact2D<T, DEBUG>::operator[] (index x) const
 {
   if (DEBUG)
     assert (!(x<0 || x >=sizeX));

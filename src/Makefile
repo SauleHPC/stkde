@@ -25,4 +25,4 @@ depend:
 	makedepend -Y -I . *.cpp 
 # DO NOT DELETE
 
-point-based.o: types.hpp io.hpp
+point-based.o: types.hpp io.hpp compact.hpp compact_impl.hpp timestamp.hpp

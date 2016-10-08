@@ -30,12 +30,12 @@ values densityF( coordinate obsX, coordinate obsY, coordinate obsT,
 std::shared_ptr<util::Compact3D<values>> stkde(const bounding_box& bb,
 					       const instance& inst,
 					       const parameters& pa) {
-  int voxX = std::lround(std::ceil((bb.xh-bb.xl)/pa.xres))+1;
-  int voxY = std::lround(std::ceil((bb.yh-bb.yl)/pa.yres))+1;
-  int voxT = std::lround(std::ceil((bb.th-bb.tl)/pa.tres))+1;
+  index voxX = std::lround(std::ceil((bb.xh-bb.xl)/pa.xres))+1;
+  index voxY = std::lround(std::ceil((bb.yh-bb.yl)/pa.yres))+1;
+  index voxT = std::lround(std::ceil((bb.th-bb.tl)/pa.tres))+1;
 
-  int voxsbw = std::lround(std::ceil(pa.xbw/pa.xres));
-  int voxtbw = std::lround(std::ceil(pa.tbw/pa.tres));
+  index voxsbw = std::lround(std::ceil(pa.xbw/pa.xres));
+  index voxtbw = std::lround(std::ceil(pa.tbw/pa.tres));
 
   std::cerr.precision(4);
     
@@ -47,15 +47,15 @@ std::shared_ptr<util::Compact3D<values>> stkde(const bounding_box& bb,
   util::Compact3D<values>& co = *p;
 
   //fill in zeroes
-  for (int i=0; i< co.getSizeX(); ++i)
-    for (int j=0; j< co.getSizeY(); ++j)
-      for (int k=0; k< co.getSizeZ(); ++k)
+  for (index i=0; i< co.getSizeX(); ++i)
+    for (index j=0; j< co.getSizeY(); ++j)
+      for (index k=0; k< co.getSizeZ(); ++k)
 	co(i,j,k) = 0;
 
   int eval = 0;
     
   //account for observations
-  for (int ob=0; ob<inst.obsx.size(); ++ob) {
+  for (index ob=0; ob<inst.obsx.size(); ++ob) {
     //observation
     coordinate ox = inst.obsx[ob];
     coordinate oy = inst.obsy[ob];
@@ -69,9 +69,9 @@ std::shared_ptr<util::Compact3D<values>> stkde(const bounding_box& bb,
     //std::cerr<<"obsv: "<<obsvx<<" "<<obsvy<<" "<<obsvt<<std::endl;
 
     //BW around observation
-    for (int i = std::max(obsvx - voxsbw, 0); i< std::min(obsvx + voxsbw, voxX); ++i) {
-      for (int j = std::max(obsvy - voxsbw, 0); j< std::min(obsvy + voxsbw, voxY); ++j) {
-	for (int k = std::max(obsvt - voxtbw, 0); k< std::min(obsvt + voxtbw, voxT); ++k) {
+    for (index i = std::max(obsvx - voxsbw, (index)0); i< std::min(obsvx + voxsbw, voxX); ++i) {
+      for (index j = std::max(obsvy - voxsbw, (index)0); j< std::min(obsvy + voxsbw, voxY); ++j) {
+	for (index k = std::max(obsvt - voxtbw, (index)0); k< std::min(obsvt + voxtbw, voxT); ++k) {
 	  coordinate vox_x = bb.xl + i*pa.xres;
 	  coordinate vox_y = bb.yl + j*pa.yres;
 	  coordinate vox_t = bb.tl + k*pa.tres;
@@ -157,8 +157,8 @@ int main (int argc, char* argv[]) {
     std::ofstream out ("log");
     //for debugging purpose
     for (int k=15; k< 16; ++k) {
-      for (int i=0; i<std::min(dens->getSizeX(), 400); ++i) {
-	for (int j=0; j<std::min(dens->getSizeY(), 400); ++j) { 
+      for (int i=0; i<std::min(dens->getSizeX(), (index)400); ++i) {
+	for (int j=0; j<std::min(dens->getSizeY(), (index)400); ++j) { 
 	  //      for (int k=0; k<std::min(dens->getSizeZ(), 10); ++k)
 	  out<<(*dens)(i, j, k)<<" ";
 	}
