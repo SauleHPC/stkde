@@ -1,5 +1,5 @@
-#ifndef POINT_BASED_SYMBAR_HPP
-#define POINT_BASED_SYMBAR_HPP
+#ifndef POINT_BASED_SYM_HPP
+#define POINT_BASED_SYM_HPP
 
 #include <iostream>
 #include <cmath>
@@ -13,9 +13,9 @@
 #include "timestamp.hpp"
 #include "density.hpp"
 
-std::shared_ptr<util::Compact3D<values>> stkde_pointbased_symbar(const bounding_box& bb,
-								 const instance& inst,
-								 const parameters& pa) {
+std::shared_ptr<util::Compact3D<values>> stkde_pointbased_sym(const bounding_box& bb,
+							      const instance& inst,
+							      const parameters& pa) {
   index voxX = std::lround(std::ceil((bb.xh-bb.xl)/pa.xres))+1;
   index voxY = std::lround(std::ceil((bb.yh-bb.yl)/pa.yres))+1;
   index voxT = std::lround(std::ceil((bb.th-bb.tl)/pa.tres))+1;
@@ -32,6 +32,9 @@ std::shared_ptr<util::Compact3D<values>> stkde_pointbased_symbar(const bounding_
 
   util::Compact3D<values>& co = *p;
 
+  util::Compact2D<values> disk (voxX, voxY); //naive version of symmetry uses a disk buffer of the map size
+  std::vector<values> bar(voxT);
+  
   util::timestamp init_b;
   
   //fill in zeroes
@@ -61,40 +64,47 @@ std::shared_ptr<util::Compact3D<values>> stkde_pointbased_symbar(const bounding_
 
     //std::cerr<<"obsv: "<<obsvx<<" "<<obsvy<<" "<<obsvt<<std::endl;
 
-    
-    //BW around observation
+
+    for (index i = std::max(obsvx - voxsbw, (index)0); i< std::min(obsvx + voxsbw, voxX); ++i) {
+      for (index j = std::max(obsvy - voxsbw, (index)0); j< std::min(obsvy + voxsbw, voxY); ++j) {
+	coordinate vox_x = bb.xl + i*pa.xres;
+	coordinate vox_y = bb.yl + j*pa.yres;
+
+	if (std::sqrt((ox - vox_x)*(ox - vox_x) + (oy - vox_y)*(oy - vox_y)) <= pa.xbw ) {
+	  disk[i][j]  = densityF_disk(ox, oy, ot,
+				      vox_x, vox_y, -1,
+				      inst.obsx.size(), pa.xbw, pa.tbw);
+	} else {
+	  disk [i][j] = 0.;
+	}
+      }
+    }
+
     for (index k = std::max(obsvt - voxtbw, (index)0); k< std::min(obsvt + voxtbw, voxT); ++k) {
       coordinate vox_t = bb.tl + k*pa.tres;
       
       if (std::abs(vox_t - ot) <= pa.tbw) {
 	
+	bar[k] = densityF_bar(ox, oy, ot,
+			      -1, -1, vox_t,
+			      inst.obsx.size(), pa.xbw, pa.tbw);
+      }
+    }
+    
+    
+    //BW around observation
+    for (index i = std::max(obsvx - voxsbw, (index)0); i< std::min(obsvx + voxsbw, voxX); ++i) {
+      for (index j = std::max(obsvy - voxsbw, (index)0); j< std::min(obsvy + voxsbw, voxY); ++j) {
 	
-	//std::cerr<<i<<" "<<j<<" "<<k<<std::endl;	   
-	
-	values bar = densityF_bar(ox, oy, ot,
-				  -1, -1, vox_t,
-				  inst.obsx.size(), pa.xbw, pa.tbw);
-	
-	for (index i = std::max(obsvx - voxsbw, (index)0); i< std::min(obsvx + voxsbw, voxX); ++i) {
-	  for (index j = std::max(obsvy - voxsbw, (index)0); j< std::min(obsvy + voxsbw, voxY); ++j) {
-	    coordinate vox_x = bb.xl + i*pa.xres;
-	    coordinate vox_y = bb.yl + j*pa.yres;
-	    
-	    if (std::sqrt((ox - vox_x)*(ox - vox_x) + (oy - vox_y)*(oy - vox_y)) <= pa.xbw ) {
-	      values disk = densityF_disk(ox, oy, ot,
-					  vox_x, vox_y, -1,
-					  inst.obsx.size(), pa.xbw, pa.tbw);
-	      
-	      
-	      values val = disk*bar;
-	    
-	      //std::cerr<<vox_x<<" "<<vox_y<<" "<<vox_t<<" "<<val<<std::endl;
-	      
-	      co(i,j,k) += val;
-	      //eval++;
-	    }
-	  }
+	for (index k = std::max(obsvt - voxtbw, (index)0); k< std::min(obsvt + voxtbw, voxT); ++k) {
+	  values val = disk[i][j]*bar[k];
+	  
+	  //std::cerr<<vox_x<<" "<<vox_y<<" "<<vox_t<<" "<<val<<std::endl;
+	  
+	  co(i,j,k) += val;
+	  //eval++;
 	}
+	
       }
     }
   }

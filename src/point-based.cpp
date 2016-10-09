@@ -12,6 +12,7 @@
 #include "point-based.hpp"
 #include "point-based-symdisk.hpp"
 #include "point-based-symbar.hpp"
+#include "point-based-sym.hpp"
 
 int main (int argc, char* argv[]) {
 
@@ -64,7 +65,7 @@ int main (int argc, char* argv[]) {
   
   //
   util::timestamp beg;
-  std::shared_ptr<util::Compact3D<values>> dens = stkde_pointbased_symbar (bb, inst, param);
+  std::shared_ptr<util::Compact3D<values>> dens = stkde_pointbased_sym (bb, inst, param);
   util::timestamp end;
 
   if (1) {
