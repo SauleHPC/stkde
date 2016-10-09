@@ -82,7 +82,8 @@ bool longitude_of_record (const std::vector<std::string>& a, double* ret) {
     //longitude
     {
       std::stringstream ss;
-      ss.str(a[51]);
+      //      ss.str(a[51]); //51 is point_long
+      ss.str(a[52]); //I know 52 is point_lat! it seems the dataset was not correctly exported
       ss>>*ret;
       if (!ss) {//a[51] does not contain a number
 	double box_long[4];
@@ -128,10 +129,11 @@ bool longitude_of_record (const std::vector<std::string>& a, double* ret) {
 //or pick a randomly uniform point in the box if a box is all we have.
 bool latitude_of_record (const std::vector<std::string>& a, double* ret) {
 
-    //longitude
+    //latitude
     {
       std::stringstream ss;
-      ss.str(a[52]);
+      //      ss.str(a[52]); //52 is point_lat
+      ss.str(a[51]); //I KNOW this is point_long, it seems the dataset was not correctly exported!
       ss>>*ret;
       if (!ss) {//a[51] does not contain a number
 	double box_lat[4];
@@ -267,6 +269,11 @@ int main(int argc, char* argv[]) {
     if (a[52].compare("") == 0)
       a[52] = "undef";
 
+    // if (a[0].compare("707982103334490113") == 0) {
+    //   std::cerr<<"first lat in box "<<a[42]<<" "<<a[43]<<std::endl;
+    //   std::cerr<<longitude<<'\t'<<latitude<<'\t'<<time<<std::endl;
+    // }
+    
     std::cout.precision(std::numeric_limits< double > ::max_digits10);
     //std::cout<<a[0]<<'\t'; //for debugging
     std::cout<<longitude<<'\t'<<latitude<<'\t'<<time<<std::endl;
