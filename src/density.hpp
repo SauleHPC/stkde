@@ -23,6 +23,7 @@ values densityF( coordinate obsX, coordinate obsY, coordinate obsT,
   return spaceTimeKDE;
 }
 
+//compute the part of the density estimation that comes from the disk
 inline
 values densityF_disk( coordinate obsX, coordinate obsY, coordinate obsT,
 		      coordinate voxX, coordinate voxY, coordinate voxT,
@@ -40,6 +41,7 @@ values densityF_disk( coordinate obsX, coordinate obsY, coordinate obsT,
   return spaceTimeKDE;
 }
 
+//compute the part of the density estimation that comes from the bar
 inline
 values densityF_bar( coordinate obsX, coordinate obsY, coordinate obsT,
 		     coordinate voxX, coordinate voxY, coordinate voxT,
