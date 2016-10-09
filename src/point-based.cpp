@@ -19,6 +19,7 @@ int main (int argc, char* argv[]) {
   std::string bbfile = argv[1];
   std::string obsfile = argv[2];
   std::string paramfile = argv[3];
+  std::string method = argv[4];
   
   bounding_box bb = load_bounding_box(bbfile);
 
@@ -65,7 +66,16 @@ int main (int argc, char* argv[]) {
   
   //
   util::timestamp beg;
-  std::shared_ptr<util::Compact3D<values>> dens = stkde_pointbased_sym (bb, inst, param);
+  std::shared_ptr<util::Compact3D<values>> dens;
+
+  if (method.compare("POINTBASED") == 0)
+    dens = stkde_pointbased (bb, inst, param);
+  if (method.compare("POINTBASED-SYMDISK") == 0)
+    dens = stkde_pointbased_symdisk (bb, inst, param);
+  if (method.compare("POINTBASED-SYMBAR") == 0)
+    dens = stkde_pointbased_symbar (bb, inst, param);
+  if (method.compare("POINTBASED-SYM") == 0)
+    dens = stkde_pointbased_sym (bb, inst, param);
   util::timestamp end;
 
   if (1) {
