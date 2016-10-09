@@ -26,3 +26,5 @@ depend:
 # DO NOT DELETE
 
 point-based.o: types.hpp io.hpp compact.hpp compact_impl.hpp timestamp.hpp
+point-based.o: density.hpp point-based.hpp point-based-symdisk.hpp
+point-based.o: point-based-symbar.hpp

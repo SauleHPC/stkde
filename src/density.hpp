@@ -4,6 +4,7 @@
 #include <cmath>
 #include "types.hpp"
 
+inline
 values densityF( coordinate obsX, coordinate obsY, coordinate obsT,
 		 coordinate voxX, coordinate voxY, coordinate voxT,
 		 int nbObs, coordinate xbw, coordinate tbw
@@ -22,6 +23,7 @@ values densityF( coordinate obsX, coordinate obsY, coordinate obsT,
   return spaceTimeKDE;
 }
 
+inline
 values densityF_disk( coordinate obsX, coordinate obsY, coordinate obsT,
 		      coordinate voxX, coordinate voxY, coordinate voxT,
 		      int nbObs, coordinate xbw, coordinate tbw
@@ -38,7 +40,7 @@ values densityF_disk( coordinate obsX, coordinate obsY, coordinate obsT,
   return spaceTimeKDE;
 }
 
-
+inline
 values densityF_bar( coordinate obsX, coordinate obsY, coordinate obsT,
 		     coordinate voxX, coordinate voxY, coordinate voxT,
 		     int nbObs, coordinate xbw, coordinate tbw
