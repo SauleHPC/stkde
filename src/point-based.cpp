@@ -81,9 +81,9 @@ int main (int argc, char* argv[]) {
   if (1) {
     std::ofstream out ("log");
     //for debugging purpose
-    for (int k=500; k< 501; ++k) {
-      for (int i=0; i<std::min(dens->getSizeX(), (index)400); ++i) {
-	for (int j=0; j<std::min(dens->getSizeY(), (index)400); ++j) { 
+    for (int k=20; k< 21; ++k) {
+	for (int j=0; j<std::min(dens->getSizeY(), (index)4000); ++j) {
+	  for (int i=0; i<std::min(dens->getSizeX(), (index)4000); i+=2) {
 	  //      for (int k=0; k<std::min(dens->getSizeZ(), 10); ++k)
 	  out<<(*dens)(i, j, k)<<" ";
 	}
