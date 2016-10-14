@@ -13,6 +13,7 @@
 #include "point-based-symdisk.hpp"
 #include "point-based-symbar.hpp"
 #include "point-based-sym.hpp"
+#include "point-based-symomp.hpp"
 
 int main (int argc, char* argv[]) {
 
@@ -76,6 +77,8 @@ int main (int argc, char* argv[]) {
     dens = stkde_pointbased_symbar (bb, inst, param);
   if (method.compare("POINTBASED-SYM") == 0)
     dens = stkde_pointbased_sym (bb, inst, param);
+    if (method.compare("POINTBASED-SYMOMP") == 0)
+    dens = stkde_pointbased_symomp (bb, inst, param);
   util::timestamp end;
 
   if (1) {
