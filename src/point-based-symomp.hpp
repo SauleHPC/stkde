@@ -12,6 +12,7 @@
 #include <memory>
 #include "timestamp.hpp"
 #include "density.hpp"
+#include "omp.h"
 
 struct computation {
   //size of the space in voxels
@@ -41,6 +42,7 @@ void init_stkde (computation& c) {
   util::timestamp init_b;
   
   //fill in zeroes
+#pragma omp parallel for collapse(2) schedule(dynamic,1)
   for (index i=0; i< co.getSizeX(); ++i)
     for (index j=0; j< co.getSizeY(); ++j)
       for (index k=0; k< co.getSizeZ(); ++k)
@@ -62,6 +64,12 @@ long process_observation_boxed_sym (computation& c,
 				    util::Compact2D<values>& bufferdisk,//buffer
 				    std::vector<values>& bufferbar
 				    ) {
+  // std::cerr<<"processing voxel box: "
+  // 	   <<"["<< voxXmin<<";"<<voxXmax<<"["
+  //   	   <<" ["<< voxYmin<<";"<<voxYmax<<"["
+  //   	   <<" ["<< voxTmin<<";"<<voxTmax<<"["<<std::endl;
+	
+    
   long eval = 0;
 
   util::Compact3D<values>& co = *(c.p);
@@ -74,15 +82,15 @@ long process_observation_boxed_sym (computation& c,
     coordinate ot = obst[ob];
 
     //voxel containing the observation
-    int obsvx = (ox - c.bb.xl)/c.pa.xres;
-    int obsvy = (oy - c.bb.yl)/c.pa.yres;
-    int obsvt = (ot - c.bb.tl)/c.pa.tres;
+    index obsvx = (ox - c.bb.xl)/c.pa.xres;
+    index obsvy = (oy - c.bb.yl)/c.pa.yres;
+    index obsvt = (ot - c.bb.tl)/c.pa.tres;
 
     //std::cerr<<"obsv: "<<obsvx<<" "<<obsvy<<" "<<obsvt<<std::endl;
 
 
-    for (index i = std::max(obsvx - c.voxsbw, (index)0); i< std::min(obsvx + c.voxsbw, c.voxX); ++i) {
-      for (index j = std::max(obsvy - c.voxsbw, (index)0); j< std::min(obsvy + c.voxsbw, c.voxY); ++j) {
+    for (index i = std::max(obsvx - c.voxsbw, (index)voxXmin); i< std::min(obsvx + c.voxsbw, voxXmax); ++i) {
+      for (index j = std::max(obsvy - c.voxsbw, (index)voxYmin); j< std::min(obsvy + c.voxsbw, voxYmax); ++j) {
 	coordinate vox_x = c.bb.xl + i*c.pa.xres;
 	coordinate vox_y = c.bb.yl + j*c.pa.yres;
 
@@ -96,7 +104,7 @@ long process_observation_boxed_sym (computation& c,
       }
     }
 
-    for (index k = std::max(obsvt - c.voxtbw, (index)0); k< std::min(obsvt + c.voxtbw, c.voxT); ++k) {
+    for (index k = std::max(obsvt - c.voxtbw, (index)voxTmin); k< std::min(obsvt + c.voxtbw, voxTmax); ++k) {
       coordinate vox_t = c.bb.tl + k*c.pa.tres;
       
       if (std::abs(vox_t - ot) <= c.pa.tbw) { //is this test even necessary?
@@ -109,16 +117,16 @@ long process_observation_boxed_sym (computation& c,
     
     
     //BW around observation
-    for (index i = std::max(obsvx - c.voxsbw, (index)0); i< std::min(obsvx + c.voxsbw, c.voxX); ++i) {
-      for (index j = std::max(obsvy - c.voxsbw, (index)0); j< std::min(obsvy + c.voxsbw, c.voxY); ++j) {
+    for (index i = std::max(obsvx - c.voxsbw, (index)voxXmin); i< std::min(obsvx + c.voxsbw, voxXmax); ++i) {
+      for (index j = std::max(obsvy - c.voxsbw, (index)voxYmin); j< std::min(obsvy + c.voxsbw, voxYmax); ++j) {
 	
-	for (index k = std::max(obsvt - c.voxtbw, (index)0); k< std::min(obsvt + c.voxtbw, c.voxT); ++k) {
+	for (index k = std::max(obsvt - c.voxtbw, (index)voxTmin); k< std::min(obsvt + c.voxtbw, voxTmax); ++k) {
 	  values val = bufferdisk[i][j]*bufferbar[k];
 	  
 	  //std::cerr<<vox_x<<" "<<vox_y<<" "<<vox_t<<" "<<val<<std::endl;
 	  
 	  co(i,j,k) += val;
-	  //eval++;
+	  eval++;
 	}
 	
       }
@@ -128,6 +136,13 @@ long process_observation_boxed_sym (computation& c,
   return eval;  
 }
 
+bool intersect1d (coordinate min1, coordinate max1,
+		  coordinate min2, coordinate max2) {
+  if (max2 < min1) return false;
+  if (min2 > max1) return false;
+
+  return true;
+}
 
 std::shared_ptr<util::Compact3D<values>> stkde_pointbased_symomp(const bounding_box& bb,
 								 const instance& inst,
@@ -145,7 +160,7 @@ std::shared_ptr<util::Compact3D<values>> stkde_pointbased_symomp(const bounding_
   c.bb = bb;
   c.pa = pa;
   
-  std::cerr.precision(4);
+  std::cerr.precision(9);
     
   std::cerr<<"voxsize: "<<c.voxX<<"x"<<c.voxY<<"x"<<c.voxT<<" size:"<<c.voxX*c.voxY*c.voxT*sizeof(values)/1024./1024.<<"MB"<<std::endl;
   std::cerr<<"voxBW: "<<c.voxsbw<<" "<<c.voxtbw<<std::endl;
@@ -154,19 +169,173 @@ std::shared_ptr<util::Compact3D<values>> stkde_pointbased_symomp(const bounding_
 
   util::Compact3D<values>& co = *(c.p);
 
-  util::Compact2D<values> disk (c.voxX, c.voxY); //naive version of symmetry uses a disk buffer of the map size
-  std::vector<values> bar(c.voxT);
-  
+
   init_stkde(c);
   
   long int eval = 0;
 
+
+  util::timestamp decbeg;
+  //decomposition
+  index decompsizeX = 8;
+  index decompsizeY = 8;
+  index decompsizeT = 8;
+
+  util::Compact3D<index> load (decompsizeX, decompsizeY, decompsizeT);
+
+  for (int dx = 0; dx<decompsizeX; ++dx) {
+    for (int dy = 0; dy<decompsizeY; ++dy) {
+      for (int dt = 0; dt<decompsizeT; ++dt) {
+	load(dx,dy,dt) = 0;
+      }
+    }
+  }
   
-  eval +=  process_observation_boxed_sym (c, //comp
-					  0, c.voxX, 0, c.voxY, 0, c.voxT, //box
-					  inst.obsx, inst.obsy, inst.obst, //observations
-					  disk, bar //workbuffer
-					  );
+    
+  util::Compact3D<std::vector<coordinate>> decompX (decompsizeX, decompsizeY, decompsizeT);
+  util::Compact3D<std::vector<coordinate>> decompY (decompsizeX, decompsizeY, decompsizeT);
+  util::Compact3D<std::vector<coordinate>> decompT (decompsizeX, decompsizeY, decompsizeT);
+
+  //
+  long inter = 0;
+  for (int i=0; i< inst.obsx.size(); ++i) {
+    auto ox = inst.obsx[i];
+    auto oy = inst.obsy[i];
+    auto ot = inst.obst[i];
+
+    //place in appropriate decomposition
+    for (int dx = 0; dx<decompsizeX; ++dx) {
+      coordinate decxmin = bb.xl + ( dx   *(bb.xh-bb.xl)/decompsizeX );
+      coordinate decxmax = bb.xl + ((dx+1)*(bb.xh-bb.xl)/decompsizeX );
+
+      coordinate bwxmin = ox-pa.xbw;
+      coordinate bwxmax = ox+pa.xbw;
+      //does it intersect?
+      if (! intersect1d(bwxmin, bwxmax, decxmin, decxmax)) {continue;}
+      
+      
+      for (int dy = 0; dy<decompsizeY; ++dy) {
+	coordinate decymin = bb.yl + ( dy   *(bb.yh-bb.yl)/decompsizeY );
+	coordinate decymax = bb.yl + ((dy+1)*(bb.yh-bb.yl)/decompsizeY );
+
+	coordinate bwymin = oy-pa.ybw;
+	coordinate bwymax = oy+pa.ybw;
+	//does it intersect?
+	if (! intersect1d(bwymin, bwymax, decymin, decymax)) {continue;}
+
+	
+	for (int dt = 0; dt<decompsizeT; ++dt) {
+	  coordinate dectmin = bb.tl + ( dt   *(bb.th-bb.tl)/decompsizeT );
+	  coordinate dectmax = bb.tl + ((dt+1)*(bb.th-bb.tl)/decompsizeT );
+
+	  coordinate bwtmin = ot-pa.tbw;
+	  coordinate bwtmax = ot+pa.tbw;
+	  //does it intersect?
+	  if (! intersect1d(bwtmin, bwtmax, dectmin, dectmax)) {continue;}
+
+	  if (0 && i == 0){
+	    std::cerr<<"adding "<<ox<<","<<oy<<","<<ot<<" to "
+		     <<decxmin<<";"<<decxmax<<" "
+		     <<decymin<<";"<<decymax<<" "
+		     <<dectmin<<";"<<dectmax<<std::endl;
+	  }
+	  
+	  //it does intersect
+	  load(dx,dy,dt) ++;
+	  inter++;
+	  decompX(dx,dy,dt).push_back(ox);
+	  decompY(dx,dy,dt).push_back(oy);
+	  decompT(dx,dy,dt).push_back(ot);
+
+	}
+      }
+    }
+  }
+  std::cerr<<"intersect: "<<inter<<std::endl;
+  util::timestamp decend;
+
+  std::cerr<<"decomposition time: "<<decend-decbeg<<" seconds"<<std::endl;
+  index mostloaded = 0;
+  for (int dt = 0; dt<decompsizeT; ++dt) {
+    for (int dy = 0; dy<decompsizeY; ++dy) {
+      for (int dx = 0; dx<decompsizeX; ++dx) {
+	mostloaded = std::max(mostloaded, load(dx,dy,dt));
+     	//std::cerr<<load(dx,dy,dt)<<" ";
+      }
+      // std::cerr<<std::endl;
+     }
+    //   std::cerr<<std::endl;
+   }
+  std::cerr<<"max load: "<<mostloaded<<" avgloadperbox: "<<((double)inst.obsx.size())/(decompsizeX*decompsizeY*decompsizeT)<<" avgloadpercore: "<<((double)inst.obsx.size())/omp_get_max_threads()<<std::endl;
+
+
+  util::timestamp computebeg;
+  //compute
+#pragma omp parallel
+  {
+    
+    util::Compact2D<values> disk (c.voxX, c.voxY); //naive version of symmetry uses a disk buffer of the map size
+    std::vector<values> bar(c.voxT);
+
+  //
+  
+#pragma omp for collapse(3) schedule(dynamic,1)
+    for (int dx = 0; dx<decompsizeX; ++dx) {
+      
+      for (int dy = 0; dy<decompsizeY; ++dy) {
+	
+	for (int dt = 0; dt<decompsizeT; ++dt) {
+	  
+	  coordinate decxmin = bb.xl + ( dx   *(bb.xh-bb.xl)/decompsizeX );
+	  index voxXmin = std::lround((decxmin-bb.xl)/pa.xres);
+	  coordinate decxmax = bb.xl + ((dx+1)*(bb.xh-bb.xl)/decompsizeX );
+	  index voxXmax;
+	  if (dx != decompsizeX-1)
+	    voxXmax = std::lround((decxmax-bb.xl)/pa.xres);
+	  else
+	    voxXmax = c.voxX;
+	  
+	  coordinate decymin = bb.yl + ( dy   *(bb.yh-bb.yl)/decompsizeY );
+	  index voxYmin = std::lround((decymin-bb.yl)/pa.yres);
+	  coordinate decymax = bb.yl + ((dy+1)*(bb.yh-bb.yl)/decompsizeY );
+	  index voxYmax;
+	  if (dy != decompsizeY-1)
+	    voxYmax = std::lround((decymax-bb.yl)/pa.yres);
+	  else
+	    voxYmax = c.voxY;
+
+	  
+	  coordinate dectmin = bb.tl + ( dt   *(bb.th-bb.tl)/decompsizeT );
+	  index voxTmin = std::lround((dectmin-bb.tl)/pa.tres);
+	  coordinate dectmax = bb.tl + ((dt+1)*(bb.th-bb.tl)/decompsizeT );
+	  index voxTmax;
+	  if (dt != decompsizeT-1)
+	    voxTmax = std::lround((dectmax-bb.tl)/pa.tres);
+	  else
+	    voxTmax = c.voxT;
+	  
+
+	  index ret =  process_observation_boxed_sym (c, //comp
+						      voxXmin, voxXmax, voxYmin, voxYmax, voxTmin, voxTmax, //box
+						      decompX(dx,dy,dt), decompY(dx,dy,dt), decompT(dx,dy,dt), //observations
+						      disk, bar //workbuffer
+						      );
+#pragma atomic
+	  eval +=  ret;
+	}
+      }
+    }
+  }
+  util::timestamp computeend;
+
+  std::cerr<<"compute: "<<computeend-computebeg<<" seconds"<<std::endl;
+  
+  // eval +=  process_observation_boxed_sym (c, //comp
+  // 					  0, c.voxX, 0, c.voxY, 0, c.voxT, //box
+  // 					  inst.obsx, inst.obsy, inst.obst, //observations
+  // 					  disk, bar //workbuffer
+  // 					  );
+
   
   std::cerr<<"evaluations: "<<eval<<std::endl;
   

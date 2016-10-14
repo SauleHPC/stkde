@@ -47,7 +47,8 @@ std::shared_ptr<util::Compact3D<values>> stkde_pointbased_sym(const bounding_box
 
   std::cerr<<"Initialization time: "<<init_e-init_b<<std::endl;
 
-  
+
+  util::timestamp computebeg;
   long int eval = 0;
     
   //account for observations
@@ -102,12 +103,14 @@ std::shared_ptr<util::Compact3D<values>> stkde_pointbased_sym(const bounding_box
 	  //std::cerr<<vox_x<<" "<<vox_y<<" "<<vox_t<<" "<<val<<std::endl;
 	  
 	  co(i,j,k) += val;
-	  //eval++;
+	  eval++;
 	}
 	
       }
     }
   }
+  util::timestamp computeend;
+  std::cerr<<"compute: "<<computeend-computebeg<<" seconds"<<std::endl;
 
   std::cerr<<"evaluations: "<<eval<<std::endl;
   
