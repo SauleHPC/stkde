@@ -25,6 +25,13 @@ struct computation {
 
   //return
   std::shared_ptr<util::Compact3D<values>> p;
+
+  //total obs and box
+  index totalobs;
+  bounding_box bb;
+
+  //parameters
+  parameters pa;
 };
 
 
@@ -45,6 +52,82 @@ void init_stkde (computation& c) {
 
 }
 
+long process_observation_boxed_sym (computation& c,
+				    index voxXmin, index voxXmax,//bounding box [min;max[
+				    index voxYmin, index voxYmax,
+				    index voxTmin, index voxTmax,
+				    const std::vector<coordinate>& obsx,//observations
+				    const std::vector<coordinate>& obsy,
+				    const std::vector<coordinate>& obst,
+				    util::Compact2D<values>& bufferdisk,//buffer
+				    std::vector<values>& bufferbar
+				    ) {
+  long eval = 0;
+
+  util::Compact3D<values>& co = *(c.p);
+  
+//account for observations
+  for (index ob=0; ob<obsx.size(); ++ob) {
+    //observation
+    coordinate ox = obsx[ob];
+    coordinate oy = obsy[ob];
+    coordinate ot = obst[ob];
+
+    //voxel containing the observation
+    int obsvx = (ox - c.bb.xl)/c.pa.xres;
+    int obsvy = (oy - c.bb.yl)/c.pa.yres;
+    int obsvt = (ot - c.bb.tl)/c.pa.tres;
+
+    //std::cerr<<"obsv: "<<obsvx<<" "<<obsvy<<" "<<obsvt<<std::endl;
+
+
+    for (index i = std::max(obsvx - c.voxsbw, (index)0); i< std::min(obsvx + c.voxsbw, c.voxX); ++i) {
+      for (index j = std::max(obsvy - c.voxsbw, (index)0); j< std::min(obsvy + c.voxsbw, c.voxY); ++j) {
+	coordinate vox_x = c.bb.xl + i*c.pa.xres;
+	coordinate vox_y = c.bb.yl + j*c.pa.yres;
+
+	if (std::sqrt((ox - vox_x)*(ox - vox_x) + (oy - vox_y)*(oy - vox_y)) <= c.pa.xbw ) {
+	  bufferdisk[i][j]  = densityF_disk(ox, oy, ot,
+					    vox_x, vox_y, -1,
+					    c.totalobs, c.pa.xbw, c.pa.tbw);
+	} else {
+	  bufferdisk [i][j] = 0.;
+	}
+      }
+    }
+
+    for (index k = std::max(obsvt - c.voxtbw, (index)0); k< std::min(obsvt + c.voxtbw, c.voxT); ++k) {
+      coordinate vox_t = c.bb.tl + k*c.pa.tres;
+      
+      if (std::abs(vox_t - ot) <= c.pa.tbw) { //is this test even necessary?
+	
+	bufferbar[k] = densityF_bar(ox, oy, ot,
+				    -1, -1, vox_t,
+				    c.totalobs, c.pa.xbw, c.pa.tbw);
+      }
+    }
+    
+    
+    //BW around observation
+    for (index i = std::max(obsvx - c.voxsbw, (index)0); i< std::min(obsvx + c.voxsbw, c.voxX); ++i) {
+      for (index j = std::max(obsvy - c.voxsbw, (index)0); j< std::min(obsvy + c.voxsbw, c.voxY); ++j) {
+	
+	for (index k = std::max(obsvt - c.voxtbw, (index)0); k< std::min(obsvt + c.voxtbw, c.voxT); ++k) {
+	  values val = bufferdisk[i][j]*bufferbar[k];
+	  
+	  //std::cerr<<vox_x<<" "<<vox_y<<" "<<vox_t<<" "<<val<<std::endl;
+	  
+	  co(i,j,k) += val;
+	  //eval++;
+	}
+	
+      }
+    }
+  }
+
+  return eval;  
+}
+
 
 std::shared_ptr<util::Compact3D<values>> stkde_pointbased_symomp(const bounding_box& bb,
 								 const instance& inst,
@@ -58,6 +141,10 @@ std::shared_ptr<util::Compact3D<values>> stkde_pointbased_symomp(const bounding_
   c.voxsbw = std::lround(std::ceil(pa.xbw/pa.xres));
   c.voxtbw = std::lround(std::ceil(pa.tbw/pa.tres));
 
+  c.totalobs = inst.obsx.size();
+  c.bb = bb;
+  c.pa = pa;
+  
   std::cerr.precision(4);
     
   std::cerr<<"voxsize: "<<c.voxX<<"x"<<c.voxY<<"x"<<c.voxT<<" size:"<<c.voxX*c.voxY*c.voxT*sizeof(values)/1024./1024.<<"MB"<<std::endl;
@@ -73,66 +160,14 @@ std::shared_ptr<util::Compact3D<values>> stkde_pointbased_symomp(const bounding_
   init_stkde(c);
   
   long int eval = 0;
-    
-  //account for observations
-  for (index ob=0; ob<inst.obsx.size(); ++ob) {
-    //observation
-    coordinate ox = inst.obsx[ob];
-    coordinate oy = inst.obsy[ob];
-    coordinate ot = inst.obst[ob];
 
-    //voxel containing the observation
-    int obsvx = (ox - bb.xl)/pa.xres;
-    int obsvy = (oy - bb.yl)/pa.yres;
-    int obsvt = (ot - bb.tl)/pa.tres;
-
-    //std::cerr<<"obsv: "<<obsvx<<" "<<obsvy<<" "<<obsvt<<std::endl;
-
-
-    for (index i = std::max(obsvx - c.voxsbw, (index)0); i< std::min(obsvx + c.voxsbw, c.voxX); ++i) {
-      for (index j = std::max(obsvy - c.voxsbw, (index)0); j< std::min(obsvy + c.voxsbw, c.voxY); ++j) {
-	coordinate vox_x = bb.xl + i*pa.xres;
-	coordinate vox_y = bb.yl + j*pa.yres;
-
-	if (std::sqrt((ox - vox_x)*(ox - vox_x) + (oy - vox_y)*(oy - vox_y)) <= pa.xbw ) {
-	  disk[i][j]  = densityF_disk(ox, oy, ot,
-				      vox_x, vox_y, -1,
-				      inst.obsx.size(), pa.xbw, pa.tbw);
-	} else {
-	  disk [i][j] = 0.;
-	}
-      }
-    }
-
-    for (index k = std::max(obsvt - c.voxtbw, (index)0); k< std::min(obsvt + c.voxtbw, c.voxT); ++k) {
-      coordinate vox_t = bb.tl + k*pa.tres;
-      
-      if (std::abs(vox_t - ot) <= pa.tbw) {
-	
-	bar[k] = densityF_bar(ox, oy, ot,
-			      -1, -1, vox_t,
-			      inst.obsx.size(), pa.xbw, pa.tbw);
-      }
-    }
-    
-    
-    //BW around observation
-    for (index i = std::max(obsvx - c.voxsbw, (index)0); i< std::min(obsvx + c.voxsbw, c.voxX); ++i) {
-      for (index j = std::max(obsvy - c.voxsbw, (index)0); j< std::min(obsvy + c.voxsbw, c.voxY); ++j) {
-	
-	for (index k = std::max(obsvt - c.voxtbw, (index)0); k< std::min(obsvt + c.voxtbw, c.voxT); ++k) {
-	  values val = disk[i][j]*bar[k];
-	  
-	  //std::cerr<<vox_x<<" "<<vox_y<<" "<<vox_t<<" "<<val<<std::endl;
-	  
-	  co(i,j,k) += val;
-	  //eval++;
-	}
-	
-      }
-    }
-  }
-
+  
+  eval +=  process_observation_boxed_sym (c, //comp
+					  0, c.voxX, 0, c.voxY, 0, c.voxT, //box
+					  inst.obsx, inst.obsy, inst.obst, //observations
+					  disk, bar //workbuffer
+					  );
+  
   std::cerr<<"evaluations: "<<eval<<std::endl;
   
   return c.p;
