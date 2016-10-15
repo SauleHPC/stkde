@@ -99,6 +99,31 @@ space-time kernel density; performance; distributed memory; gpu
 
 \subsection{Results}
 
+\begin{table*}
+  \begin{tabular}{|l|rrrr|r|}
+    \input{analysis/seq_table.tex}
+  \end{tabular}
+  \caption{Runtime of different algorithm. Times are in seconds. PB-SYM is the fastest.}
+\end{table*}
+
+\begin{table*}
+  \begin{tabular}{|l|r|rrrrrrrrr|}
+    \input{analysis/parspace-t1.tex}
+  \end{tabular}
+  \caption{Different spatial decomposition at t=1. Times are in
+    seconds. Some decomposition improve performance dues to better
+    cache fitting. Overdecomposition can cause significant overhead.}
+\end{table*}
+
+\begin{table*}
+  \begin{tabular}{|l|r|rrrrrrrrr|}
+    \input{analysis/parspace-t16.tex}
+  \end{tabular}
+  \caption{different spatial decomposition at t=16}
+\end{table*}
+
+
+
 \section{Conclusion}
 
 \section*{Acknowledgment}
