@@ -17,6 +17,12 @@
 
 int main (int argc, char* argv[]) {
 
+  if (argc < 5 ) {
+    std::cerr<<"usage: "<<argv[0]<<" boundary observations param method"<<std::endl;
+    return -1;	
+  }
+    
+  
   std::string bbfile = argv[1];
   std::string obsfile = argv[2];
   std::string paramfile = argv[3];
@@ -24,6 +30,9 @@ int main (int argc, char* argv[]) {
   
   bounding_box bb = load_bounding_box(bbfile);
 
+  
+  std::cerr.precision(10);
+  
   std::cerr<<"bounding: "
 	   <<"["<<bb.xl<<";"<<bb.xh<<"]"<<"x"
     	   <<"["<<bb.yl<<";"<<bb.yh<<"]"<<"x"
@@ -81,12 +90,12 @@ int main (int argc, char* argv[]) {
     dens = stkde_pointbased_symomp (bb, inst, param);
   util::timestamp end;
 
-  if (1) {
+  if (0) {
     std::ofstream out ("log");
     //for debugging purpose
-    for (int k=20; k< 21; ++k) {
+    for (int k=0; k< dens->getSizeZ(); ++k) {
 	for (int j=0; j<std::min(dens->getSizeY(), (index)4000); ++j) {
-	  for (int i=0; i<std::min(dens->getSizeX(), (index)4000); i+=2) {
+	  for (int i=0; i<std::min(dens->getSizeX(), (index)4000); ++i) {
 	  //      for (int k=0; k<std::min(dens->getSizeZ(), 10); ++k)
 	  out<<(*dens)(i, j, k)<<" ";
 	}

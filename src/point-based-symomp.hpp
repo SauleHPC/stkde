@@ -233,7 +233,7 @@ std::shared_ptr<util::Compact3D<values>> stkde_pointbased_symomp(const bounding_
 	  //does it intersect?
 	  if (! intersect1d(bwtmin, bwtmax, dectmin, dectmax)) {continue;}
 
-	  if (0 && i == 0){
+	  if ( i == 0){
 	    std::cerr<<"adding "<<ox<<","<<oy<<","<<ot<<" to "
 		     <<decxmin<<";"<<decxmax<<" "
 		     <<decymin<<";"<<decymax<<" "
@@ -271,10 +271,11 @@ std::shared_ptr<util::Compact3D<values>> stkde_pointbased_symomp(const bounding_
 
   util::timestamp computebeg;
   //compute
-#pragma omp parallel
+#pragma omp parallel reduction(+:eval)
   {
     
     util::Compact2D<values> disk (c.voxX, c.voxY); //naive version of symmetry uses a disk buffer of the map size
+
     std::vector<values> bar(c.voxT);
 
   //
@@ -320,7 +321,6 @@ std::shared_ptr<util::Compact3D<values>> stkde_pointbased_symomp(const bounding_
 						      decompX(dx,dy,dt), decompY(dx,dy,dt), decompT(dx,dy,dt), //observations
 						      disk, bar //workbuffer
 						      );
-#pragma atomic
 	  eval +=  ret;
 	}
       }
