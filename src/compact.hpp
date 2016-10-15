@@ -132,6 +132,15 @@ namespace util
       assert (z>=0 && z < sizeZ);
       return *(data+sizeY*sizeX*z+sizeX*y+x);
     }
+
+    inline
+    T& operator() (index x)
+    {
+      assert (x>=0 && x < sizeX * sizeY*sizeZ);
+      
+      return *(data+x);
+    }
+
     
     inline
     ~Compact3D()

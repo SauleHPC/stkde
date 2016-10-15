@@ -1,6 +1,6 @@
 LD=g++
 #CXXFLAGS = -std=c++14 -O0 -g
-CXXFLAGS = -std=c++14 -O3 -march=native -fopenmp
+CXXFLAGS = -std=c++14 -O3 -march=native -fopenmp -DNDEBUG
 LDFLAGS= -O3 -march=native -fopenmp
 
 OBJS = point-based.o
@@ -29,4 +29,4 @@ depend:
 point-based.o: types.hpp io.hpp compact.hpp compact_impl.hpp timestamp.hpp
 point-based.o: density.hpp point-based.hpp point-based-symdisk.hpp
 point-based.o: point-based-symbar.hpp point-based-sym.hpp
-point-based.o: point-based-symomp.hpp
+point-based.o: point-based-symomp.hpp point-based-symomp-pointdecomp.hpp
