@@ -95,7 +95,7 @@ int main (int argc, char* argv[]) {
   if (method.compare("POINTBASED-SYM") == 0)
     dens = stkde_pointbased_sym (bb, inst, param);
   if (method.compare("POINTBASED-SYMOMP") == 0)
-    dens = stkde_pointbased_symomp (bb, inst, param, 8, 8, 8);
+    dens = stkde_pointbased_symomp (bb, inst, param, decompX, decompY, decompT);
   util::timestamp end;
 
   if (0) {
