@@ -100,10 +100,22 @@ namespace util
       assert (data);
     }
 
+    void zero() {
+      for (index i=0; i<sizeX*sizeY*sizeZ; ++i )
+	data[i] = 0;
+    }
+
+    void zero_parallel() {
+#pragma omp parallel for schedule(dynamic,512)
+      for (index i=0; i<sizeX*sizeY*sizeZ; ++i )
+	data[i] = 0;
+    }
+    
     index getSizeX() const {return sizeX;}
     index getSizeY() const {return sizeY;}
     index getSizeZ() const {return sizeZ;}
     
+    inline
     const T& operator() (index x, index y, index z) const
     {
       assert (x>=0 && x < sizeX);
@@ -111,7 +123,8 @@ namespace util
       assert (z>=0 && z < sizeZ);
       return *(data+sizeY*sizeX*z+sizeX*y+x);
     }
-    
+
+    inline
     T& operator() (index x, index y, index z)
     {
       assert (x>=0 && x < sizeX);
@@ -120,7 +133,7 @@ namespace util
       return *(data+sizeY*sizeX*z+sizeX*y+x);
     }
     
-    
+    inline
     ~Compact3D()
     {
       delete[] data;

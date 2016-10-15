@@ -37,10 +37,11 @@ std::shared_ptr<util::Compact3D<values>> stkde_pointbased(const bounding_box& bb
   util::timestamp init_b;
   
   //fill in zeroes
-  for (index i=0; i< co.getSizeX(); ++i)
-    for (index j=0; j< co.getSizeY(); ++j)
-      for (index k=0; k< co.getSizeZ(); ++k)
-	co(i,j,k) = 0;
+  // for (index i=0; i< co.getSizeX(); ++i)
+  //   for (index j=0; j< co.getSizeY(); ++j)
+  //     for (index k=0; k< co.getSizeZ(); ++k)
+  // 	co(i,j,k) = 0;
+  co.zero();
 
   util::timestamp init_e;
 
