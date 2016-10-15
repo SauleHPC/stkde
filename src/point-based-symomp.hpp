@@ -238,7 +238,7 @@ std::shared_ptr<util::Compact3D<values>> stkde_pointbased_symomp(const bounding_
 	  //does it intersect?
 	  if (! intersect1d(bwtmin, bwtmax, dectmin, dectmax)) {continue;}
 
-	  if ( i == 0){
+	  if (0 && i == 0){
 	    std::cerr<<"adding "<<ox<<","<<oy<<","<<ot<<" to "
 		     <<decxmin<<";"<<decxmax<<" "
 		     <<decymin<<";"<<decymax<<" "

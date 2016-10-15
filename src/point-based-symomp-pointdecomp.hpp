@@ -31,6 +31,17 @@ std::shared_ptr<util::Compact3D<values>> stkde_pointbased_symomp_point(const bou
   
   std::shared_ptr<util::Compact3D<values>> p;
 
+  {
+    //estimated memory
+    long long estimated_memory_consumption = omp_get_max_threads();
+    estimated_memory_consumption *= voxX*voxY*voxT;
+    estimated_memory_consumption *= sizeof(values);
+    if (estimated_memory_consumption > ((long long)100)*((long long)1024*1024 *1024)) {
+      std::cerr<<"not enough memory"<<std::endl;
+      exit(1);
+    }
+  }
+  
   std::shared_ptr<util::Compact3D<values>> *ptemp = new std::shared_ptr<util::Compact3D<values>> [omp_get_max_threads()];
   
   long int eval = 0;
