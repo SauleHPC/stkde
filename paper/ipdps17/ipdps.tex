@@ -101,24 +101,28 @@ space-time kernel density; performance; distributed memory; gpu
 
 \begin{table*}
   \begin{tabular}{|l|rrrr|r|}
-Instance & PB & PB-SYMDISK & PB-SYMBAR & PB-SYM & SYM speedup \\
-Dengue\_lowres-lowbw    & 0.031         & 0.027         & 0.028         & 0.027         & 1.148 \\
-Dengue\_lowres-highbw   & 0.856         & 0.504         & 0.755         & 0.503         & 1.702 \\
-Dengue\_highres-lowbw   & 0.082         & 0.080         & 0.080         & 0.080         & 1.025 \\
-Dengue\_highres-highbw  & 3.437         & 2.044         & 3.026         & 2.087         & 1.647 \\
-Dengue\_highres-vhighbw         & 49.585        & 12.002        & 40.791        & 7.424         & 6.679 \\
-Pollen\_lowres-lowbw    & 0.619         & 0.226         & 0.498         & 0.210         & 2.948 \\
-Pollen\_highres-lowbw   & 19.183        & 7.268         & 15.133        & 5.210         & 3.682 \\
-Pollen\_highres-medbw   & 330.352       & 87.250        & 270.699       & 56.274        & 5.870 \\
-Pollen\_highres-highbw  & 2596.372      & 626.069       & 2135.457      & 394.337       & 6.584 \\
-Flu-Animal\_lowres-lowbw        & 0.030         & 0.030         & 0.030         & 0.031         & 0.968 \\
-Flu-Animal\_lowres-highbw       & 0.058         & 0.040         & 0.051         & 0.039         & 1.487 \\
-Flu-Animal\_medres-lowbw        & 0.287         & 0.272         & 0.283         & 0.273         & 1.051 \\
-Flu-Animal\_medres-highbw       & 0.604         & 0.364         & 0.527         & 0.331         & 1.825 \\
-Flu-Animal\_highres-lowbw       & 7.142         & 6.737         & 7.019         & 5.542         & 1.289 \\
-Flu-Animal\_highres-highbw      & 12.086        & 6.817         & 10.448        & 6.401         & 1.888 \\
+    \input{analysis/seq_table.tex}
   \end{tabular}
-  \end{table*}
+  \caption{Runtime of different algorithm. Times are in seconds. PB-SYM is the fastest.}
+\end{table*}
+
+\begin{table*}
+  \begin{tabular}{|l|r|rrrrrrrrr|}
+    \input{analysis/parspace-t1.tex}
+  \end{tabular}
+  \caption{Different spatial decomposition at t=1. Times are in
+    seconds. Some decomposition improve performance dues to better
+    cache fitting. Overdecomposition can cause significant overhead.}
+\end{table*}
+
+\begin{table*}
+  \begin{tabular}{|l|r|rrrrrrrrr|}
+    \input{analysis/parspace-t16.tex}
+  \end{tabular}
+  \caption{different spatial decomposition at t=16}
+\end{table*}
+
+
 
 \section{Conclusion}
 
