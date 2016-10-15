@@ -146,7 +146,11 @@ bool intersect1d (coordinate min1, coordinate max1,
 
 std::shared_ptr<util::Compact3D<values>> stkde_pointbased_symomp(const bounding_box& bb,
 								 const instance& inst,
-								 const parameters& pa) {
+								 const parameters& pa,
+								 index decompsizeX,
+								 index decompsizeY,
+								 index decompsizeT
+) {
   computation c;
   
   c.voxX = std::lround(std::ceil((bb.xh-bb.xl)/pa.xres))+1;
@@ -177,10 +181,7 @@ std::shared_ptr<util::Compact3D<values>> stkde_pointbased_symomp(const bounding_
 
   util::timestamp decbeg;
   //decomposition
-  index decompsizeX = 8;
-  index decompsizeY = 8;
-  index decompsizeT = 8;
-
+  
   util::Compact3D<index> load (decompsizeX, decompsizeY, decompsizeT);
 
   for (int dx = 0; dx<decompsizeX; ++dx) {
@@ -212,6 +213,9 @@ std::shared_ptr<util::Compact3D<values>> stkde_pointbased_symomp(const bounding_
       coordinate bwxmax = ox+pa.xbw;
       //does it intersect?
       if (! intersect1d(bwxmin, bwxmax, decxmin, decxmax)) {continue;}
+      //this kind of intersection can cause to touch (evaluate) less
+      //voxels than the sequential code would. Though it is because of
+      //a rounding error in sequential. So it is begnin.
       
       
       for (int dy = 0; dy<decompsizeY; ++dy) {

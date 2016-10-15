@@ -27,6 +27,14 @@ int main (int argc, char* argv[]) {
   std::string obsfile = argv[2];
   std::string paramfile = argv[3];
   std::string method = argv[4];
+
+  index decompX=-1, decompY=-1, decompT=-1;
+  
+  if (method.compare("POINTBASED-SYMOMP") == 0) {
+    decompX = atoi(argv[5]);
+    decompY = atoi(argv[6]);
+    decompT = atoi(argv[7]);
+  }
   
   bounding_box bb = load_bounding_box(bbfile);
 
@@ -86,8 +94,8 @@ int main (int argc, char* argv[]) {
     dens = stkde_pointbased_symbar (bb, inst, param);
   if (method.compare("POINTBASED-SYM") == 0)
     dens = stkde_pointbased_sym (bb, inst, param);
-    if (method.compare("POINTBASED-SYMOMP") == 0)
-    dens = stkde_pointbased_symomp (bb, inst, param);
+  if (method.compare("POINTBASED-SYMOMP") == 0)
+    dens = stkde_pointbased_symomp (bb, inst, param, 8, 8, 8);
   util::timestamp end;
 
   if (0) {
