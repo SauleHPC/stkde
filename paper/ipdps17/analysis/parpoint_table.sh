@@ -10,13 +10,19 @@ gettime() {
 
 RESULTDIR=../results
 
-
-for inst in Dengue_lowres-lowbw Dengue_lowres-highbw Dengue_highres-lowbw Dengue_highres-highbw Dengue_highres-veryhighbandwidth \
-            Pollen_lowres-lowbw Pollen_highres-lowbw Pollen_highres-medbw Pollen_highres-highbw \
-	    Flu-Animal_lowres-lowbw Flu-Animal_lowres-highbw Flu-Animal_medres-lowbw Flu-Animal_medres-highbw Flu-Animal_highres-lowbw Flu-Animal_highres-highbw
-do
-    echo $inst \\t\& \
-	 $(gettime ${inst} POINTBASED-SYM) \\t\& $(gettime ${inst} POINTBASED-SYMDISK) \\t\& \
-	 $(gettime ${inst} POINTBASED-SYMBAR) \\t\& $(gettime ${inst} POINTBASED-SYM) \\t\& \
-	 $(echo $(gettime ${inst} POINTBASED) / $(gettime ${inst} POINTBASED-SYM) | bc -l | awk '{printf "%.3f", $1}' ) '\\\\' 
-done | sed 's/_/\\_/g' | sed 's/veryhighbandwidth/vhighbw/' >par
+(
+    echo instance \& seq \& t1 \& t2 \& t4 \& t8 \& t16 '\\\\'
+    
+    for inst in Dengue_lowres-lowbw Dengue_lowres-highbw Dengue_highres-lowbw Dengue_highres-highbw Dengue_highres-veryhighbandwidth \
+				    Pollen_lowres-lowbw Pollen_highres-lowbw Pollen_highres-medbw Pollen_highres-highbw \
+				    Flu-Animal_lowres-lowbw Flu-Animal_lowres-highbw Flu-Animal_medres-lowbw Flu-Animal_medres-highbw Flu-Animal_highres-lowbw Flu-Animal_highres-highbw
+    do
+	echo -n $inst \& $(gettime $inst POINTBASED-SYM) \ 
+	for t in 1 2 4 8 16
+	do
+	    meth="POINTBASED-SYMOMP-POINTDECOMP_t${t}"
+	    echo -n \& $(gettime $inst $meth) \ 
+	done
+	echo '\\\\'
+    done
+) | sed 's/_/\\_/g' >  parpoint_table.tex

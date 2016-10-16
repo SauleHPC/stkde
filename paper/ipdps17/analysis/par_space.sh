@@ -70,7 +70,7 @@ DECOMP="1_1_1 1_1_4 1_1_8 4_4_1 4_4_4 4_4_8 8_8_1 8_8_4 8_8_8"
     done
 ) | sed 's/_/\\_/g' >  parspace-t1.tex
 
-exit
+#exit
 
 for inst in $INSTANCES
 do
