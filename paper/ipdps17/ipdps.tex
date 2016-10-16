@@ -18,7 +18,7 @@
 \usepackage{amsthm}
 
 \newcommand{\todo}[1]{\color{red}\textbf{\hl{\{ #1 \}}}\color{black}\xspace}
-
+\newcommand{\ceil}[1]{\left\lceil #1 \right\rceil}
 
 \begin{document}
 \title{High Performance Space-Time Kernel Density Estimation}
@@ -67,7 +67,29 @@ space-time kernel density; performance; distributed memory; gpu
 
 \subsection{Problem Definition}
 
+
+Notations: domainsize $gx$, $gy$, $gt$. bandwidth: $sbw$,
+$tbw$. Spatial resolution $sres$, temporal resolution $tres$. This
+forms a grid of size $GX=\ceil{\frac{gx}{sres}}$,
+$GY=\ceil{\frac{gy}{sres}}$, $GT=\ceil{\frac{gt}{tres}}$. And we
+denote the bandwidth in voxel $SBW=\ceil{\frac{sbw}{sres}}$,
+$TBW=\ceil{\frac{tbw}{tres}}$.
+
+There are $N$ observations.
+
 \subsection{Gold Standard Implementation}
+
+The gold standard implementation follows the exact definition of stkde
+as it is given above. It is a voxel-based algorithm we call VB. For
+each voxel, VB finds the close observations and calculate contribution
+to the density of this particular voxel.
+
+\todo{include voxel based algorithm}
+
+The algorithm does $\theta(GX * GY * GT * N)$ distance test and computes
+$\theta(N * SBW^2 * TBW )$ density. Noticing that the bandwidth has to be
+smaller than the grid size, the complexity of the algorithm is
+$\theta(GX * GY * GT * N )$.
 
 \subsection{Related Works}
 
@@ -75,7 +97,53 @@ space-time kernel density; performance; distributed memory; gpu
 
 \subsection{Observation-based Algorithm}
 
+The voxel-based algorithm suffers from a massive cost of computing
+distances. The gold implementation reduces them by extremely
+decomposition the domain, but that still incures a significant
+overhead. These calculation are mostly unnecessary since we know
+exactly where each observation will radiate density. The observation
+based algorithm OB leverages that property.
+
+\todo{spell out algorithm}
+
+The algorithm OB incurs mostly two costs. Initializing the memory which costs
+$\Theta(GX * GY * GT)$ and computing the impact of each observation
+$\Theta(N * SBW^2 * TBW)$. Note that it is possible that either of these
+two term is significantly larger than the other. Therefore the
+complexity of the algorithm is $\Theta(GX * GY * GT + N * SBW^2 * TBW)$.
+
 \subsection{Exploiting Symmetries}
+
+When the bandwidth is large computing the density contribution of each
+observation each voxel in the bandwidth is the most expensive
+operation. Each of these $N * (2 * SBW)^2 * 2 * TBW$ calculations costs
+approximately 40 floating point operations. (The exact cost is
+difficult to estimate since there are floating point additions,
+multiplications, divisions, and square root operations.)
+
+One can remark that the calculation is mostly redundant. \todo{give
+  precise formula.}  Indeed for one particular observation, its
+contribution to the neighbooring vertices can be decomposed in two
+components. One that only depends on the spatial coordinate of the
+voxel with respect to the observation and does not depend on its
+temporal coordinate. And one that only depends on the temporal
+coordinate and not on the spatial coordinate.
+
+\todo{include figure.}
+
+Therefore, one can write an algorithm to leverage these symmetries in
+the problem. We wrote three variants, the OB-DISK variant ensures that
+the invariant on the spatial domain is only computed once. The OB-BAR
+variant ensures that the invariant on the temporal domain is only
+computed once. The SYM variant computes independently the spatial
+invariant and the temporal invariant and then adds the density caused
+by the observation by taking the product of the two invariants. Notice
+that leveraging the symmetries in the calculation does not change the
+complexity. The SYM algorithm still has a complexity of $\Theta(GX *
+GY * GT + N * SBW^2 * TBW)$. However the number of flops reduced to 
+\todo{estimate flop cost.}
+
+\todo{include pseudo code of the SYM variant.}
 
 \section{Utilizing Modern Hardware}
 \todo{That's a terrible section header...}
@@ -97,7 +165,7 @@ space-time kernel density; performance; distributed memory; gpu
 
 \paragraph{Dataset}
 
-\subsection{Results}
+\subsection{Algorithm design}
 
 \begin{table*}
   \begin{tabular}{|l|rrrr|r|}
@@ -105,6 +173,9 @@ space-time kernel density; performance; distributed memory; gpu
   \end{tabular}
   \caption{Runtime of different algorithm. Times are in seconds. PB-SYM is the fastest.}
 \end{table*}
+
+
+\subsection{Parallel}
 
 \begin{table*}
   \begin{tabular}{|l|r|rrrrrrrrr|}
