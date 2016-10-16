@@ -1,0 +1,11 @@
+bounding: [-180;180]x[7;72]x[5875;5958]
+read 588189 observations
+res: 0.1 0.1 1 bw: 2.5 2.5 7
+voxsize: 3601x651x84 size:751.179062MB
+voxBW: 25 7
+Initialization time: 0.072149
+decomposition time: 0.022420 seconds
+max load: 588189 avgloadperbox: 588189 avgloadpercore: 36761.8125 total load: 588189
+compute: 51.731320 seconds
+evaluations: 20189433200
+time: 51.826830 seconds
