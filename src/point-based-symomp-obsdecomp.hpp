@@ -131,7 +131,7 @@ std::shared_ptr<util::Compact3D<values>> stkde_pointbased_symomp_obsdecomp(const
 	mostloaded = std::max(mostloaded, load(dx,dy,dt));
 	totalload += load(dx,dy,dt);
      	//std::cerr<<load(dx,dy,dt)<<" ";
-	if (load(dx,dy,dt) > ((double)inst.obsx.size())/omp_get_max_threads()/3)
+	if (load(dx,dy,dt) > ((double)inst.obsx.size())/omp_get_max_threads()/10)
 	  std::cerr<<dx<<","<<dy<<","<<dt<<" : "<<load(dx,dy,dt)<<std::endl;
       }
       // std::cerr<<std::endl;
@@ -174,7 +174,13 @@ std::shared_ptr<util::Compact3D<values>> stkde_pointbased_symomp_obsdecomp(const
 	    }
 	  }
 #pragma omp master
-	  std::cerr<<"maxin round:"<<maxobs<<std::endl;
+	  {
+	    std::cerr<<"maxin round:"<<maxobs<<std::endl;
+	    maxobs = 0;
+	  }
+#pragma omp barrier
+
+
 	}
       }
     }
