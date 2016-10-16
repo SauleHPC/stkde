@@ -102,6 +102,14 @@ std::shared_ptr<util::Compact3D<values>> stkde_pointbased_symomp_obsdecomp(const
     index dx = (ox-bb.xl)/(bb.xh-bb.xl)*decompsizeX;
     index dy = (oy-bb.yl)/(bb.yh-bb.yl)*decompsizeY;
     index dt = (ot-bb.tl)/(bb.th-bb.tl)*decompsizeT;
+
+    //handling points out of rnage. Processing them with near by boundary
+    dx = std::max(dx, (index)0);
+    dy = std::max(dy, (index)0);
+    dt = std::max(dt, (index)0);
+    dx = std::min(dx, decompsizeX-1);
+    dy = std::min(dy, decompsizeY-1);
+    dt = std::min(dt, decompsizeT-1);
     
     //it does intersect
     load(dx,dy,dt) ++;
@@ -123,6 +131,8 @@ std::shared_ptr<util::Compact3D<values>> stkde_pointbased_symomp_obsdecomp(const
 	mostloaded = std::max(mostloaded, load(dx,dy,dt));
 	totalload += load(dx,dy,dt);
      	//std::cerr<<load(dx,dy,dt)<<" ";
+	if (load(dx,dy,dt) > ((double)inst.obsx.size())/omp_get_max_threads()/3)
+	  std::cerr<<dx<<","<<dy<<","<<dt<<" : "<<load(dx,dy,dt)<<std::endl;
       }
       // std::cerr<<std::endl;
      }
@@ -133,6 +143,7 @@ std::shared_ptr<util::Compact3D<values>> stkde_pointbased_symomp_obsdecomp(const
 
   util::timestamp computebeg;
   //compute
+  index maxobs = 0;
 #pragma omp parallel reduction(+:eval)
   {
     
@@ -145,12 +156,14 @@ std::shared_ptr<util::Compact3D<values>> stkde_pointbased_symomp_obsdecomp(const
     for (int xbase=0; xbase < 2; ++xbase) {
       for (int ybase=0; ybase < 2; ++ybase) {
 	for (int tbase=0; tbase < 2; ++tbase) {
-		  
-#pragma omp for collapse(3) schedule(dynamic,1)
+	  
+#pragma omp for collapse(3) schedule(dynamic,1) reduction(max:maxobs)
 	  for (int dx = xbase; dx<decompsizeX; dx+=2) {
 	    for (int dy = ybase; dy<decompsizeY; dy+=2) {
 	      for (int dt = tbase; dt<decompsizeT; dt+=2) {
-	  
+
+		maxobs = std::max(maxobs, load(dx,dy,dt));
+		
 		index ret =  process_observation_boxed_sym (c, //comp
 							    0, c.voxX, 0, c.voxY, 0, c.voxT, //box
 							    decompX(dx,dy,dt), decompY(dx,dy,dt), decompT(dx,dy,dt), //observations
@@ -160,6 +173,8 @@ std::shared_ptr<util::Compact3D<values>> stkde_pointbased_symomp_obsdecomp(const
 	      }
 	    }
 	  }
+#pragma omp master
+	  std::cerr<<"maxin round:"<<maxobs<<std::endl;
 	}
       }
     }
