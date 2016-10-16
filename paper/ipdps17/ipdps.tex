@@ -147,6 +147,9 @@ GY * GT + N * SBW^2 * TBW)$. However the number of flops reduced to
 
 \todo{include pseudo code of the SYM variant.}
 
+Notice that this exploitation of symmetries is not possible in a voxel
+based algorithm.
+
 \section{Utilizing Modern Hardware}
 \todo{That's a terrible section header...}
 
@@ -165,8 +168,9 @@ $P$ copies need to be summed.
 
 This algorithm has a memory requirement of $\Theta (P * GX * GY * GT)$
 and a parallel amount of work of $\Theta (P * GX * GY * GT + N * SBW^2
-* TBW)$. Though the increase in work enable the parallelism to be
-pleasingly parallel.
+* TBW)$. Though the increase in work enables the parallelism to be
+pleasingly parallel. (It is actually in two pleasingly parallel phases,
+processing the observations and reducing the partial results.)
 
 \todo{give pseudo code of the algorithm}
 
@@ -174,11 +178,42 @@ pleasingly parallel.
 
 An other strategy to avoid the data race is by computing the intensity
 of the voxels of different subdomains independently. The SYM-DD
-algorithm splits the domain in AxBxC subdomains. Then it associates to
-each subdomain the observations which associated cylinder intersect on
-a voxel of the subdomain.
+algorithm splits the domain in AxBxC subdomains. And each subdomain is
+associated the observations which cylinder intersects with a voxel of
+the subdomain. Then the algorithm proceeds with processing each
+subdomain independently by only considering the impact of the
+observation on the voxels within the subdomain.
 
+\todo{include algorithm}
 
+The main problem with Domain Decomposition is that it requires some
+observations to be replicated across multiple subdomain which incurs
+additional work. Indeed for a particular observation replicated in two
+subdomains (if it is replicated in more, a similar effect happens),
+its cylinder is split across two subdomain. Assume the split is
+temporal, then using SYM each subdomain will need to compute part of
+the temporal invariant, the entire spatial invariant, and part of the
+cylinder. Therefore both subdomain needed to compute the entire
+spatial invariant.
+
+\todo{draw figure that examplify the issue}
+
+If the algorihtms keeps the number of subdomain small such that each
+observation is not replicated more than a constant number of time then
+the work performed when expressed in Big-Oh notation does not change.
+(This can be achieved, for instance, by having subdomains larger than
+$SBW \times SBW \time TBW$.) However, the practical amount of work can
+increase by a non negligable factor. (We will see factors of about 1.5
+in the experiments.)
+
+An other issue with Domain Decomposition is load imbalance. The
+observations are unlikely well distributed in the domain space, but
+more likely clustered around some locations. The subdomain containing
+such a location will have a significantly higher work than other
+subdomains. And this work is not executed in parallel. One could
+decompose the domain more, but replication observation (described
+above) will incur an even higher overhead which may end up nullifying
+the gain in load balance.
 
 \subsection{Vectorization}
 
@@ -225,7 +260,7 @@ a voxel of the subdomain.
   \begin{tabular}{|l|r|rrrrr|}
     \input{analysis/parpoint_table.tex}
   \end{tabular}
-  \caption{domain replication. Times are in seconds. Missing data points run out of memory}
+  \caption{domain replication. Times are in seconds. Missing data points run out of memory.}
 \end{table*}
 
 
