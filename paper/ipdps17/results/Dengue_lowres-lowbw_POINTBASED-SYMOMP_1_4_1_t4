@@ -6,8 +6,8 @@ voxBW: 3 1
 Initialization time: 0.009091
 adding 1064383.17,877617.301,3 to 1053872.97;1068485.73 874593.691;879395.974 3;730
 intersect: 12338
-decomposition time: 0.000631 seconds
+decomposition time: 0.000650 seconds
 max load: 5623 avgloadperbox: 2764 avgloadpercore: 2764
-compute: 0.004429 seconds
+compute: 0.004208 seconds
 evaluations: 794352
-time: 0.014270 seconds
+time: 0.014079 seconds

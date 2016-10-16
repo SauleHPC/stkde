@@ -3,6 +3,6 @@ read 11056 observations
 res: 50 50 1 bw: 2500 2500 1
 voxsize: 294x386x728 size:315.2MB
 voxBW: 50 1
-Initialization time: 0.075010
+Initialization time: 0.075313
 evaluations: 0
-time: 2.043539 seconds
+time: 2.022477 seconds

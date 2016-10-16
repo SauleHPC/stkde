@@ -1,6 +1,6 @@
 #!/bin/sh
 
-if [ ! -d results ]
+if [ ! -e results ]
 then
     mkdir results
 fi

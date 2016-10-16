@@ -1,0 +1,6 @@
+bounding: [-39;77]x[-159;148]x[0;5950]
+read 31478 observations
+res: 0.2 0.2 1 bw: 1 1 7
+voxsize: 581x1536x5951 size:2.026e+04MB
+voxBW: 5 7
+not enough memory
