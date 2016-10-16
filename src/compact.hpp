@@ -136,7 +136,7 @@ namespace util
     inline
     T& operator() (index x)
     {
-      assert (x>=0 && x < sizeX * sizeY*sizeZ);
+      assert (x>=0 && x < sizeX * sizeY * sizeZ);
       
       return *(data+x);
     }

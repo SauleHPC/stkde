@@ -70,6 +70,7 @@ std::shared_ptr<util::Compact3D<values>> stkde_pointbased_symomp_point(const bou
 
 #pragma omp master    
     {
+      p = ptemp[0];
       std::cerr<<"Initialization time: "<<init_e-init_b<<std::endl;
     }
     
@@ -141,12 +142,15 @@ std::shared_ptr<util::Compact3D<values>> stkde_pointbased_symomp_point(const bou
     }
  
     util::timestamp reducebeg;
-   
+
+    util::Compact3D<values>& out = *(ptemp[0]);
+
+    int totalthread=omp_get_num_threads();
     //reduce intermediate compacts
 #pragma omp for schedule(dynamic,2048)
     for (index k=0; k< co.getSizeX()*co.getSizeY()*co.getSizeZ(); ++k) {
       double value = 0.;
-      for (int t = 1; t<omp_get_num_threads(); ++t) {
+      for (int t = 1; t < totalthread; ++t) {
 	value += (*(ptemp[t]))(k);
       }
       (*(ptemp[0]))(k) += value;
@@ -157,7 +161,6 @@ std::shared_ptr<util::Compact3D<values>> stkde_pointbased_symomp_point(const bou
 
 #pragma omp master
     {
-      p = ptemp[0];
       std::cerr<<"reduce: "<<reduceend-reducebeg<<" seconds"<<std::endl;
     }
   }
