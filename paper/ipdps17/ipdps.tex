@@ -172,6 +172,14 @@ pleasingly parallel.
 
 \subsection{Domain Decomposition}
 
+An other strategy to avoid the data race is by computing the intensity
+of the voxels of different subdomains independently. The SYM-DD
+algorithm splits the domain in AxBxC subdomains. Then it associates to
+each subdomain the observations which associated cylinder intersect on
+a voxel of the subdomain.
+
+
+
 \subsection{Vectorization}
 
 \subsection{Accelerators}
