@@ -91,6 +91,8 @@ $\theta(N * SBW^2 * TBW )$ density. Noticing that the bandwidth has to be
 smaller than the grid size, the complexity of the algorithm is
 $\theta(GX * GY * GT * N )$.
 
+Requires $\theta(GX * GY * GT)$ memory.
+
 \subsection{Related Works}
 
 \section{Algorithm Design and Engineering}
@@ -148,9 +150,27 @@ GY * GT + N * SBW^2 * TBW)$. However the number of flops reduced to
 \section{Utilizing Modern Hardware}
 \todo{That's a terrible section header...}
 
-\subsection{Spatial Decomposition}
+\subsection{Domain Replication}
 
-\subsection{Observation Decomposition}
+The simplest way to parallelize this kind of computation is to split
+the observation equally among the $P$ different computational
+units. Though if two close-by observations are computed
+simultaneously, the cylinder of density around it might collide and
+there is a race condition.
+
+The SYM-DR algorithm solves the data race issue by having
+each of the $P$ computational unit aggregate the result on a local
+copy of the domain. Once all the observations have been processed, the
+$P$ copies need to be summed.
+
+This algorithm has a memory requirement of $\Theta (P * GX * GY * GT)$
+and a parallel amount of work of $\Theta (P * GX * GY * GT + N * SBW^2
+* TBW)$. Though the increase in work enable the parallelism to be
+pleasingly parallel.
+
+\todo{give pseudo code of the algorithm}
+
+\subsection{Domain Decomposition}
 
 \subsection{Vectorization}
 
