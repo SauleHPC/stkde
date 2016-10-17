@@ -239,4 +239,51 @@ void loadbased_color(util::Compact3D<loadv>& color,
 }
 
 
+
+
+////generate a topological order
+void topo_sort(const util::Compact3D<std::vector<triplet> > & graph_out,
+		   std::vector<triplet>& topo_order) {
+
+  util::Compact3D<std::vector<triplet> > graph_in(graph_out.getSizeX(), graph_out.getSizeY(), graph_out.getSizeZ() );
+  generate_in (graph_out, graph_in);
+
+  //init in_degree
+  util::Compact3D<int> in_degree(graph_out.getSizeX(), graph_out.getSizeY(), graph_out.getSizeZ() );
+  for (int i=0; i<graph_in.getSizeX(); ++i)
+    for (int j=0; j<graph_in.getSizeY(); ++j)
+      for (int k=0; k<graph_in.getSizeZ(); ++k)
+	in_degree(i,j,k) = graph_in(i,j,k).size();
+
+  //init distance
+  util::Compact3D<loadv> dist(graph_out.getSizeX(), graph_out.getSizeY(), graph_out.getSizeZ() );
+  for (int i=0; i<graph_in.getSizeX(); ++i)
+    for (int j=0; j<graph_in.getSizeY(); ++j)
+      for (int k=0; k<graph_in.getSizeZ(); ++k)
+	dist(i,j,k) = 0;
+	
+  std::queue<triplet> ready;
+  //init ready
+  for (int i=0; i<graph_in.getSizeX(); ++i)
+    for (int j=0; j<graph_in.getSizeY(); ++j)
+      for (int k=0; k<graph_in.getSizeZ(); ++k)
+	if (in_degree(i,j,k) == 0)
+	  ready.push(triplet(i,j,k));
+
+  while (! ready.empty()) {
+    triplet t = ready.front();
+    ready.pop();
+
+    topo_order.push_back(t);
+
+    //remove (virtually) t from graph
+    for (auto ch : graph_out(t.x, t.y, t.z)) {
+      in_degree(ch.x, ch.y, ch.z) --;
+      if (in_degree(ch.x, ch.y, ch.z) == 0)
+	ready.push(ch);
+    }
+  }
+  
+}
+
 #endif
