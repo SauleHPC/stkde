@@ -38,15 +38,15 @@ std::shared_ptr<util::Compact3D<values>> stkde_pointbased_symomp_obsdecomp(const
   {
     bool decompchanged = false;
     
-    while (decompsizeX >= (bb.xh-bb.xl)/pa.xbw && decompsizeX>1) {
+    while (decompsizeX >= (bb.xh-bb.xl)/(2*pa.xbw) && decompsizeX>1) {
       decompsizeX --;
       decompchanged = true;
     }
-    while (decompsizeY >= (bb.yh-bb.yl)/pa.ybw && decompsizeY>1) {
+    while (decompsizeY >= (bb.yh-bb.yl)/(2*pa.ybw) && decompsizeY>1) {
       decompsizeY --;
       decompchanged = true;
     }
-    while (decompsizeT >= (bb.th-bb.tl)/pa.tbw && decompsizeT>1) {
+    while (decompsizeT >= (bb.th-bb.tl)/(2*pa.tbw) && decompsizeT>1) {
       decompsizeT --;
       decompchanged = true;
     }
@@ -131,7 +131,7 @@ std::shared_ptr<util::Compact3D<values>> stkde_pointbased_symomp_obsdecomp(const
 	mostloaded = std::max(mostloaded, load(dx,dy,dt));
 	totalload += load(dx,dy,dt);
      	//std::cerr<<load(dx,dy,dt)<<" ";
-	if (load(dx,dy,dt) > ((double)inst.obsx.size())/omp_get_max_threads()/3)
+	if (load(dx,dy,dt) > ((double)inst.obsx.size())/omp_get_max_threads()/10)
 	  std::cerr<<dx<<","<<dy<<","<<dt<<" : "<<load(dx,dy,dt)<<std::endl;
       }
       // std::cerr<<std::endl;
@@ -174,7 +174,13 @@ std::shared_ptr<util::Compact3D<values>> stkde_pointbased_symomp_obsdecomp(const
 	    }
 	  }
 #pragma omp master
-	  std::cerr<<"maxin round:"<<maxobs<<std::endl;
+	  {
+	    std::cerr<<"maxin round:"<<maxobs<<std::endl;
+	    maxobs = 0;
+	  }
+#pragma omp barrier
+
+
 	}
       }
     }
