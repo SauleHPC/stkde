@@ -172,7 +172,8 @@ std::shared_ptr<util::Compact3D<values>> stkde_pointbased_symomp_obsdecomp_sched
 	      for (int dy = ybase; dy<decompsizeY; dy+=2) {
 		for (int dt = tbase; dt<decompsizeT; dt+=2) {
 #pragma omp task depend(inout:dummy[(dx+1)*(decompsizeY+2)*(decompsizeT+2)+(dy+1)*(decompsizeT+2)+(dt+1)]) \
-                    depend(in:dummy[(dx)*(decompsizeY+2)*(decompsizeT+2)+(dy)*(decompsizeT+2)+(dt+1)], \
+                    depend(in:dummy[(dx)*(decompsizeY+2)*(decompsizeT+2)+(dy)*(decompsizeT+2)+(dt)], \
+                              dummy[(dx)*(decompsizeY+2)*(decompsizeT+2)+(dy)*(decompsizeT+2)+(dt+1)], \
                               dummy[(dx)*(decompsizeY+2)*(decompsizeT+2)+(dy)*(decompsizeT+2)+(dt+2)], \
                               dummy[(dx)*(decompsizeY+2)*(decompsizeT+2)+(dy+1)*(decompsizeT+2)+(dt)], \
 			      dummy[(dx)*(decompsizeY+2)*(decompsizeT+2)+(dy+1)*(decompsizeT+2)+(dt+1)], \
@@ -184,7 +185,7 @@ std::shared_ptr<util::Compact3D<values>> stkde_pointbased_symomp_obsdecomp_sched
 			      dummy[(dx+1)*(decompsizeY+2)*(decompsizeT+2)+(dy)*(decompsizeT+2)+(dt+1)], \
                               dummy[(dx+1)*(decompsizeY+2)*(decompsizeT+2)+(dy)*(decompsizeT+2)+(dt+2)], \
                               dummy[(dx+1)*(decompsizeY+2)*(decompsizeT+2)+(dy+1)*(decompsizeT+2)+(dt)], \
-			      dummy[(dx)*(decompsizeY+2)*(decompsizeT+2)+(dy)*(decompsizeT+2)+(dt)], \
+			      \
                               dummy[(dx+1)*(decompsizeY+2)*(decompsizeT+2)+(dy+1)*(decompsizeT+2)+(dt+2)], \
 			      dummy[(dx+1)*(decompsizeY+2)*(decompsizeT+2)+(dy+2)*(decompsizeT+2)+(dt)], \
 			      dummy[(dx+1)*(decompsizeY+2)*(decompsizeT+2)+(dy+2)*(decompsizeT+2)+(dt+1)], \
