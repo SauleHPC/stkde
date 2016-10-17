@@ -34,3 +34,4 @@ point-based.o: density.hpp point-based.hpp point-based-symdisk.hpp
 point-based.o: point-based-symbar.hpp point-based-sym.hpp
 point-based.o: point-based-symomp.hpp point-based-symomp-pointdecomp.hpp
 point-based.o: point-based-symomp-obsdecomp.hpp
+point-based.o: point-based-symomp-obsdecomp-sched.hpp

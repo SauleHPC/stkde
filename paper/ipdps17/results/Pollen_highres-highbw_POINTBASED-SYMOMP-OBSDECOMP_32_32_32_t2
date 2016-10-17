@@ -1,0 +1,20 @@
+bounding: [-180;180]x[7;72]x[5875;5958]
+read 588189 observations
+res: 0.1 0.1 1 bw: 5 5 14
+decomposition should allow blocks larger than bandwidth. Adjusting decomposition to 32x12x5
+voxsize: 3601x651x84 size:751.179062MB
+voxBW: 50 14
+Initialization time: 0.099544
+decomposition time: 0.021320 seconds
+max load: 25749 avgloadperbox: 306.348437 avgloadpercore: 294094.5 total load: 588189
+maxin round:19895
+maxin round:21288
+maxin round:21288
+maxin round:21288
+maxin round:25749
+maxin round:25749
+maxin round:25749
+maxin round:25749
+compute: 212.345979 seconds
+evaluations: 157284155464
+time: 212.467363 seconds

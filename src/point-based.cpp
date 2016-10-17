@@ -16,6 +16,7 @@
 #include "point-based-symomp.hpp"
 #include "point-based-symomp-pointdecomp.hpp"
 #include "point-based-symomp-obsdecomp.hpp"
+#include "point-based-symomp-obsdecomp-sched.hpp"
 
 int main (int argc, char* argv[]) {
 
@@ -33,7 +34,8 @@ int main (int argc, char* argv[]) {
   index decompX=-1, decompY=-1, decompT=-1;
   
   if (method.compare("POINTBASED-SYMOMP") == 0
-      || method.compare("POINTBASED-SYMOMP-OBSDECOMP") == 0) {
+      || method.compare("POINTBASED-SYMOMP-OBSDECOMP") == 0
+      || method.compare("POINTBASED-SYMOMP-OBSDECOMP-SCHED") == 0) {
     decompX = atoi(argv[5]);
     decompY = atoi(argv[6]);
     decompT = atoi(argv[7]);
@@ -101,6 +103,8 @@ int main (int argc, char* argv[]) {
     dens = stkde_pointbased_symomp (bb, inst, param, decompX, decompY, decompT);
   if (method.compare("POINTBASED-SYMOMP-OBSDECOMP") == 0)
     dens = stkde_pointbased_symomp_obsdecomp (bb, inst, param, decompX, decompY, decompT);
+  if (method.compare("POINTBASED-SYMOMP-OBSDECOMP-SCHED") == 0)
+    dens = stkde_pointbased_symomp_obsdecomp_sched (bb, inst, param, decompX, decompY, decompT);
   if (method.compare("POINTBASED-SYMOMP-POINTDECOMP") == 0)
     dens = stkde_pointbased_symomp_point (bb, inst, param);
 
