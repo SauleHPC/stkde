@@ -171,6 +171,7 @@ std::shared_ptr<util::Compact3D<values>> stkde_pointbased_symomp_obsdecomp_sched
 	    for (int dx = xbase; dx<decompsizeX; dx+=2) {
 	      for (int dy = ybase; dy<decompsizeY; dy+=2) {
 		for (int dt = tbase; dt<decompsizeT; dt+=2) {
+		  if (decompX(dx,dy,dt).size() > 0) { //not generating task if there is no work to decrease scheduler pressure
 #pragma omp task depend(inout:dummy[(dx+1)*(decompsizeY+2)*(decompsizeT+2)+(dy+1)*(decompsizeT+2)+(dt+1)]) \
                     depend(in:dummy[(dx)*(decompsizeY+2)*(decompsizeT+2)+(dy)*(decompsizeT+2)+(dt)], \
                               dummy[(dx)*(decompsizeY+2)*(decompsizeT+2)+(dy)*(decompsizeT+2)+(dt+1)], \
@@ -208,6 +209,7 @@ std::shared_ptr<util::Compact3D<values>> stkde_pointbased_symomp_obsdecomp_sched
 								decompX(dx,dy,dt), decompY(dx,dy,dt), decompT(dx,dy,dt), //observations
 								*(diskbuf[tid]), *(barbuf[tid]) //workbuffer
 								);
+		  }
 		  }
 		  //  eval +=  ret;
 		}
