@@ -38,15 +38,15 @@ std::shared_ptr<util::Compact3D<values>> stkde_pointbased_symomp_obsdecomp(const
   {
     bool decompchanged = false;
     
-    while (decompsizeX >= (bb.xh-bb.xl)/pa.xbw && decompsizeX>1) {
+    while (decompsizeX >= (bb.xh-bb.xl)/(2*pa.xbw) && decompsizeX>1) {
       decompsizeX --;
       decompchanged = true;
     }
-    while (decompsizeY >= (bb.yh-bb.yl)/pa.ybw && decompsizeY>1) {
+    while (decompsizeY >= (bb.yh-bb.yl)/(2*pa.ybw) && decompsizeY>1) {
       decompsizeY --;
       decompchanged = true;
     }
-    while (decompsizeT >= (bb.th-bb.tl)/pa.tbw && decompsizeT>1) {
+    while (decompsizeT >= (bb.th-bb.tl)/(2*pa.tbw) && decompsizeT>1) {
       decompsizeT --;
       decompchanged = true;
     }
