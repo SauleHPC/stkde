@@ -11,12 +11,14 @@ OBJS = point-based.o
 point-based: point-based.o
 	$(LD) $(LDFLAGS) -o point-based point-based.o
 
+graphanalysis: graphanalysis.o
+	$(LD) $(LDFLAGS) -o graphanalysis graphanalysis.o
+
 test: point-based
 	./point-based ../dataset/Dengue-allcases-2010-2011/AllCases2010_11_clip_bds.txt  ../dataset/Dengue-allcases-2010-2011/AllCases2010_11_clip.txt  ../dataset/Dengue-allcases-2010-2011/lowres-lowbw POINTBASED
 
 test-med: point-based
 	./point-based ../dataset/Dengue-allcases-2010-2011/AllCases2010_11_clip_bds.txt  ../dataset/Dengue-allcases-2010-2011/AllCases2010_11_clip.txt  ../dataset/Dengue-allcases-2010-2011/lowres-highbw POINTBASED
-
 
 test-hard: point-based
 	./point-based ../dataset/Dengue-allcases-2010-2011/AllCases2010_11_clip_bds.txt  ../dataset/Dengue-allcases-2010-2011/AllCases2010_11_clip.txt  ../dataset/Dengue-allcases-2010-2011/highres-highbw POINTBASED

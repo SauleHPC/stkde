@@ -63,12 +63,6 @@ std::shared_ptr<util::Compact3D<values>> stkde_pointbased_symomp_obsdecomp_sched
   std::cerr<<"voxsize: "<<c.voxX<<"x"<<c.voxY<<"x"<<c.voxT<<" size:"<<c.voxX*c.voxY*c.voxT*sizeof(values)/1024./1024.<<"MB"<<std::endl;
   std::cerr<<"voxBW: "<<c.voxsbw<<" "<<c.voxtbw<<std::endl;
   
-  c.p = std::make_shared<util::Compact3D<values>>(c.voxX, c.voxY, c.voxT);
-
-  util::Compact3D<values>& co = *(c.p);
-
-
-  init_stkde(c);
   
   long int eval = 0;
 
@@ -140,7 +134,25 @@ std::shared_ptr<util::Compact3D<values>> stkde_pointbased_symomp_obsdecomp_sched
    }
   std::cerr<<"max load: "<<mostloaded<<" avgloadperbox: "<<((double)inst.obsx.size())/(decompsizeX*decompsizeY*decompsizeT)<<" avgloadpercore: "<<((double)inst.obsx.size())/omp_get_max_threads()<<" total load: "<<totalload<<std::endl;
 
+  if (1) {
+    std::ofstream out ("loadmap");
+    for (int dt = 0; dt<decompsizeT; ++dt) {
+      for (int dy = 0; dy<decompsizeY; ++dy) {
+	for (int dx = 0; dx<decompsizeX; ++dx) {
+	  out<<dx<<" "<<dy<<" "<<dt<<" "<<load(dx,dy,dt)<<std::endl;
+	}
+      }
+    }
+  }
 
+  c.p = std::make_shared<util::Compact3D<values>>(c.voxX, c.voxY, c.voxT);
+
+  util::Compact3D<values>& co = *(c.p);
+
+
+  init_stkde(c);
+
+  
   util::timestamp computebeg;
   //compute
   index maxobs = 0;
