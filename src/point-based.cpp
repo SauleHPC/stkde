@@ -112,9 +112,9 @@ int main (int argc, char* argv[]) {
     dens = stkde_pointbased_symomp_obsdecomp_colorsched (bb, inst, param, decompX, decompY, decompT);
   if (method.compare("POINTBASED-SYMOMP-POINTDECOMP") == 0)
     dens = stkde_pointbased_symomp_point (bb, inst, param);
-  if (method.compare("VOXELBASED") == 0)
+  if (method.compare("VOXELBASED") == 0) {
     dens = stkde_voxelbased(bb, inst, param);
-    
+  }
   util::timestamp end;
 
   if (0) {
