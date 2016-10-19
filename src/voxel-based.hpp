@@ -9,10 +9,11 @@
 std::shared_ptr<util::Compact3D<values>> stkde_voxelbased(const bounding_box& bb,
 				 const instance& inst,
 				 const parameters& pa) {
-
-  int voxx = (bb.xh - bb.xl) / pa.xres;
-  int voxy = (bb.yh - bb.yl) / pa.yres;
-  int voxt = (bb.th - bb.tl) / pa.tres;
+  
+  // std::cout << "Running the voxel based implementation." << std::endl;
+  int voxx = ceil((bb.xh - bb.xl) / pa.xres) + 1;
+  int voxy = ceil((bb.yh - bb.yl) / pa.yres) + 1;
+  int voxt = ceil((bb.th - bb.tl) / pa.tres) + 1;
 
   int n = inst.obsx.size();
  
@@ -27,9 +28,9 @@ std::shared_ptr<util::Compact3D<values>> stkde_voxelbased(const bounding_box& bb
   util::Compact3D<values>& co = *p;
   co.zero();
 
-  for(int i = 0; i <= voxx; i++) {
-    for(int j = 0; j <= voxy; j++) {
-      for(int k = 0; k <= voxt; k++) {
+  for(int i = 0; i < voxx; i++) {
+    for(int j = 0; j < voxy; j++) {
+      for(int k = 0; k < voxt; k++) {
 	// contruct the point
 	px = bb.xl + i * pa.xres;
 	py = bb.yl + j * pa.yres;
@@ -52,7 +53,7 @@ std::shared_ptr<util::Compact3D<values>> stkde_voxelbased(const bounding_box& bb
   }
   
   util::timestamp t2;
-  std::cout<<"compute: " << t2 - t1 << std::endl;
+  std::cout<<"compute: " << t2 - t1 << " seconds" <<std::endl;
   std::cout<<"evals: "<< evals << std::endl;
   return p;
 }
