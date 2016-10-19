@@ -1,0 +1,29 @@
+bounding: [-39;77]x[-159;148]x[0;5950]
+read 31478 observations
+res: 0.5 0.5 3 bw: 1 1 7
+voxsize: 233x615x1985 size:1085.05468MB
+voxBW: 2 3
+Initialization time: 0.259306
+decomposition time: 0.007429 seconds
+25,17,17 : 678
+28,1,20 : 485
+25,17,21 : 717
+25,17,23 : 1161
+25,17,24 : 670
+25,17,25 : 1230
+19,19,25 : 709
+25,17,28 : 575
+18,27,28 : 469
+25,17,29 : 523
+max load: 1230 avgloadperbox: 0.960632324 avgloadpercore: 3934.75 total load: 31478
+maxin round:387
+maxin round:291
+maxin round:485
+maxin round:292
+maxin round:266
+maxin round:156
+maxin round:670
+maxin round:1230
+compute: 0.009883 seconds
+evaluations: 3021792
+time: 0.278741 seconds

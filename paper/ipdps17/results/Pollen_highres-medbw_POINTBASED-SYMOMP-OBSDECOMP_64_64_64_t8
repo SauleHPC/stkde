@@ -1,0 +1,42 @@
+bounding: [-180;180]x[7;72]x[5875;5958]
+read 588189 observations
+res: 0.1 0.1 1 bw: 2.5 2.5 7
+decomposition should allow blocks larger than bandwidth. Adjusting decomposition to 64x12x5
+voxsize: 3601x651x84 size:751.179062MB
+voxBW: 25 7
+Initialization time: 0.181535
+decomposition time: 0.060071 seconds
+18,6,1 : 10150
+17,3,2 : 11543
+14,4,2 : 16372
+15,4,2 : 9377
+17,4,2 : 7971
+10,5,2 : 8641
+17,5,2 : 8758
+18,5,2 : 10024
+16,6,2 : 10241
+17,6,2 : 9654
+18,6,2 : 18022
+17,3,3 : 8582
+11,4,3 : 8643
+17,4,3 : 7834
+10,5,3 : 13195
+16,5,3 : 7579
+17,5,3 : 9987
+18,5,3 : 11764
+16,6,3 : 10896
+17,6,3 : 10392
+18,6,3 : 18857
+18,6,4 : 14248
+max load: 18857 avgloadperbox: 153.174219 avgloadpercore: 73523.625 total load: 588189
+maxin round:18022
+maxin round:18857
+maxin round:10024
+maxin round:13195
+maxin round:9654
+maxin round:10392
+maxin round:11543
+maxin round:9987
+compute: 33.748111 seconds
+evaluations: 20189433200
+time: 33.992593 seconds

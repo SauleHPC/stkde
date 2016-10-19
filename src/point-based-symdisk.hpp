@@ -45,6 +45,7 @@ std::shared_ptr<util::Compact3D<values>> stkde_pointbased_symdisk(const bounding
 
   std::cerr<<"Initialization time: "<<init_e-init_b<<std::endl;
 
+  util::timestamp computebeg;
   
   long int eval = 0;
     
@@ -98,6 +99,8 @@ std::shared_ptr<util::Compact3D<values>> stkde_pointbased_symdisk(const bounding
       }
     }
   }
+  util::timestamp computeend;
+  std::cerr<<"compute: "<<computeend-computebeg<<" seconds"<<std::endl;
 
   std::cerr<<"evaluations: "<<eval<<std::endl;
   

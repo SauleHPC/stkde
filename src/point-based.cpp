@@ -1,3 +1,4 @@
+#include <unistd.h>
 #include <iostream>
 #include <cmath>
 #include <fstream>
@@ -18,6 +19,7 @@
 #include "point-based-symomp-obsdecomp.hpp"
 #include "point-based-symomp-obsdecomp-sched.hpp"
 #include "point-based-symomp-obsdecomp-colorsched.hpp"
+#include "voxel-based.hpp"
 
 int main (int argc, char* argv[]) {
 
@@ -47,6 +49,12 @@ int main (int argc, char* argv[]) {
 
   
   std::cerr.precision(10);
+
+  char host[1024];
+  gethostname (host, 1024);
+  host [1023] = '0';
+  
+  std::cerr<<"hostname : "<<host<<std::endl;
   
   std::cerr<<"bounding: "
 	   <<"["<<bb.xl<<";"<<bb.xh<<"]"<<"x"
@@ -111,7 +119,10 @@ int main (int argc, char* argv[]) {
     dens = stkde_pointbased_symomp_obsdecomp_colorsched (bb, inst, param, decompX, decompY, decompT);
   if (method.compare("POINTBASED-SYMOMP-POINTDECOMP") == 0)
     dens = stkde_pointbased_symomp_point (bb, inst, param);
-
+  if (method.compare("VOXELBASED") == 0) {
+    std::cout << "Voxel based" << std::endl;
+    dens = stkde_voxelbased(bb, inst, param);
+  }
   util::timestamp end;
 
   if (0) {

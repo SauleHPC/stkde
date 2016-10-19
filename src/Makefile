@@ -17,6 +17,9 @@ graphanalysis: graphanalysis.o
 test: point-based
 	./point-based ../dataset/Dengue-allcases-2010-2011/AllCases2010_11_clip_bds.txt  ../dataset/Dengue-allcases-2010-2011/AllCases2010_11_clip.txt  ../dataset/Dengue-allcases-2010-2011/lowres-lowbw POINTBASED
 
+test-voxel: point-based
+	./point-based ../dataset/Dengue-allcases-2010-2011/AllCases2010_11_clip_bds.txt  ../dataset/Dengue-allcases-2010-2011/AllCases2010_11_clip.txt  ../dataset/Dengue-allcases-2010-2011/lowres-lowbw VOXELBASED
+
 test-med: point-based
 	./point-based ../dataset/Dengue-allcases-2010-2011/AllCases2010_11_clip_bds.txt  ../dataset/Dengue-allcases-2010-2011/AllCases2010_11_clip.txt  ../dataset/Dengue-allcases-2010-2011/lowres-highbw POINTBASED
 
@@ -39,3 +42,5 @@ point-based.o: point-based-symomp.hpp point-based-symomp-pointdecomp.hpp
 point-based.o: point-based-symomp-obsdecomp.hpp
 point-based.o: point-based-symomp-obsdecomp-sched.hpp
 point-based.o: point-based-symomp-obsdecomp-colorsched.hpp graphanalysis.hpp
+point-based.o: voxel-based.hpp
+t.o: timestamp.hpp

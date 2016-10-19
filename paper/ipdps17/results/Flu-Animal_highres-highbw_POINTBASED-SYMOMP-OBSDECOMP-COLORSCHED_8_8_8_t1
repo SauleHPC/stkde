@@ -1,0 +1,14 @@
+bounding: [-39;77]x[-159;148]x[0;5950]
+read 31478 observations
+res: 0.2 0.2 1 bw: 2 2 21
+voxsize: 581x1536x5951 size:20258.9707MB
+voxBW: 10 21
+decomposition time: 0.003411 seconds
+max load: 2352 avgloadperbox: 61.4804688 avgloadpercore: 31478 total load: 31478
+Initialization time: 4.831972
+mem: 1000
+most loaded: 6 4 5
+schedule time: 0.000566 seconds
+compute: 2.187890 seconds
+evaluations: 0
+time: 7.025847 seconds
