@@ -5,11 +5,10 @@ res: 100 100 1 bw: 2500 2500 1
 decomposition should allow blocks larger than bandwidth. Adjusting decomposition to 2x3x4
 voxsize: 148x194x728 size:79.736084MB
 voxBW: 25 1
-decomposition time: 0.000409 seconds
-1,1,0 : 2539
+decomposition time: 0.001126 seconds
 max load: 2539 avgloadperbox: 460.666667 avgloadpercore: 5528 total load: 11056
-Initialization time: 0.015932
+Initialization time: 0.024129
 mem: 120
-compute: 0.894779 seconds
+compute: 1.059901 seconds
 evaluations: 0
-time: 0.912348 seconds
+time: 1.085415 seconds

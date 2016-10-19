@@ -5,14 +5,9 @@ res: 100 100 1 bw: 2500 2500 1
 voxsize: 148x194x728 size:79.736084MB
 voxBW: 25 1
 decomposition time: 0.001063 seconds
-0,0,0 : 2110
-1,0,0 : 1623
-0,1,0 : 1570
-1,1,0 : 4205
-1,1,1 : 794
 max load: 4205 avgloadperbox: 1382 avgloadpercore: 1382 total load: 11056
-Initialization time: 0.018326
+Initialization time: 0.021169
 mem: 64
-compute: 1.044780 seconds
+compute: 1.136453 seconds
 evaluations: 0
-time: 1.065581 seconds
+time: 1.158997 seconds
