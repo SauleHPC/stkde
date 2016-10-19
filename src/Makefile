@@ -42,5 +42,5 @@ point-based.o: point-based-symomp.hpp point-based-symomp-pointdecomp.hpp
 point-based.o: point-based-symomp-obsdecomp.hpp
 point-based.o: point-based-symomp-obsdecomp-sched.hpp
 point-based.o: point-based-symomp-obsdecomp-colorsched.hpp graphanalysis.hpp
-point-based.o: voxel-based.hpp
+point-based.o: voxel-based.hpp voxel-based-obsdecomp.hpp
 t.o: timestamp.hpp
