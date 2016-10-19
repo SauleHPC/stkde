@@ -1,10 +1,10 @@
 LD=g++
-#CXXFLAGS = -std=c++14 -O0 -g
-CXXFLAGS = -std=c++14 -O3 -march=native -fopenmp -DNDEBUG
+CXXFLAGS = -std=c++14 -O0 -g
+#CXXFLAGS = -std=c++14 -O3 -march=native -fopenmp -DNDEBUG
 #CXXFLAGS = -std=c++14 -O3 -march=native  -DNDEBUG
 #LDFLAGS= -O3 -march=native -fopenmp
-LDFLAGS= -O3 -march=native -fopenmp
-#LDFLAGS= -O0 -fopenmp
+#LDFLAGS= -O3 -march=native -fopenmp
+LDFLAGS= -O0 -fopenmp
 
 OBJS = point-based.o
 
@@ -42,5 +42,6 @@ point-based.o: point-based-symomp.hpp point-based-symomp-pointdecomp.hpp
 point-based.o: point-based-symomp-obsdecomp.hpp
 point-based.o: point-based-symomp-obsdecomp-sched.hpp
 point-based.o: point-based-symomp-obsdecomp-colorsched.hpp graphanalysis.hpp
+point-based.o: point-based-symomp-obsdecomp-colorsched-rep.hpp
 point-based.o: voxel-based.hpp voxel-based-obsdecomp.hpp
 t.o: timestamp.hpp

@@ -17,7 +17,10 @@ struct triplet {
   triplet(int px, int py, int pz)
     :x(px), y(py), z(pz)
   {};
-  
+
+  bool operator == (const triplet& t) const {
+    return x == t.x && y == t.y &&z ==t.z;
+  }
 };
 
 
@@ -171,6 +174,96 @@ loadv longest_path(const util::Compact3D<std::vector<triplet> > & graph_out,
   return maxd;
 }
 
+
+//longest path taking replication into account and returning the longest path
+loadv longest_path(const util::Compact3D<std::vector<triplet> > & graph_out,
+		   const util::Compact3D<std::vector<triplet> > & graph_in, 
+		   const util::Compact3D<loadv>& load,
+		   const util::Compact3D<int>& replication,
+		   std::vector<triplet>& path) {
+
+
+  //init in_degree
+  util::Compact3D<int> in_degree(graph_out.getSizeX(), graph_out.getSizeY(), graph_out.getSizeZ() );
+  for (int i=0; i<graph_in.getSizeX(); ++i)
+    for (int j=0; j<graph_in.getSizeY(); ++j)
+      for (int k=0; k<graph_in.getSizeZ(); ++k)
+	in_degree(i,j,k) = graph_in(i,j,k).size();
+
+  //init distance
+  util::Compact3D<loadv> dist(graph_out.getSizeX(), graph_out.getSizeY(), graph_out.getSizeZ() );
+  for (int i=0; i<graph_in.getSizeX(); ++i)
+    for (int j=0; j<graph_in.getSizeY(); ++j)
+      for (int k=0; k<graph_in.getSizeZ(); ++k)
+	dist(i,j,k) = 0;
+	
+  std::queue<triplet> ready;
+  //init ready
+  for (int i=0; i<graph_in.getSizeX(); ++i)
+    for (int j=0; j<graph_in.getSizeY(); ++j)
+      for (int k=0; k<graph_in.getSizeZ(); ++k)
+	if (in_degree(i,j,k) == 0)
+	  ready.push(triplet(i,j,k));
+
+  //return path
+  util::Compact3D<triplet> from(graph_out.getSizeX(), graph_out.getSizeY(), graph_out.getSizeZ() );
+  //init to itself
+  for (int i=0; i<graph_in.getSizeX(); ++i)
+    for (int j=0; j<graph_in.getSizeY(); ++j)
+      for (int k=0; k<graph_in.getSizeZ(); ++k)
+	from(i,j,k) = triplet (i,j,k);
+  
+  
+  while (! ready.empty()) {
+    triplet t = ready.front();
+    ready.pop();
+
+    //compute distance to end of t
+    loadv maxpa = 0;
+    for (auto pa : graph_in(t.x, t.y, t.z)) {
+      if (maxpa < dist(pa.x, pa.y, pa.z)){
+	maxpa = dist(pa.x, pa.y, pa.z);
+	from(t.x,t.y,t.z) = pa;
+      }
+    }
+    maxpa += load(t.x, t.y, t.z)/replication(t.x, t.y,t.z);
+    
+    dist(t.x, t.y, t.z) = maxpa;
+
+    //remove (virtually) t from graph
+    for (auto ch : graph_out(t.x, t.y, t.z)) {
+      in_degree(ch.x, ch.y, ch.z) --;
+      if (in_degree(ch.x, ch.y, ch.z) == 0)
+	ready.push(ch);
+    }
+  }
+
+  //find max load and longest sink of the graph
+  loadv maxd = 0;
+  triplet longestsink = triplet (0,0,0);
+  for (int i=0; i<graph_in.getSizeX(); ++i)
+    for (int j=0; j<graph_in.getSizeY(); ++j)
+      for (int k=0; k<graph_in.getSizeZ(); ++k) {
+	if (maxd < dist(i,j,k)) {
+	  maxd = dist(i,j,k);
+	  longestsink = triplet(i,j,k);
+	}
+      }
+
+  //construct longest chain
+  path.clear();
+  path.push_back(longestsink);
+  while (1) {
+    auto p = path.back();
+    if (p == from(p.x, p.y, p.z)) break;
+    path.push_back(from(p.x, p.y, p.z));
+  } 
+  
+	
+  return maxd;
+}
+
+
 ////different coloring
 void naive_color(util::Compact3D<loadv>& color,
 		 const util::Compact3D<loadv>& load) {
@@ -284,6 +377,45 @@ void topo_sort(const util::Compact3D<std::vector<triplet> > & graph_out,
     }
   }
   
+}
+
+///replication based scheduling
+//return max number of replication
+int replicate(const util::Compact3D<std::vector<triplet> > & graph_out,
+	      const util::Compact3D<loadv>& load,
+	      util::Compact3D<int>& replication,
+	      loadv threshold
+	      ) {
+
+  //make the reverse graph as we'll need it often
+  util::Compact3D<std::vector<triplet> > graph_in(graph_out.getSizeX(), graph_out.getSizeY(), graph_out.getSizeZ() );
+  generate_in (graph_out, graph_in);
+  
+  std::vector<triplet> path;
+
+  loadv lp = 0;
+  
+  while ((lp = longest_path (graph_out, graph_in, load, replication, path)) > threshold) {
+    std::cerr<<"path is "<<lp<<" units long"<<std::endl;
+    for (auto t : path) {
+      std::cerr<<"replicating: "<<t.x<<" "<<t.y<<" "<<t.z<<" : "
+	       <<replication(t.x, t.y, t.z)<<" times. "
+	       <<"original load : "<<load(t.x,t.y,t.z) <<" now: "<< load(t.x,t.y,t.z)/ replication(t.x, t.y, t.z)<<std::endl;
+
+      replication(t.x, t.y, t.z)++;
+      
+    }
+    
+  }
+
+  ///  return  # replication
+  int max = 0;
+  for (int i=0; i<graph_out.getSizeX(); ++i)
+    for (int j=0; j<graph_out.getSizeY(); ++j)
+      for (int k=0; k<graph_out.getSizeZ(); ++k) {
+	max = std::max (max, replication(i,j,k));
+      }
+  return max;	  
 }
 
 #endif
