@@ -200,12 +200,16 @@ std::shared_ptr<util::Compact3D<values>> stkde_pointbased_symomp_obsdecomp_color
   //array for storing replicated chunks
   std::shared_ptr<util::Compact3D<values>> *ptemp = new std::shared_ptr<util::Compact3D<values>> [nb_replication];
   
-  
+  util::timestamp init_b; 
   for (int i=0; i<nb_replication; ++i)  {
     ptemp[i] = std::make_shared<util::Compact3D<values>>(c.voxX, c.voxY, c.voxT);
 
     (*(ptemp[i])).zero_parallel();
   }
+  util::timestamp init_e;
+  
+  std::cerr<<"Initialization time: "<<init_e-init_b<<std::endl;
+  
 
   util::Compact3D<values>& co = *(ptemp[0]);
 
