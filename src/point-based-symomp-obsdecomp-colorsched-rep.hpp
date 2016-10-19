@@ -160,6 +160,7 @@ std::shared_ptr<util::Compact3D<values>> stkde_pointbased_symomp_obsdecomp_color
   }
 
   
+  int nb_replication;
   {
     util::timestamp schedbeg;
     
@@ -176,20 +177,26 @@ std::shared_ptr<util::Compact3D<values>> stkde_pointbased_symomp_obsdecomp_color
 
     loadv targetCP = inst.obsx.size()/(2*omp_get_max_threads());
     
-    replicate (graph_out, load, replication, targetCP);
+    nb_replication = replicate (graph_out, load, replication, targetCP);
     
     util::timestamp schedend;
 
     std::cerr<<"schedule time: "<<schedend-schedbeg<<" seconds"<<std::endl; 
   }
+
+  //array for storing replicated chunks
+  std::shared_ptr<util::Compact3D<values>> *ptemp = new std::shared_ptr<util::Compact3D<values>> [nb_replication];
   
+  
+  for (int i=0; i<nb_replication; ++i)  {
+    ptemp[i] = std::make_shared<util::Compact3D<values>>(c.voxX, c.voxY, c.voxT);
 
-  c.p = std::make_shared<util::Compact3D<values>>(c.voxX, c.voxY, c.voxT);
+    (*(ptemp[i])).zero_parallel();
+  }
 
-  util::Compact3D<values>& co = *(c.p);
+  util::Compact3D<values>& co = *(ptemp[0]);
 
 
-  init_stkde(c);
 
   
   util::timestamp computebeg;
@@ -197,7 +204,7 @@ std::shared_ptr<util::Compact3D<values>> stkde_pointbased_symomp_obsdecomp_color
   index maxobs = 0;
 
   std::cerr<<"mem: "<<(decompsizeX+2)*(decompsizeY+2)*(decompsizeT+2)<<std::endl;
-  int* dummy = new int[(decompsizeX+2)*(decompsizeY+2)*(decompsizeT+2)];
+  int* dummy = new int[nb_replication*(decompsizeX+2)*(decompsizeY+2)*(decompsizeT+2)];
 
   util::Compact2D<values> **diskbuf = new util::Compact2D<values> *[omp_get_max_threads()];
   std::vector<values> **barbuf = new std::vector<values> *[omp_get_max_threads()];
@@ -222,43 +229,54 @@ std::shared_ptr<util::Compact3D<values>> stkde_pointbased_symomp_obsdecomp_color
 	index dt = t.z;
 	
 	if (decompX(dx,dy,dt).size() > 0) { //not generating task if there is no work to decrease scheduler pressure
-#pragma omp task depend(inout:dummy[(dx+1)*(decompsizeY+2)*(decompsizeT+2)+(dy+1)*(decompsizeT+2)+(dt+1)]) \
-                    depend(in:dummy[(dx)*(decompsizeY+2)*(decompsizeT+2)+(dy)*(decompsizeT+2)+(dt)], \
-                              dummy[(dx)*(decompsizeY+2)*(decompsizeT+2)+(dy)*(decompsizeT+2)+(dt+1)], \
-                              dummy[(dx)*(decompsizeY+2)*(decompsizeT+2)+(dy)*(decompsizeT+2)+(dt+2)], \
-                              dummy[(dx)*(decompsizeY+2)*(decompsizeT+2)+(dy+1)*(decompsizeT+2)+(dt)], \
-			      dummy[(dx)*(decompsizeY+2)*(decompsizeT+2)+(dy+1)*(decompsizeT+2)+(dt+1)], \
-                              dummy[(dx)*(decompsizeY+2)*(decompsizeT+2)+(dy+1)*(decompsizeT+2)+(dt+2)], \
-			      dummy[(dx)*(decompsizeY+2)*(decompsizeT+2)+(dy+2)*(decompsizeT+2)+(dt)], \
-			      dummy[(dx)*(decompsizeY+2)*(decompsizeT+2)+(dy+2)*(decompsizeT+2)+(dt+1)], \
-                              dummy[(dx)*(decompsizeY+2)*(decompsizeT+2)+(dy+2)*(decompsizeT+2)+(dt+2)], \
-			      dummy[(dx+1)*(decompsizeY+2)*(decompsizeT+2)+(dy)*(decompsizeT+2)+(dt)], \
-			      dummy[(dx+1)*(decompsizeY+2)*(decompsizeT+2)+(dy)*(decompsizeT+2)+(dt+1)], \
-                              dummy[(dx+1)*(decompsizeY+2)*(decompsizeT+2)+(dy)*(decompsizeT+2)+(dt+2)], \
-                              dummy[(dx+1)*(decompsizeY+2)*(decompsizeT+2)+(dy+1)*(decompsizeT+2)+(dt)], \
+	  for (int rep = 0; rep < replication(dx,dy,dt); ++rep) {
+#pragma omp task depend(inout:dummy[rep*(decompsizeX+2)*(decompsizeY+2)*(decompsizeT+2) + (dx+1)*(decompsizeY+2)*(decompsizeT+2)+(dy+1)*(decompsizeT+2)+(dt+1)]) \
+                    depend(in:dummy[rep*(decompsizeX+2)*(decompsizeY+2)*(decompsizeT+2) + (dx)*(decompsizeY+2)*(decompsizeT+2)+(dy)*(decompsizeT+2)+(dt)], \
+                              dummy[rep*(decompsizeX+2)*(decompsizeY+2)*(decompsizeT+2) + (dx)*(decompsizeY+2)*(decompsizeT+2)+(dy)*(decompsizeT+2)+(dt+1)], \
+                              dummy[rep*(decompsizeX+2)*(decompsizeY+2)*(decompsizeT+2) + (dx)*(decompsizeY+2)*(decompsizeT+2)+(dy)*(decompsizeT+2)+(dt+2)], \
+                              dummy[rep*(decompsizeX+2)*(decompsizeY+2)*(decompsizeT+2) + (dx)*(decompsizeY+2)*(decompsizeT+2)+(dy+1)*(decompsizeT+2)+(dt)], \
+			      dummy[rep*(decompsizeX+2)*(decompsizeY+2)*(decompsizeT+2) + (dx)*(decompsizeY+2)*(decompsizeT+2)+(dy+1)*(decompsizeT+2)+(dt+1)], \
+                              dummy[rep*(decompsizeX+2)*(decompsizeY+2)*(decompsizeT+2) + (dx)*(decompsizeY+2)*(decompsizeT+2)+(dy+1)*(decompsizeT+2)+(dt+2)], \
+			      dummy[rep*(decompsizeX+2)*(decompsizeY+2)*(decompsizeT+2) + (dx)*(decompsizeY+2)*(decompsizeT+2)+(dy+2)*(decompsizeT+2)+(dt)], \
+			      dummy[rep*(decompsizeX+2)*(decompsizeY+2)*(decompsizeT+2) + (dx)*(decompsizeY+2)*(decompsizeT+2)+(dy+2)*(decompsizeT+2)+(dt+1)], \
+                              dummy[rep*(decompsizeX+2)*(decompsizeY+2)*(decompsizeT+2) + (dx)*(decompsizeY+2)*(decompsizeT+2)+(dy+2)*(decompsizeT+2)+(dt+2)], \
+			      dummy[rep*(decompsizeX+2)*(decompsizeY+2)*(decompsizeT+2) + (dx+1)*(decompsizeY+2)*(decompsizeT+2)+(dy)*(decompsizeT+2)+(dt)], \
+			      dummy[rep*(decompsizeX+2)*(decompsizeY+2)*(decompsizeT+2) + (dx+1)*(decompsizeY+2)*(decompsizeT+2)+(dy)*(decompsizeT+2)+(dt+1)], \
+                              dummy[rep*(decompsizeX+2)*(decompsizeY+2)*(decompsizeT+2) + (dx+1)*(decompsizeY+2)*(decompsizeT+2)+(dy)*(decompsizeT+2)+(dt+2)], \
+                              dummy[rep*(decompsizeX+2)*(decompsizeY+2)*(decompsizeT+2) + (dx+1)*(decompsizeY+2)*(decompsizeT+2)+(dy+1)*(decompsizeT+2)+(dt)], \
 			      \
-                              dummy[(dx+1)*(decompsizeY+2)*(decompsizeT+2)+(dy+1)*(decompsizeT+2)+(dt+2)], \
-			      dummy[(dx+1)*(decompsizeY+2)*(decompsizeT+2)+(dy+2)*(decompsizeT+2)+(dt)], \
-			      dummy[(dx+1)*(decompsizeY+2)*(decompsizeT+2)+(dy+2)*(decompsizeT+2)+(dt+1)], \
-                              dummy[(dx+1)*(decompsizeY+2)*(decompsizeT+2)+(dy+2)*(decompsizeT+2)+(dt+2)], \
-			      dummy[(dx+2)*(decompsizeY+2)*(decompsizeT+2)+(dy)*(decompsizeT+2)+(dt)], \
-			      dummy[(dx+2)*(decompsizeY+2)*(decompsizeT+2)+(dy)*(decompsizeT+2)+(dt+1)], \
-                              dummy[(dx+2)*(decompsizeY+2)*(decompsizeT+2)+(dy)*(decompsizeT+2)+(dt+2)], \
-                              dummy[(dx+2)*(decompsizeY+2)*(decompsizeT+2)+(dy+1)*(decompsizeT+2)+(dt)], \
-			      dummy[(dx+2)*(decompsizeY+2)*(decompsizeT+2)+(dy+1)*(decompsizeT+2)+(dt+1)], \
-                              dummy[(dx+2)*(decompsizeY+2)*(decompsizeT+2)+(dy+1)*(decompsizeT+2)+(dt+2)], \
-			      dummy[(dx+2)*(decompsizeY+2)*(decompsizeT+2)+(dy+2)*(decompsizeT+2)+(dt)], \
-			      dummy[(dx+2)*(decompsizeY+2)*(decompsizeT+2)+(dy+2)*(decompsizeT+2)+(dt+1)], \
-                              dummy[(dx+2)*(decompsizeY+2)*(decompsizeT+2)+(dy+2)*(decompsizeT+2)+(dt+2)] \
+                              dummy[rep*(decompsizeX+2)*(decompsizeY+2)*(decompsizeT+2) + (dx+1)*(decompsizeY+2)*(decompsizeT+2)+(dy+1)*(decompsizeT+2)+(dt+2)], \
+			      dummy[rep*(decompsizeX+2)*(decompsizeY+2)*(decompsizeT+2) + (dx+1)*(decompsizeY+2)*(decompsizeT+2)+(dy+2)*(decompsizeT+2)+(dt)], \
+			      dummy[rep*(decompsizeX+2)*(decompsizeY+2)*(decompsizeT+2) + (dx+1)*(decompsizeY+2)*(decompsizeT+2)+(dy+2)*(decompsizeT+2)+(dt+1)], \
+                              dummy[rep*(decompsizeX+2)*(decompsizeY+2)*(decompsizeT+2) + (dx+1)*(decompsizeY+2)*(decompsizeT+2)+(dy+2)*(decompsizeT+2)+(dt+2)], \
+			      dummy[rep*(decompsizeX+2)*(decompsizeY+2)*(decompsizeT+2) + (dx+2)*(decompsizeY+2)*(decompsizeT+2)+(dy)*(decompsizeT+2)+(dt)], \
+			      dummy[rep*(decompsizeX+2)*(decompsizeY+2)*(decompsizeT+2) + (dx+2)*(decompsizeY+2)*(decompsizeT+2)+(dy)*(decompsizeT+2)+(dt+1)], \
+                              dummy[rep*(decompsizeX+2)*(decompsizeY+2)*(decompsizeT+2) + (dx+2)*(decompsizeY+2)*(decompsizeT+2)+(dy)*(decompsizeT+2)+(dt+2)], \
+                              dummy[rep*(decompsizeX+2)*(decompsizeY+2)*(decompsizeT+2) + (dx+2)*(decompsizeY+2)*(decompsizeT+2)+(dy+1)*(decompsizeT+2)+(dt)], \
+			      dummy[rep*(decompsizeX+2)*(decompsizeY+2)*(decompsizeT+2) + (dx+2)*(decompsizeY+2)*(decompsizeT+2)+(dy+1)*(decompsizeT+2)+(dt+1)], \
+                              dummy[rep*(decompsizeX+2)*(decompsizeY+2)*(decompsizeT+2) + (dx+2)*(decompsizeY+2)*(decompsizeT+2)+(dy+1)*(decompsizeT+2)+(dt+2)], \
+			      dummy[rep*(decompsizeX+2)*(decompsizeY+2)*(decompsizeT+2) + (dx+2)*(decompsizeY+2)*(decompsizeT+2)+(dy+2)*(decompsizeT+2)+(dt)], \
+			      dummy[rep*(decompsizeX+2)*(decompsizeY+2)*(decompsizeT+2) + (dx+2)*(decompsizeY+2)*(decompsizeT+2)+(dy+2)*(decompsizeT+2)+(dt+1)], \
+                              dummy[rep*(decompsizeX+2)*(decompsizeY+2)*(decompsizeT+2) + (dx+2)*(decompsizeY+2)*(decompsizeT+2)+(dy+2)*(decompsizeT+2)+(dt+2)] \
 			)
-	  {
-	    int tid = omp_get_thread_num();
-	    //		    std::cerr<<dx<<"x"<<dy<<"x"<<dt<<std::endl;
-	    index ret =  process_observation_boxed_sym (c, //comp
-							0, c.voxX, 0, c.voxY, 0, c.voxT, //box
-							decompX(dx,dy,dt), decompY(dx,dy,dt), decompT(dx,dy,dt), //observations
-							*(diskbuf[tid]), *(barbuf[tid]) //workbuffer
-							);
+	    {
+	      index beg = rep*decompX(dx,dy,dt).size()/replication(dx,dy,dt);
+	      index end = (rep+1)*decompX(dx,dy,dt).size()/replication(dx,dy,dt);
+	      if (rep == replication(dx,dy,dt) -1 )
+		end = decompX(dx,dy,dt).size();
+	      
+	      int tid = omp_get_thread_num();
+
+	      computation clocal = c;
+	      c.p = ptemp[rep];
+	      
+	      //		    std::cerr<<dx<<"x"<<dy<<"x"<<dt<<std::endl;
+	      index ret =  process_observation_boxed_sym (c, //comp// DO SOMETHING HERE!
+							  0, c.voxX, 0, c.voxY, 0, c.voxT, //box
+							  decompX(dx,dy,dt), decompY(dx,dy,dt), decompT(dx,dy,dt), //observations
+							  *(diskbuf[tid]), *(barbuf[tid]), //workbuffer
+							  beg, end);
+	    }
 	  }
 	}
 	//  eval +=  ret;
@@ -269,6 +287,24 @@ std::shared_ptr<util::Compact3D<values>> stkde_pointbased_symomp_obsdecomp_color
   util::timestamp computeend;
 
   std::cerr<<"compute: "<<computeend-computebeg<<" seconds"<<std::endl;
+
+  //reduction
+  
+      util::timestamp reducebeg;
+
+    util::Compact3D<values>& out = *(ptemp[0]);
+
+    int totalthread=omp_get_num_threads();
+    //reduce intermediate compacts
+#pragma omp for schedule(dynamic,2048)
+    for (index k=0; k< co.getSizeX()*co.getSizeY()*co.getSizeZ(); ++k) {
+      double value = 0.;
+      for (int t = 1; t < nb_replication; ++t) {
+	value += (*(ptemp[t]))(k);
+      }
+      (*(ptemp[0]))(k) += value;
+    }
+    util::timestamp reduceend;
   
   // eval +=  process_observation_boxed_sym (c, //comp
   // 					  0, c.voxX, 0, c.voxY, 0, c.voxT, //box
@@ -279,7 +315,7 @@ std::shared_ptr<util::Compact3D<values>> stkde_pointbased_symomp_obsdecomp_color
   
   std::cerr<<"evaluations: "<<eval<<std::endl;
   
-  return c.p;
+  return ((ptemp[0]));
 }
 
 
