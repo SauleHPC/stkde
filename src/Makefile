@@ -1,10 +1,10 @@
 LD=g++
-CXXFLAGS = -std=c++14 -O0 -g
-#CXXFLAGS = -std=c++14 -O3 -march=native -fopenmp -DNDEBUG
+#CXXFLAGS = -std=c++14 -O0 -g
+CXXFLAGS = -std=c++14 -O3 -march=native -fopenmp -DNDEBUG
 #CXXFLAGS = -std=c++14 -O3 -march=native  -DNDEBUG
 #LDFLAGS= -O3 -march=native -fopenmp
-#LDFLAGS= -O3 -march=native -fopenmp
-LDFLAGS= -O0 -fopenmp
+LDFLAGS= -O3 -march=native -fopenmp
+#LDFLAGS= -O0 -fopenmp
 
 OBJS = point-based.o
 
