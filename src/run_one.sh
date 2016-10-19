@@ -28,7 +28,7 @@ echo $BOUNDARY
 echo $OBSERVATIONS
 echo $BANDWIDTH
 
-for method in POINTBASED POINTBASED-SYMDISK POINTBASED-SYMBAR POINTBASED-SYM POINTBASED-SYMOMP POINTBASED-SYMOMP-POINTDECOMP POINTBASED-SYMOMP-OBSDECOMP POINTBASED-SYMOMP-OBSDECOMP-SCHED POINTBASED-SYMOMP-OBSDECOMP-COLORSCHED
+for method in POINTBASED POINTBASED-SYMDISK POINTBASED-SYMBAR POINTBASED-SYM POINTBASED-SYMOMP POINTBASED-SYMOMP-POINTDECOMP POINTBASED-SYMOMP-OBSDECOMP POINTBASED-SYMOMP-OBSDECOMP-SCHED POINTBASED-SYMOMP-OBSDECOMP-COLORSCHED-REP
 do
     if [ $method = POINTBASED-SYMOMP ]
     then
@@ -108,12 +108,28 @@ do
 			    done
 			done
 		    else
-			FILE=results/${INSTANCE}_$(basename $BANDWIDTH)_${method}
-			
-			if [ ! -f $FILE ]
+			if [ $method = POINTBASED-SYMOMP-OBSDECOMP-COLORSCHED-REP ]
 			then
-			    echo $BIN $BOUNDARY $OBSERVATIONS $BANDWIDTH $method
-			    $BIN $BOUNDARY $OBSERVATIONS $BANDWIDTH $method > $FILE 2>&1 
+			    for t in 16 8 4 2 1
+			    do
+				for decomp in 64 32 16 8 4 2 1
+				do
+				    FILE=results/${INSTANCE}_$(basename $BANDWIDTH)_${method}_${decomp}_${decomp}_${decomp}_t${t}
+				    if [ ! -f $FILE ]
+				    then
+					echo OMP_NUM_THREADS=$t  $BIN $BOUNDARY $OBSERVATIONS $BANDWIDTH $method $decomp $decomp $decomp
+					OMP_NUM_THREADS=$t  $BIN $BOUNDARY $OBSERVATIONS $BANDWIDTH $method $decomp $decomp $decomp > $FILE 2>&1
+				    fi
+				done
+			    done
+			else
+			    FILE=results/${INSTANCE}_$(basename $BANDWIDTH)_${method}
+			    
+			    if [ ! -f $FILE ]
+			    then
+				echo $BIN $BOUNDARY $OBSERVATIONS $BANDWIDTH $method
+				$BIN $BOUNDARY $OBSERVATIONS $BANDWIDTH $method > $FILE 2>&1 
+			    fi
 			fi
 		    fi
 		fi
