@@ -63,20 +63,25 @@ long process_observation_boxed_sym (computation& c,
 				    const std::vector<coordinate>& obsy,
 				    const std::vector<coordinate>& obst,
 				    util::Compact2D<values>& bufferdisk,//buffer
-				    std::vector<values>& bufferbar
+				    std::vector<values>& bufferbar,
+				    index obsmin=-1, index obsmax=-1 //what range of observation to do, -1 for all
 				    ) {
   // std::cerr<<"processing voxel box: "
   // 	   <<"["<< voxXmin<<";"<<voxXmax<<"["
   //   	   <<" ["<< voxYmin<<";"<<voxYmax<<"["
   //   	   <<" ["<< voxTmin<<";"<<voxTmax<<"["<<std::endl;
-	
+
+  if (obsmin < 0 )
+    obsmin = 0;
+  if (obsmax < 0 )
+    obsmax = obsx.size();
     
   long eval = 0;
 
   util::Compact3D<values>& co = *(c.p);
   
 //account for observations
-  for (index ob=0; ob<obsx.size(); ++ob) {
+  for (index ob=obsmin; ob<obsmax; ++ob) {
     //observation
     coordinate ox = obsx[ob];
     coordinate oy = obsy[ob];
