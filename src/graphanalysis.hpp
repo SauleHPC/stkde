@@ -12,7 +12,7 @@ typedef long loadv;
 
 struct triplet {
   int x,y,z;
-
+  
   triplet(){};
   triplet(int px, int py, int pz)
     :x(px), y(py), z(pz)

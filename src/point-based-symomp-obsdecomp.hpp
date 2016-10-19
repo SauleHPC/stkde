@@ -178,8 +178,6 @@ std::shared_ptr<util::Compact3D<values>> stkde_pointbased_symomp_obsdecomp(const
 	    std::cerr<<"maxin round:"<<maxobs<<std::endl;
 	    maxobs = 0;
 	  }
-#pragma omp barrier
-
 
 	}
       }
