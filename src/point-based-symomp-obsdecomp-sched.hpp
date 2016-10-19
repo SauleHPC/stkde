@@ -125,8 +125,8 @@ std::shared_ptr<util::Compact3D<values>> stkde_pointbased_symomp_obsdecomp_sched
 	mostloaded = std::max(mostloaded, load(dx,dy,dt));
 	totalload += load(dx,dy,dt);
      	//std::cerr<<load(dx,dy,dt)<<" ";
-	if (load(dx,dy,dt) > ((double)inst.obsx.size())/omp_get_max_threads()/3)
-	  std::cerr<<dx<<","<<dy<<","<<dt<<" : "<<load(dx,dy,dt)<<std::endl;
+	//if (load(dx,dy,dt) > ((double)inst.obsx.size())/omp_get_max_threads()/3)
+	//std::cerr<<dx<<","<<dy<<","<<dt<<" : "<<load(dx,dy,dt)<<std::endl;
       }
       // std::cerr<<std::endl;
      }
@@ -134,7 +134,7 @@ std::shared_ptr<util::Compact3D<values>> stkde_pointbased_symomp_obsdecomp_sched
    }
   std::cerr<<"max load: "<<mostloaded<<" avgloadperbox: "<<((double)inst.obsx.size())/(decompsizeX*decompsizeY*decompsizeT)<<" avgloadpercore: "<<((double)inst.obsx.size())/omp_get_max_threads()<<" total load: "<<totalload<<std::endl;
 
-  if (1) {
+  if (0) {
     std::ofstream out ("loadmap");
     for (int dt = 0; dt<decompsizeT; ++dt) {
       for (int dy = 0; dy<decompsizeY; ++dy) {
