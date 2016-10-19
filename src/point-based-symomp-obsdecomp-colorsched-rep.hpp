@@ -181,6 +181,7 @@ std::shared_ptr<util::Compact3D<values>> stkde_pointbased_symomp_obsdecomp_color
     
     util::timestamp schedend;
 
+    std::cerr<<"nb replication: "<<nb_replication<<std::endl;
     std::cerr<<"schedule time: "<<schedend-schedbeg<<" seconds"<<std::endl; 
   }
 
@@ -290,21 +291,22 @@ std::shared_ptr<util::Compact3D<values>> stkde_pointbased_symomp_obsdecomp_color
 
   //reduction
   
-      util::timestamp reducebeg;
-
-    util::Compact3D<values>& out = *(ptemp[0]);
-
-    int totalthread=omp_get_num_threads();
-    //reduce intermediate compacts
+  util::timestamp reducebeg;
+  
+  util::Compact3D<values>& out = *(ptemp[0]);
+  
+  //reduce intermediate compacts
 #pragma omp for schedule(dynamic,2048)
-    for (index k=0; k< co.getSizeX()*co.getSizeY()*co.getSizeZ(); ++k) {
-      double value = 0.;
-      for (int t = 1; t < nb_replication; ++t) {
-	value += (*(ptemp[t]))(k);
-      }
-      (*(ptemp[0]))(k) += value;
+  for (index k=0; k< co.getSizeX()*co.getSizeY()*co.getSizeZ(); ++k) {
+    double value = 0.;
+    for (int t = 1; t < nb_replication; ++t) {
+      value += (*(ptemp[t]))(k);
     }
-    util::timestamp reduceend;
+    (*(ptemp[0]))(k) += value;
+  }
+  util::timestamp reduceend;
+
+  std::cerr<<"reduction: "<<reduceend - reducebeg<<" seconds"<<std::endl;
   
   // eval +=  process_observation_boxed_sym (c, //comp
   // 					  0, c.voxX, 0, c.voxY, 0, c.voxT, //box
