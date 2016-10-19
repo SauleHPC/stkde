@@ -185,6 +185,18 @@ std::shared_ptr<util::Compact3D<values>> stkde_pointbased_symomp_obsdecomp_color
     std::cerr<<"schedule time: "<<schedend-schedbeg<<" seconds"<<std::endl; 
   }
 
+  {
+    //estimated memory
+    long long estimated_memory_consumption = nb_replication;
+    estimated_memory_consumption *= c.voxX*c.voxY*c.voxT;
+    estimated_memory_consumption *= sizeof(values);
+    if (estimated_memory_consumption > ((long long)100)*((long long)1024*1024 *1024)) {
+      std::cerr<<"not enough memory"<<std::endl;
+      exit(1);
+    }
+  }
+
+
   //array for storing replicated chunks
   std::shared_ptr<util::Compact3D<values>> *ptemp = new std::shared_ptr<util::Compact3D<values>> [nb_replication];
   
