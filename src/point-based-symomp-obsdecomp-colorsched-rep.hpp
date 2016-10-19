@@ -200,8 +200,8 @@ std::shared_ptr<util::Compact3D<values>> stkde_pointbased_symomp_obsdecomp_color
   //array for storing replicated chunks
   std::shared_ptr<util::Compact3D<values>> *ptemp = new std::shared_ptr<util::Compact3D<values>> [nb_replication];
   
-  util::timestamp init_b; 
-  for (int i=0; i<nb_replication; ++i)  {
+  util::timestamp init_b;  
+  for (int i=0; i<nb_replication; ++i)  { //TODO: one could only allocate the piece of memory that will be used
     ptemp[i] = std::make_shared<util::Compact3D<values>>(c.voxX, c.voxY, c.voxT);
 
     (*(ptemp[i])).zero_parallel();
@@ -313,7 +313,7 @@ std::shared_ptr<util::Compact3D<values>> stkde_pointbased_symomp_obsdecomp_color
   
   //reduce intermediate compacts
 #pragma omp for schedule(dynamic,2048)
-  for (index k=0; k< co.getSizeX()*co.getSizeY()*co.getSizeZ(); ++k) {
+  for (index k=0; k< co.getSizeX()*co.getSizeY()*co.getSizeZ(); ++k) { //TODO: one could only reduce the piece of memory that have  been used
     double value = 0.;
     for (int t = 1; t < nb_replication; ++t) {
       value += (*(ptemp[t]))(k);
