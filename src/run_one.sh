@@ -32,13 +32,13 @@ for method in POINTBASED POINTBASED-SYMDISK POINTBASED-SYMBAR POINTBASED-SYM POI
 do
     if [ $method = POINTBASED-SYMOMP ]
     then
-	for t in 1 2 4 8 16
+	for t in 16 8 4 2 1
 	do
-	    for decompx in 1 4 8 
+	    for decompx in 8 4 1
 	    do
-		for decompy in 1 4 8 
+		for decompy in 8 4 1
 		do	
-		    for decompt in 1 4 8
+		    for decompt in 8 4 1
 		    do
 			FILE=results/${INSTANCE}_$(basename $BANDWIDTH)_${method}_${decompx}_${decompy}_${decompt}_t${t}
 			if [ ! -f $FILE ]
@@ -53,7 +53,7 @@ do
     else
 	if [ $method = POINTBASED-SYMOMP-POINTDECOMP ]
 	then
-	    for t in 1 2 4 8 16
+	    for t in 16 8 4 2 1
 	    do
 		FILE=results/${INSTANCE}_$(basename $BANDWIDTH)_${method}_t${t}
 		if [ ! -f $FILE ]
@@ -65,9 +65,9 @@ do
 	else
 	    if [ $method = POINTBASED-SYMOMP-OBSDECOMP ]
 	    then
-		for t in 1 2 4 8 16
+		for t in 16 8 4 2 1
 		do
-		    for decomp in 1 2 4 8 16 32 64
+		    for decomp in 64 32 16 8 4 2 1
 		    do
 			FILE=results/${INSTANCE}_$(basename $BANDWIDTH)_${method}_${decomp}_${decomp}_${decomp}_t${t}
 			if [ ! -f $FILE ]
@@ -80,9 +80,9 @@ do
 	    else
 		if [ $method = POINTBASED-SYMOMP-OBSDECOMP-SCHED ]
 		then
-		    for t in 1 2 4 8 16
+		    for t in 16 8 4 2 1
 		    do
-			for decomp in 1 2 4 8 16 32 64
+			for decomp in 64 32 16 8 4 2 1
 			do
 			    FILE=results/${INSTANCE}_$(basename $BANDWIDTH)_${method}_${decomp}_${decomp}_${decomp}_t${t}
 			    if [ ! -f $FILE ]
@@ -95,9 +95,9 @@ do
 		else
 		    if [ $method = POINTBASED-SYMOMP-OBSDECOMP-COLORSCHED ]
 		    then
-			for t in 1 2 4 8 16
+			for t in 16 8 4 2 1
 			do
-			    for decomp in 1 2 4 8 16 32 64
+			    for decomp in 64 32 16 8 4 2 1
 			    do
 				FILE=results/${INSTANCE}_$(basename $BANDWIDTH)_${method}_${decomp}_${decomp}_${decomp}_t${t}
 				if [ ! -f $FILE ]

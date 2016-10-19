@@ -1,13 +1,13 @@
+hostname : sth-c4.uncc.edu
 bounding: [-39;77]x[-159;148]x[0;5950]
 read 31478 observations
 res: 1 1 7 bw: 1 1 7
 voxsize: 117x308x851 size:116.983932MB
 voxBW: 1 1
-Initialization time: 0.025872
-adding 34.631428,36.326969,3506 to -39;77 -159;148 0;5950
+Initialization time: 0.056940
 intersect: 31478
-decomposition time: 0.001101 seconds
+decomposition time: 0.002663 seconds
 max load: 31478 avgloadperbox: 31478 avgloadpercore: 31478
-compute: 0.002108 seconds
+compute: 0.006111 seconds
 evaluations: 251812
-time: 0.029214 seconds
+time: 0.066041 seconds

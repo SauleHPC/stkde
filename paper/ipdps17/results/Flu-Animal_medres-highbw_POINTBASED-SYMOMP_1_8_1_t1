@@ -1,13 +1,13 @@
+hostname : sth-c25.uncc.edu
 bounding: [-39;77]x[-159;148]x[0;5950]
 read 31478 observations
 res: 0.5 0.5 3 bw: 2 2 21
 voxsize: 233x615x1985 size:1085.05468MB
 voxBW: 4 7
-Initialization time: 0.242018
-adding 34.631428,36.326969,3506 to -39;77 32.875;71.25 0;5950
+Initialization time: 0.239187
 intersect: 34474
-decomposition time: 0.001910 seconds
+decomposition time: 0.001724 seconds
 max load: 10830 avgloadperbox: 3934.75 avgloadpercore: 31478
-compute: 0.049658 seconds
+compute: 0.049297 seconds
 evaluations: 28160272
-time: 0.293763 seconds
+time: 0.290375 seconds

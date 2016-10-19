@@ -1,18 +1,19 @@
+hostname : sth-c9.uncc.edu
 bounding: [-180;180]x[7;72]x[5875;5958]
 read 588189 observations
 res: 0.1 0.1 1 bw: 1 1 3
 voxsize: 3601x651x84 size:751.179062MB
 voxBW: 10 3
-decomposition time: 0.056467 seconds
+decomposition time: 0.056531 seconds
 0,0,0 : 138926
 0,1,0 : 80535
 0,0,1 : 230706
 0,1,1 : 137582
 max load: 230706 avgloadperbox: 73523.625 avgloadpercore: 73523.625 total load: 588189
-Initialization time: 0.139464
+Initialization time: 0.139474
 mem: 64
 most loaded: 0 0 1
-schedule time: 0.000054 seconds
-compute: 5.007437 seconds
+schedule time: 0.000055 seconds
+compute: 5.026503 seconds
 evaluations: 0
-time: 5.206387 seconds
+time: 5.225218 seconds

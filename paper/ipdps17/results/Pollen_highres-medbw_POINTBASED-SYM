@@ -1,9 +1,10 @@
+hostname : sth-c22.uncc.edu
 bounding: [-180;180]x[7;72]x[5875;5958]
 read 588189 observations
 res: 0.1 0.1 1 bw: 2.5 2.5 7
 voxsize: 3601x651x84 size:751.2MB
 voxBW: 25 7
-Initialization time: 0.179543
-compute: 51.394421 seconds
+Initialization time: 0.185316
+compute: 53.095741 seconds
 evaluations: 20189433200
-time: 51.574578 seconds
+time: 53.281391 seconds
