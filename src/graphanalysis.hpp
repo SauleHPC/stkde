@@ -396,11 +396,11 @@ int replicate(const util::Compact3D<std::vector<triplet> > & graph_out,
   loadv lp = 0;
   
   while ((lp = longest_path (graph_out, graph_in, load, replication, path)) > threshold) {
-    std::cerr<<"path is "<<lp<<" units long"<<std::endl;
+    //std::cerr<<"path is "<<lp<<" units long"<<std::endl;
     for (auto t : path) {
-      std::cerr<<"replicating: "<<t.x<<" "<<t.y<<" "<<t.z<<" : "
-	       <<replication(t.x, t.y, t.z)<<" times. "
-	       <<"original load : "<<load(t.x,t.y,t.z) <<" now: "<< load(t.x,t.y,t.z)/ replication(t.x, t.y, t.z)<<std::endl;
+      // std::cerr<<"replicating: "<<t.x<<" "<<t.y<<" "<<t.z<<" : "
+      // 	       <<replication(t.x, t.y, t.z)<<" times. "
+      // 	       <<"original load : "<<load(t.x,t.y,t.z) <<" now: "<< load(t.x,t.y,t.z)/ replication(t.x, t.y, t.z)<<std::endl;
 
       replication(t.x, t.y, t.z)++;
       

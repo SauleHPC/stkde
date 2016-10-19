@@ -260,8 +260,8 @@ std::shared_ptr<util::Compact3D<values>> stkde_pointbased_symomp_obsdecomp_color
                               dummy[rep*(decompsizeX+2)*(decompsizeY+2)*(decompsizeT+2) + (dx+2)*(decompsizeY+2)*(decompsizeT+2)+(dy+2)*(decompsizeT+2)+(dt+2)] \
 			)
 	    {
-	      index beg = rep*decompX(dx,dy,dt).size()/replication(dx,dy,dt);
-	      index end = (rep+1)*decompX(dx,dy,dt).size()/replication(dx,dy,dt);
+	      index beg = rep*(decompX(dx,dy,dt).size()/replication(dx,dy,dt));
+	      index end = (rep+1)*(decompX(dx,dy,dt).size()/replication(dx,dy,dt));
 	      if (rep == replication(dx,dy,dt) -1 )
 		end = decompX(dx,dy,dt).size();
 	      
