@@ -5,6 +5,23 @@ then
     mkdir results
 fi
 
+hostname
+
+echo
+
+cat /proc/cpuinfo
+
+echo
+
+sleep 10
+
+echo
+
+uptime
+
+echo
+
+
 BIN=./point-based
 echo $INSTANCE
 echo $BOUNDARY
@@ -91,6 +108,7 @@ do
 			    done
 			done
 		    else
+			FILE=results/${INSTANCE}_$(basename $BANDWIDTH)_${method}
 			
 			if [ ! -f $FILE ]
 			then
