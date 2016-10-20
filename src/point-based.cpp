@@ -127,9 +127,9 @@ int main (int argc, char* argv[]) {
     dens = stkde_pointbased_symomp_point (bb, inst, param);
   if (method.compare("VOXELBASED") == 0)
     dens = stkde_voxelbased(bb, inst, param);
-  if (method.compare("VOXELBASED-OBSDECOMP") == 0)
+  if (method.compare("VOXELBASED-OBSDECOMP") == 0) 
     dens = stkde_voxelbased_obsdecomp(bb, inst, param, decompX, decompY, decompT);
- 
+  
   util::timestamp end;
 
   if (0) {
