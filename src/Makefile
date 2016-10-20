@@ -1,5 +1,5 @@
 LD=g++
-#CXXFLAGS = -std=c++14 -O0 -g
+#CXXFLAGS = -std=c++14 -O0 -g -fopenmp
 CXXFLAGS = -std=c++14 -O3 -march=native -fopenmp -DNDEBUG
 #CXXFLAGS = -std=c++14 -O3 -march=native  -DNDEBUG
 #LDFLAGS= -O3 -march=native -fopenmp

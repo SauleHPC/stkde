@@ -161,6 +161,7 @@ std::shared_ptr<util::Compact3D<values>> stkde_pointbased_symomp_obsdecomp_color
 
   
   int nb_replication;
+  util::Compact3D<int> activereplicate (decompsizeX, decompsizeY, decompsizeT); //activereplicate(i,j,k) tells how many replicateds of that block are used.
   {
     util::timestamp schedbeg;
     
@@ -178,7 +179,22 @@ std::shared_ptr<util::Compact3D<values>> stkde_pointbased_symomp_obsdecomp_color
     loadv targetCP = inst.obsx.size()/(2*omp_get_max_threads());
     
     nb_replication = replicate (graph_out, load, replication, targetCP);
-    
+
+    //compute active replication map
+    for (index i=0; i<decompsizeX; ++i)
+      for (index j=0; j<decompsizeY; ++j)
+	for (index k=0; k<decompsizeT; ++k) {
+	  int max = 1;
+
+	  for (index dx = std::max((index)0, i-1); dx <= std::min(i+1, decompsizeX-1); ++dx)
+	    for (index dy = std::max((index)0, j-1); dy <= std::min(j+1, decompsizeY-1); ++dy)
+	      for (index dt = std::max((index)0, k-1); dt <= std::min(k+1, decompsizeT-1); ++dt)
+		max = std::max (max, replication(dx,dy,dt));
+	  
+	  activereplicate(i,j,k) = max;
+	}
+	  
+
     util::timestamp schedend;
 
     std::cerr<<"nb replication: "<<nb_replication<<std::endl;
@@ -190,13 +206,14 @@ std::shared_ptr<util::Compact3D<values>> stkde_pointbased_symomp_obsdecomp_color
     long long estimated_memory_consumption = nb_replication;
     estimated_memory_consumption *= c.voxX*c.voxY*c.voxT;
     estimated_memory_consumption *= sizeof(values);
-    if (estimated_memory_consumption > ((long long)100)*((long long)1024*1024 *1024)) {
+    if (estimated_memory_consumption > ((long long)100)*((long long)1024 * 1024 * 1024)) {
       std::cerr<<"not enough memory"<<std::endl;
       exit(1);
     }
   }
 
-
+  
+  
   //array for storing replicated chunks
   std::shared_ptr<util::Compact3D<values>> *ptemp = new std::shared_ptr<util::Compact3D<values>> [nb_replication];
   
@@ -285,7 +302,7 @@ std::shared_ptr<util::Compact3D<values>> stkde_pointbased_symomp_obsdecomp_color
 	      int tid = omp_get_thread_num();
 
 	      computation clocal = c;
-	      c.p = ptemp[rep];
+	      clocal.p = ptemp[rep];
 	      
 	      //		    std::cerr<<dx<<"x"<<dy<<"x"<<dt<<std::endl;
 	      index ret =  process_observation_boxed_sym (clocal, //comp
@@ -332,6 +349,18 @@ std::shared_ptr<util::Compact3D<values>> stkde_pointbased_symomp_obsdecomp_color
 
   
   std::cerr<<"evaluations: "<<eval<<std::endl;
+  
+
+  delete[] dummy;
+
+  for (int i=0; i<omp_get_max_threads(); ++i) {
+    delete barbuf[i];
+    delete diskbuf[i];
+  }
+
+
+  delete[] diskbuf;
+  delete[] barbuf;
   
   return ((ptemp[0]));
 }
