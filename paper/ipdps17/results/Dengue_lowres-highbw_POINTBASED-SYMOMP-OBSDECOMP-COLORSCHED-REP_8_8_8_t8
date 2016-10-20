@@ -1,4 +1,4 @@
-hostname : sth-c3.uncc.edu
+hostname : sth-c2.uncc.edu
 bounding: [1053872.965;1068485.726]x[860186.8419;879395.9741]x[3;730]
 read 11056 observations
 res: 100 100 1 bw: 2500 2500 1
@@ -10,9 +10,10 @@ max load: 1445 avgloadperbox: 230.333333 avgloadpercore: 1382 total load: 11056
 most loaded: 1 1 0
 load based longest path:6367
 nb replication: 13
-schedule time: 0.000447 seconds
+schedule time: 0.000468 seconds
+Initialization time: 0.111599
 mem: 200
-compute: 0.064428 seconds
-reduction: 0.281547 seconds
+compute: 0.063826 seconds
+reduction: 0.281591 seconds
 evaluations: 0
-time: 0.457716 seconds
+time: 0.458094 seconds

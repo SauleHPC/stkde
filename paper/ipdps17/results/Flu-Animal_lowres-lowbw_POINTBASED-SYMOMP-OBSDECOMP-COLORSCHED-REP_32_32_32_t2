@@ -1,17 +1,18 @@
-hostname : sth-c7.uncc.edu
+hostname : sth-c6.uncc.edu
 bounding: [-39;77]x[-159;148]x[0;5950]
 read 31478 observations
 res: 1 1 7 bw: 1 1 7
 voxsize: 117x308x851 size:116.983932MB
 voxBW: 1 1
-decomposition time: 0.002709 seconds
+decomposition time: 0.002603 seconds
 max load: 1230 avgloadperbox: 0.960632324 avgloadpercore: 15739 total load: 31478
 most loaded: 25 17 25
 load based longest path:1903
 nb replication: 1
-schedule time: 0.062265 seconds
+schedule time: 0.060797 seconds
+Initialization time: 0.016302
 mem: 39304
-compute: 0.002842 seconds
-reduction: 0.043735 seconds
+compute: 0.002898 seconds
+reduction: 0.043574 seconds
 evaluations: 0
-time: 0.131486 seconds
+time: 0.129016 seconds

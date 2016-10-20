@@ -4,14 +4,15 @@ read 11056 observations
 res: 100 100 1 bw: 250 250 1
 voxsize: 148x194x728 size:79.736084MB
 voxBW: 3 1
-decomposition time: 0.002938 seconds
+decomposition time: 0.002926 seconds
 max load: 85 avgloadperbox: 2.69921875 avgloadpercore: 1382 total load: 11056
 most loaded: 5 5 1
 load based longest path:416
 nb replication: 1
-schedule time: 0.022327 seconds
+schedule time: 0.021963 seconds
+Initialization time: 0.020953
 mem: 5832
-compute: 0.014144 seconds
-reduction: 0.089222 seconds
+compute: 0.013973 seconds
+reduction: 0.089196 seconds
 evaluations: 0
-time: 0.150865 seconds
+time: 0.150493 seconds
