@@ -1,3 +1,4 @@
+
 #ifndef VOXEL_BASED_OBSDECOMP_HPP
 #define VOXEL_BASED_OBSDECOMP_HPP
 
@@ -22,6 +23,7 @@ std::shared_ptr<util::Compact3D<values>> stkde_voxelbased_obsdecomp(const boundi
 									   index decompsizeY,
 									   index decompsizeT
 ) {
+  
   computation c;
   
   c.voxX = std::lround(std::ceil((bb.xh-bb.xl)/pa.xres))+1;
@@ -38,6 +40,11 @@ std::shared_ptr<util::Compact3D<values>> stkde_voxelbased_obsdecomp(const boundi
   {
     bool decompchanged = false;
     
+    decompsizeX  = 1000;
+    decompsizeY  = 1000;
+    decompsizeT  = 5000;
+    
+     
     while (decompsizeX >= (bb.xh-bb.xl)/(2*pa.xbw) && decompsizeX>1) {
       decompsizeX --;
       decompchanged = true;
@@ -58,8 +65,9 @@ std::shared_ptr<util::Compact3D<values>> stkde_voxelbased_obsdecomp(const boundi
 
   }
   
+  std::cout << decompsizeX << ", " << decompsizeY << ", " << decompsizeT << std::endl;
   std::cerr.precision(9);
-    
+  
   std::cerr<<"voxsize: "<<c.voxX<<"x"<<c.voxY<<"x"<<c.voxT<<" size:"<<c.voxX*c.voxY*c.voxT*sizeof(values)/1024./1024.<<"MB"<<std::endl;
   std::cerr<<"voxBW: "<<c.voxsbw<<" "<<c.voxtbw<<std::endl;
   
@@ -81,7 +89,7 @@ std::shared_ptr<util::Compact3D<values>> stkde_voxelbased_obsdecomp(const boundi
   for (int dx = 0; dx<decompsizeX; ++dx) {
     for (int dy = 0; dy<decompsizeY; ++dy) {
       for (int dt = 0; dt<decompsizeT; ++dt) {
-	load(dx,dy,dt) = 0;
+	      load(dx,dy,dt) = 0;
       }
     }
   }
@@ -91,17 +99,26 @@ std::shared_ptr<util::Compact3D<values>> stkde_voxelbased_obsdecomp(const boundi
   util::Compact3D<std::vector<coordinate>> decompY (decompsizeX, decompsizeY, decompsizeT);
   util::Compact3D<std::vector<coordinate>> decompT (decompsizeX, decompsizeY, decompsizeT);
 
+  std::cout << "3D box stats" << std::endl;
+  std::cout << decompsizeX << ", " << decompsizeY << ", " << decompsizeT << std::endl;
+
+  printf("[(%lf, %lf), (%lf %lf), (%lf %lf)]\n", bb.xl, bb.xh - bb.xl * 0, bb.yl, bb.yh - bb.yl, bb.tl, bb.th - bb.tl);
+
+  coordinate subd_x = (bb.xh - bb.xl) / decompsizeX;
+  coordinate subd_y = (bb.yh - bb.yl) / decompsizeY;
+  coordinate subd_t = (bb.th - bb.tl) / decompsizeT;
+
+  printf("%lf, %lf, %lf\n", subd_x, subd_y, subd_t);
+  printf("%lf, %lf, %lf\n", pa.xbw, pa.ybw, pa.tbw);
   //
   //  long inter = 0;
   for (int i=0; i< inst.obsx.size(); ++i) {
     auto ox = inst.obsx[i];
     auto oy = inst.obsy[i];
     auto ot = inst.obst[i];
-
     index dx = (ox-bb.xl)/(bb.xh-bb.xl)*decompsizeX;
     index dy = (oy-bb.yl)/(bb.yh-bb.yl)*decompsizeY;
     index dt = (ot-bb.tl)/(bb.th-bb.tl)*decompsizeT;
-
     //handling points out of rnage. Processing them with near by boundary
     dx = std::max(dx, (index)0);
     dy = std::max(dy, (index)0);
@@ -109,38 +126,93 @@ std::shared_ptr<util::Compact3D<values>> stkde_voxelbased_obsdecomp(const boundi
     dx = std::min(dx, decompsizeX-1);
     dy = std::min(dy, decompsizeY-1);
     dt = std::min(dt, decompsizeT-1);
-    
     //it does intersect
     load(dx,dy,dt) ++;
     //inter++;
     decompX(dx,dy,dt).push_back(ox);
     decompY(dx,dy,dt).push_back(oy);
     decompT(dx,dy,dt).push_back(ot);
-
   }
-  //std::cerr<<"intersect: "<<inter<<std::endl;
+  
   util::timestamp decend;
-
   std::cerr<<"decomposition time: "<<decend-decbeg<<" seconds"<<std::endl;
+  
+  
+  util::timestamp compbeg;
+  int evals = 0;
+  coordinate xl, xh, yl, yh, tl, th;
+  coordinate px, py, pt, obsx, obsy, obst;
+  
+  for(int dt = 0; dt < decompsizeT; ++dt) {
+    tl = bb.tl + dt * subd_t;
+    th = std::min(bb.th, tl + subd_t);
+    for(int dy = 0; dy < decompsizeY; ++dy) {
+      yl = bb.yl + dy * subd_y;
+      yh = std::min(bb.yh, yl + subd_y);
+      for(int dx = 0; dx < decompsizeX; ++dx) {
+        // current box
+        xl = bb.xl + dx * subd_x;
+        xh = std::min(bb.xh, xl + subd_x);
+  
+        for(int xbase = dx-1; xbase < dx+2; xbase++) {
+          for(int ybase = dy-1; ybase < dy+2; ybase++) {
+            for(int tbase = dt-1; tbase < dt+2; tbase++) {
+              if(xbase >= 0 and xbase < decompsizeX && 
+              ybase >= 0 and ybase < decompsizeY &&
+              tbase >= 0 and tbase < decompsizeT) {
+                // points inside this box can affect 
+                // the grid points in the current box
+                for(int t = 0; t < subd_t; t++) {
+                  for(int y = 0; y < subd_y; y++) {
+                    for(int x = 0; x < subd_x; x++) {
+                      pt = tl + t * pa.tres;
+                      py = yl + y * pa.yres;
+                      px = xl + x * pa.xres;
+                      int n = decompX(xbase, ybase, tbase).size();
+                      for(int o = 0; o < n; o++)  {
+                        obsx = decompX(xbase, ybase, tbase)[o];
+                        obsy = decompY(xbase, ybase, tbase)[o];
+                        obst = decompT(xbase, ybase, tbase)[o];
+                        if(abs(obst - pt) <= pa.tres) {
+                          if(sqrt((px - obsx) * (px - obsx) + (py - obsy) * (py - obsy)) <= pa.xres) {
+                            co(x, y, t) += densityF(obsx, obsy, obst, px, py, pt, inst.obsx.size(), pa.xres, pa.tres);
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      } 
+      // break;
+    }
+    // break;
+  }
+  
+  util::timestamp compend;
+
+  //std::cerr<<"intersect: "<<inter<<std::endl;
   index mostloaded = 0;
   index totalload = 0;
   for (int dt = 0; dt<decompsizeT; ++dt) {
     for (int dy = 0; dy<decompsizeY; ++dy) {
       for (int dx = 0; dx<decompsizeX; ++dx) {
-	mostloaded = std::max(mostloaded, load(dx,dy,dt));
-	totalload += load(dx,dy,dt);
-     	//std::cerr<<load(dx,dy,dt)<<" ";
-	if (load(dx,dy,dt) > ((double)inst.obsx.size())/omp_get_max_threads()/10)
-	  std::cerr<<dx<<","<<dy<<","<<dt<<" : "<<load(dx,dy,dt)<<std::endl;
-      }
-      // std::cerr<<std::endl;
-     }
-    //   std::cerr<<std::endl;
-   }
-  std::cerr<<"max load: "<<mostloaded<<" avgloadperbox: "<<((double)inst.obsx.size())/(decompsizeX*decompsizeY*decompsizeT)<<" avgloadpercore: "<<((double)inst.obsx.size())/omp_get_max_threads()<<" total load: "<<totalload<<std::endl;
-
-
-  util::timestamp computebeg;
+      	mostloaded = std::max(mostloaded, load(dx,dy,dt));
+	      totalload += load(dx,dy,dt);
+     	  //std::cerr<<load(dx,dy,dt)<<" ";
+	      if (load(dx,dy,dt) > ((double)inst.obsx.size())/omp_get_max_threads()/10)
+	        std::cerr<<dx<<","<<dy<<","<<dt<<" : "<<load(dx,dy,dt)<<std::endl;
+        }
+        // std::cerr<<std::endl;
+       }
+      //   std::cerr<<std::endl;
+    }
+    std::cerr<<"max load: "<<mostloaded<<" avgloadperbox: "<<((double)inst.obsx.size())/(decompsizeX*decompsizeY*decompsizeT)<<" avgloadpercore: "<<((double)inst.obsx.size())/omp_get_max_threads()<<" total load: "<<totalload<<std::endl;
+    
+  /*
   //compute
   index maxobs = 0;
 #pragma omp parallel reduction(+:eval)
@@ -194,7 +266,10 @@ std::shared_ptr<util::Compact3D<values>> stkde_voxelbased_obsdecomp(const boundi
 
   
   std::cerr<<"evaluations: "<<eval<<std::endl;
+  */
   
+  std::cerr<<"compute: "<<(compend-compbeg)<<" seconds"<<std::endl;
+  std::cerr<<"evaluations: "<<eval<<std::endl;
   return c.p;
 }
 
