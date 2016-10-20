@@ -288,7 +288,7 @@ std::shared_ptr<util::Compact3D<values>> stkde_pointbased_symomp_obsdecomp_color
 	      c.p = ptemp[rep];
 	      
 	      //		    std::cerr<<dx<<"x"<<dy<<"x"<<dt<<std::endl;
-	      index ret =  process_observation_boxed_sym (c, //comp// DO SOMETHING HERE!
+	      index ret =  process_observation_boxed_sym (clocal, //comp
 							  0, c.voxX, 0, c.voxY, 0, c.voxT, //box
 							  decompX(dx,dy,dt), decompY(dx,dy,dt), decompT(dx,dy,dt), //observations
 							  *(diskbuf[tid]), *(barbuf[tid]), //workbuffer
