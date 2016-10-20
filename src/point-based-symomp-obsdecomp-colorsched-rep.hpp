@@ -98,7 +98,7 @@ std::shared_ptr<util::Compact3D<values>> stkde_pointbased_symomp_obsdecomp_color
     index dy = (oy-bb.yl)/(bb.yh-bb.yl)*decompsizeY;
     index dt = (ot-bb.tl)/(bb.th-bb.tl)*decompsizeT;
 
-    //handling points out of rnage. Processing them with near by boundary
+    //handling points out of range. Processing them with near by boundary
     dx = std::max(dx, (index)0);
     dy = std::max(dy, (index)0);
     dt = std::max(dt, (index)0);
@@ -181,6 +181,7 @@ std::shared_ptr<util::Compact3D<values>> stkde_pointbased_symomp_obsdecomp_color
     nb_replication = replicate (graph_out, load, replication, targetCP);
 
     //compute active replication map
+    index totalactiveblocks = 0;
     for (index i=0; i<decompsizeX; ++i)
       for (index j=0; j<decompsizeY; ++j)
 	for (index k=0; k<decompsizeT; ++k) {
@@ -192,12 +193,14 @@ std::shared_ptr<util::Compact3D<values>> stkde_pointbased_symomp_obsdecomp_color
 		max = std::max (max, replication(dx,dy,dt));
 	  
 	  activereplicate(i,j,k) = max;
+	  totalactiveblocks += max;
 	}
 	  
 
     util::timestamp schedend;
 
     std::cerr<<"nb replication: "<<nb_replication<<std::endl;
+    std::cerr<<"total active blocks: "<<totalactiveblocks<<std::endl;
     std::cerr<<"schedule time: "<<schedend-schedbeg<<" seconds"<<std::endl; 
   }
 
@@ -218,10 +221,58 @@ std::shared_ptr<util::Compact3D<values>> stkde_pointbased_symomp_obsdecomp_color
   std::shared_ptr<util::Compact3D<values>> *ptemp = new std::shared_ptr<util::Compact3D<values>> [nb_replication];
   
   util::timestamp init_b;  
-  for (int i=0; i<nb_replication; ++i)  { //TODO: one could only allocate the piece of memory that will be used
-    ptemp[i] = std::make_shared<util::Compact3D<values>>(c.voxX, c.voxY, c.voxT);
+  for (int i=0; i<nb_replication; ++i)  { 
+    ptemp[i] = std::make_shared<util::Compact3D<values>>(c.voxX, c.voxY, c.voxT); //TODO: one could only allocate the piece of memory that will be used. Let's let linux page allocator do that
 
-    (*(ptemp[i])).zero_parallel();
+    //(*(ptemp[i])).zero_parallel();
+  }
+  
+  if (1)
+  {
+    (*(ptemp[0])).zero_parallel(); //need to init zero entirely anyway
+#pragma omp parallel for collapse(4) schedule(dynamic,1)    
+    for (int i=1; i<nb_replication; ++i)  { 
+      for (index dx = 0; dx<decompsizeX; ++dx)
+	for (index dy = 0; dy<decompsizeY; ++dy)
+	  for (index dt = 0; dt<decompsizeT; ++dt) {
+	    if (i < activereplicate(dx,dy,dt) ) {
+	      //init block dx, dy, dt of replica i
+	      	  coordinate decxmin = bb.xl + ( dx   *(bb.xh-bb.xl)/decompsizeX );
+		  index voxXmin = std::lround((decxmin-bb.xl)/pa.xres);
+		  coordinate decxmax = bb.xl + ((dx+1)*(bb.xh-bb.xl)/decompsizeX );
+		  index voxXmax;
+		  if (dx != decompsizeX-1)
+		    voxXmax = std::lround((decxmax-bb.xl)/pa.xres);
+		  else
+		    voxXmax = c.voxX;
+		  
+		  coordinate decymin = bb.yl + ( dy   *(bb.yh-bb.yl)/decompsizeY );
+		  index voxYmin = std::lround((decymin-bb.yl)/pa.yres);
+		  coordinate decymax = bb.yl + ((dy+1)*(bb.yh-bb.yl)/decompsizeY );
+		  index voxYmax;
+		  if (dy != decompsizeY-1)
+		    voxYmax = std::lround((decymax-bb.yl)/pa.yres);
+		  else
+		    voxYmax = c.voxY;
+		  
+		  
+		  coordinate dectmin = bb.tl + ( dt   *(bb.th-bb.tl)/decompsizeT );
+		  index voxTmin = std::lround((dectmin-bb.tl)/pa.tres);
+		  coordinate dectmax = bb.tl + ((dt+1)*(bb.th-bb.tl)/decompsizeT );
+		  index voxTmax;
+		  if (dt != decompsizeT-1)
+		    voxTmax = std::lround((dectmax-bb.tl)/pa.tres);
+		  else
+		    voxTmax = c.voxT;
+
+		  for (index x = voxXmin; x<voxXmax; ++x)
+		    for (index y = voxYmin; y<voxYmax; ++y)
+		      for (index t = voxTmin; t<voxTmax; ++t) {
+			(*(ptemp[i]))(x,y,t) = 0;
+		      }
+	    }
+	  }      
+    }
   }
   util::timestamp init_e;
   
@@ -329,14 +380,69 @@ std::shared_ptr<util::Compact3D<values>> stkde_pointbased_symomp_obsdecomp_color
   util::Compact3D<values>& out = *(ptemp[0]);
   
   //reduce intermediate compacts
+  if (0) {
 #pragma omp for schedule(dynamic,2048)
-  for (index k=0; k< co.getSizeX()*co.getSizeY()*co.getSizeZ(); ++k) { //TODO: one could only reduce the piece of memory that have  been used
-    double value = 0.;
-    for (int t = 1; t < nb_replication; ++t) {
-      value += (*(ptemp[t]))(k);
+    for (index k=0; k< co.getSizeX()*co.getSizeY()*co.getSizeZ(); ++k) { //TODO: one could only reduce the piece of memory that have  been used
+      values value = 0.;
+      for (int t = 1; t < nb_replication; ++t) {
+	value += (*(ptemp[t]))(k);
+      }
+      (*(ptemp[0]))(k) += value;
     }
-    (*(ptemp[0]))(k) += value;
   }
+
+  if (1) { //reduce only what needs be
+#pragma omp parallel for collapse(3) schedule(dynamic,1)    
+    for (index dx = 0; dx<decompsizeX; ++dx)
+      for (index dy = 0; dy<decompsizeY; ++dy)
+	for (index dt = 0; dt<decompsizeT; ++dt) {
+	  int nbrep_block = activereplicate(dx,dy,dt);
+	  if ( nbrep_block > 1) {
+	    //init block dx, dy, dt of replica i
+	    coordinate decxmin = bb.xl + ( dx   *(bb.xh-bb.xl)/decompsizeX );
+	    index voxXmin = std::lround((decxmin-bb.xl)/pa.xres);
+	    coordinate decxmax = bb.xl + ((dx+1)*(bb.xh-bb.xl)/decompsizeX );
+	    index voxXmax;
+	    if (dx != decompsizeX-1)
+	      voxXmax = std::lround((decxmax-bb.xl)/pa.xres);
+	    else
+	      voxXmax = c.voxX;
+	    
+	    coordinate decymin = bb.yl + ( dy   *(bb.yh-bb.yl)/decompsizeY );
+	    index voxYmin = std::lround((decymin-bb.yl)/pa.yres);
+	    coordinate decymax = bb.yl + ((dy+1)*(bb.yh-bb.yl)/decompsizeY );
+	    index voxYmax;
+	    if (dy != decompsizeY-1)
+	      voxYmax = std::lround((decymax-bb.yl)/pa.yres);
+	    else
+	      voxYmax = c.voxY;
+	    
+	    
+	    coordinate dectmin = bb.tl + ( dt   *(bb.th-bb.tl)/decompsizeT );
+	    index voxTmin = std::lround((dectmin-bb.tl)/pa.tres);
+	    coordinate dectmax = bb.tl + ((dt+1)*(bb.th-bb.tl)/decompsizeT );
+	    index voxTmax;
+	    if (dt != decompsizeT-1)
+	      voxTmax = std::lround((dectmax-bb.tl)/pa.tres);
+	    else
+	      voxTmax = c.voxT;
+
+
+	    for (index x = voxXmin; x<voxXmax; ++x)
+	      for (index y = voxYmin; y<voxYmax; ++y)
+		for (index t = voxTmin; t<voxTmax; ++t) {
+		  values sum = 0.;
+		  for (int i=1; i < nbrep_block; ++i) {
+		    sum += (*(ptemp[i]))(x,y,t) ;
+		  }
+		  (*(ptemp[0]))(x,y,t) += sum;
+		}
+	  }
+	}      
+  }
+
+
+
   util::timestamp reduceend;
 
   std::cerr<<"reduction: "<<reduceend - reducebeg<<" seconds"<<std::endl;
