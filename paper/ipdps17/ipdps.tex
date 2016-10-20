@@ -203,7 +203,7 @@ spatial invariant.
 
 \todo{draw figure that examplify the issue}
 
-If the algorihtms keeps the number of subdomain small such that each
+If the algorithms keeps the number of subdomain small such that each
 observation is not replicated more than a constant number of time then
 the work performed when expressed in Big-Oh notation does not change.
 (This can be achieved, for instance, by having subdomains larger than
@@ -219,6 +219,49 @@ subdomains. And this work is not executed in parallel. One could
 decompose the domain more, but replication observation (described
 above) will incur an even higher overhead which may end up nullifying
 the gain in load balance.
+
+\subsection{Observation Decomposition}
+
+Both of the previous strategies increase the amount of work
+significantly. We want to achieve parallelism without cutting a
+cylinder and without requiring each thread to have its own memory
+space. To achieve that goal, we propose the SYM-OD algorithm that
+decomposes the observations in sets that can be safely performed
+simultaneously.
+
+As long as two observations are separated by $2*sbw$ in a spatial
+dimension or by $2*tbw$ in the temporal dimension then the cylinder
+induced by the two observations will not overlap. SYM-OD decomposes
+the observations in $A \times B \times C$ subdomain of identical
+size. As long as these subdomains are larger than $2*sbw$ in a spatial
+dimension and $2*tbw$ in the temporal dimension, then the observations
+in domain $x, y, z$ can be done concurently with the observations in
+$x+2, y, z$.
+
+\todo{include figure that show the decomposition}
+
+We implemented a first version of this algorithm that organizes the
+subdomain in 8 sets where the first set is composed of the subdomains
+$2*i, 2*j, 2*k$, the second of all the subdomains $2*i+1, 2*j, 2*k$,
+the third of all the subdomains $2*i, 2*j+1, 2*k$, etc.. The algorithm
+execute the sets the one after the other by doing each subdomain
+within a set in parallel. In practice, this is implementation using
+$8$ OpenMP parallel for construct.
+
+\todo{include algorithms}
+
+Note that such an implementation overconstrains the execution of the
+algorithm. Indeed, despite they are not in the same set, subdomain
+$1,0,0$ and $64, 64, 64$ can be computed at the same time. The real
+constraint is that the observations contained in a subdomain can be
+processed safely as long none of the observation contained in a
+neighboring are being processed running. Using the OpenMP tasking
+construct with dependency introduced in OpenMP 4.0, one can precisely
+express this constraint, which is a 27-point stencil constraint.
+
+\subsection{Coloring and Scheduling}
+
+Coloring and moldable scheduling.
 
 \subsection{Vectorization}
 
