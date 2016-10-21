@@ -7,6 +7,7 @@
 %\usepackage{amsmath}
 %\theoremstyle{plain}
 
+\usepackage{hyperref}
 \usepackage[noend]{algorithm2e}
 \usepackage{algorithmicx}
 \usepackage{graphicx}
@@ -155,8 +156,8 @@ GY * GT + N * SBW^2 * TBW)$. However the number of flops reduced to
 Notice that this exploitation of symmetries is not possible in a voxel
 based algorithm.
 
-\section{Utilizing Modern Hardware}
-\todo{That's a terrible section header...}
+\section{Domain-based parallelism}
+
 
 \subsection{Domain Replication}
 
@@ -220,6 +221,8 @@ decompose the domain more, but replication observation (described
 above) will incur an even higher overhead which may end up nullifying
 the gain in load balance.
 
+\section{Observation based parallelism}
+
 \subsection{Observation Decomposition}
 
 Both of the previous strategies increase the amount of work
@@ -244,7 +247,7 @@ We implemented a first version of this algorithm that organizes the
 subdomain in 8 sets where the first set is composed of the subdomains
 $2*i, 2*j, 2*k$, the second of all the subdomains $2*i+1, 2*j, 2*k$,
 the third of all the subdomains $2*i, 2*j+1, 2*k$, etc.. The algorithm
-execute the sets the one after the other by doing each subdomain
+processes the sets the one after the other by doing each subdomain
 within a set in parallel. In practice, this is implementation using
 $8$ OpenMP parallel for construct.
 
@@ -263,25 +266,54 @@ express this constraint, which is a 27-point stencil constraint.
 
 Coloring and moldable scheduling.
 
-\subsection{Vectorization}
-
-\subsection{Accelerators}
 
 
 \section{Experiments}
 
 \subsection{Experimental Setting}
 
-\paragraph{Machine}
+\paragraph{Execution environment} We are using the copperhead machine
+at UNC Charlotte to perform our experiments. A node of Copperhead is
+composed of two Intel Xeon E5-2667 v3 processors. There is a total of
+16 cores clocked at 3.2Ghz. Despite each core is capable of hosting 2
+hyperthreads, hyperthreading was disabled. Each node is equipped with
+128GB of \todo{DDR4 clocked at something Ghz}. The node uses RHEL 7.2
+and Linux 3.10. All codes are compiled using gcc 5.3, which implements
+OpenMP 4.0, with optimization flags \texttt{-O3 -march=native -fopenmp
+  -DNDEBUG}. All reported execution time exclude all IOs.
 
-\paragraph{Dataset}
+\paragraph{Dataset} Three dataset are used in our experiments. Their
+key attributes are summarized in table~\ref{tab:instance}. The Dengue fever
+dataset~\cite{delmelle2013spatio}\todo{more}.
 
-\begin{table*}
-  \begin{tabular}{|l|rrr|rr|}
-    \input{analysis/instance_table.tex}
-  \end{tabular}
-  \caption{Dataset}
-\end{table*}
+The Pollen dataset is composed of 588K tweets of US users from
+February 2016 to April 2016 related to Pollen (that mention keywords
+such as ``pollen'' and ``allergy''). Tweets that did not contain a
+precise localization were approximated by picking a random location in
+the approximated region provided by
+Gnip\footnote{\url{http://www.gnip.com/}}. Tweets are mostly located
+in the US, but there are tweets all over the northern hemisphere in
+this dataset. Therefore, this is the region we modeled with a spatial
+resolution ranging from $.2^\circ$ to $1^\circ$ and a temporal
+resolution of 1 day.
+
+The Flu dataset was obtained from the Animal Surveillance
+database of the Influenza Research
+Database\footnote{\url{https://www.fludb.org/}} on October 3rd,
+2016. The dataset contains observations of birds tested positive for
+carrying any strain the avian flu from 2001 to 2016. The birds were
+observed all over the world and the modeled region spans as West as
+Alaska and East as Japan, as South as the southern shore of Australia
+and as North as the Northern shore of Russia. The domain is modeled
+with spatial resolution from $.2^\circ$ to $1^\circ$ and a temporal
+resolution of 1 day.
+
+\begin{table}
+  \input{analysis/instance_table.tex}
+  \caption{Properties of the datasets. The domain is expressed in voxels
+    and in MB. Spatial and temporal bandwidth are given in voxels.}
+  \label{tab:instance}
+\end{table}
 
 
 \subsection{Algorithm design}
@@ -294,7 +326,7 @@ Coloring and moldable scheduling.
 \end{table*}
 
 
-\subsection{Parallel}
+\subsection{Domain-based parallelism}
 
 \begin{table*}
   \begin{tabular}{|l|r|rrrrrrrrr|}
@@ -319,6 +351,7 @@ Coloring and moldable scheduling.
   \caption{domain replication. Times are in seconds. Missing data points run out of memory.}
 \end{table*}
 
+\subsection{Observation-based parallelism}
 
 \begin{table*}
   \begin{tabular}{|l|r|rrrrrrr|}
@@ -360,8 +393,6 @@ Coloring and moldable scheduling.
 
 \bibliographystyle{IEEEtran}
 \bibliography{ipdps}
-
-
 
 
 \end{document}
