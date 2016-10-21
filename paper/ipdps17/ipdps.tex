@@ -114,13 +114,27 @@ decreasing distance):
 $$k_s (u,v) = \frac{\pi}{2} (1-u)^2 (1-v)^2$$
 $$k_t (w) = \frac{3}{4} (1-w)^2$$
 
+Figure~\ref{fig:stkde-ex} presents the different 3-Dimensional heat
+maps that results from this process. Different spatial and temporal
+bandwidth where used when computing the STKDE which highlights how
+changing the bandwidth helps focusing the graphical visualization of
+Dengue fever cases in Cali, Colombia.
 
+\begin{figure}
+  \subfigure[$h_s = 2500m$, $h_t = 14 days$]{\includegraphics[page=1, width=.45\linewidth, trim={8cm 3.8cm 8cm 10cm}, clip]{figures/dengue-viz.pdf}}
+%
+  \subfigure[$h_s=750m$, $h_t = 7 days$]{\includegraphics[page=2, width=.45\linewidth, trim={8cm 3.8cm 8cm 10cm}, clip]{figures/dengue-viz.pdf}}
+  \caption{Visualization of Dengue fever cases in Cali, Colombia in
+    2010 and 2011 for different spatial bandwidth and temporal bandwidth.}
+  \label{fig:stkde-ex}
+\end{figure}
 
-The domain of size $g_x$, $g_y$, $g_t$ is discretized in
-voxels using a spatial resolution $sres$ and a temporal resolution
-$tres$. Therefore the domain is represented by a grid of size $G_x=\ceil{\frac{g_x}{sres}}$,
-$G_y=\ceil{\frac{g_y}{sres}}$, $G_t=\ceil{\frac{g_t}{tres}}$. And we
-denote the spatial and temporal bandwidth in voxel $H_s=\ceil{\frac{h_s}{sres}}$,
+Computationally, the domain of size $g_x$, $g_y$, $g_t$ is discretized
+in voxels using a spatial resolution $sres$ and a temporal resolution
+$tres$. Therefore the domain is represented by a grid of size
+$G_x=\ceil{\frac{g_x}{sres}}$, $G_y=\ceil{\frac{g_y}{sres}}$,
+$G_t=\ceil{\frac{g_t}{tres}}$. And we denote the spatial and temporal
+bandwidth in voxel $H_s=\ceil{\frac{h_s}{sres}}$,
 $H_t=\ceil{\frac{h_t}{tres}}$.
 
 All the notations are summarized in Table~\ref{tab:notation}.
@@ -142,15 +156,6 @@ All the notations are summarized in Table~\ref{tab:notation}.
   \caption{Notations}
   \label{tab:notation}
 \end{table}
-
-
-\begin{figure}
-  \subfigure[$h_s = 2500m$, $h_t = 14 days$]{\includegraphics[page=1, width=.45\linewidth, trim={8cm 3.8cm 8cm 10cm}, clip]{figures/dengue-viz.pdf}}
-%
-  \subfigure[$h_s=750m$, $h_t = 7 days$]{\includegraphics[page=2, width=.45\linewidth, trim={8cm 3.8cm 8cm 10cm}, clip]{figures/dengue-viz.pdf}}
-  \caption{Visualization of Dengue fever cases in Cali, Colombia in
-    2010 and 2011 for different spatial bandwidth and temporal bandwidth.}
-\end{figure}
 
 \subsection{Gold Standard Implementation}
 
