@@ -114,6 +114,8 @@ decreasing distance):
 $$k_s (u,v) = \frac{\pi}{2} (1-u)^2 (1-v)^2$$
 $$k_t (w) = \frac{3}{4} (1-w)^2$$
 
+
+
 The domain of size $g_x$, $g_y$, $g_t$ is discretized in
 voxels using a spatial resolution $sres$ and a temporal resolution
 $tres$. Therefore the domain is represented by a grid of size $G_x=\ceil{\frac{g_x}{sres}}$,
@@ -121,7 +123,26 @@ $G_y=\ceil{\frac{g_y}{sres}}$, $G_t=\ceil{\frac{g_t}{tres}}$. And we
 denote the spatial and temporal bandwidth in voxel $H_s=\ceil{\frac{h_s}{sres}}$,
 $H_t=\ceil{\frac{h_t}{tres}}$.
 
-\todo{Notation table}
+All the notations are summarized in Table~\ref{tab:notation}.
+
+\begin{table}
+  \centering
+  \begin{tabular}{|l|l|}
+    \hline 
+    $n$ & Number of points\\
+    $(x_i, y_i, t_i)$ & Coordinate of point $i$\\
+    $h_s$, $h_t$ & Spatial and temporal bandwidth \\ 
+    $g_x, g_y, g_t$ & Real size of the domain (in meters) \\
+    \hline
+    $sres$, $tres$ & Resolution (in meters) \\
+    $G_x, G_y, G_t$ & Size of the domain (in voxels)\\
+    $H_s, H_t$ & Bandwidth (in voxels) \\
+    \hline 
+  \end{tabular}
+  \caption{Notations}
+  \label{tab:notation}
+\end{table}
+
 
 \begin{figure}
   \subfigure[$h_s = 2500m$, $h_t = 14 days$]{\includegraphics[page=1, width=.45\linewidth, trim={8cm 3.8cm 8cm 10cm}, clip]{figures/dengue-viz.pdf}}
@@ -319,15 +340,29 @@ classical graphs and scheduling problem. Modeling the subdomains as a
 27-point stencil graph, identifying sets of subdomains to perform in
 parallel is coloring the vertices of the graph so that no two
 neighboring vertices share the same color. It differs from classical
-graph coloring problem (see survey in~\cite{}) in that the objective
+graph coloring problems (surveyed in~\cite{GMP05}) in that the objective
 is not to minimize the number of color or to balance the number of
 vertices of each color but to minimize the execution time of the
 implied schedule.
 
+The implied schedule is actually a scheduling of a graph of dependency
+which is extracted from the coloring. Each edge of the stencil graph
+is oriented from the vertex of the lowest color to the vertex with the
+highest color. Each vertex is associated with a processing time which
+is somewhat proportional to the number of observation inside the
+sub-domain the vertex represents and the neighboring subdomains. This
+construction is represented in Figure~\ref{}.
 
+\todo{Figure to highlight the process.}
 
-one can extract, out of a
-coloring of the subdomains, a dependency graph of which subdomain.
+The OpenMP scheduler is not explicit in which order tasks that are
+available are performed. Though it is reasonable to assume that the
+tasks will be scheduled using a greedy algorithm. Therefore, the
+classic guarantee from Graham's List Scheduling~\cite{Graham69} is
+valid:
+$$T_P \leq \frac{T_1 - T_\infty}{P} + T_{\infty},$$
+where $T_1$ is the total amount of work to perform and $T_\infty$ is
+the length of the longest chain in the dependency graph.
 
 Coloring and moldable scheduling.
 
