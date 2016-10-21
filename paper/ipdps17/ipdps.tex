@@ -369,9 +369,7 @@ $$T_P \leq \frac{T_1 - T_\infty}{P} + T_{\infty},$$
 where $T_1$ is the total amount of work to perform and $T_\infty$ is
 the length of the longest chain in the dependency graph.
 
-Coloring and moldable scheduling.
-
-
+\todo{Coloring and moldable scheduling.}
 
 \section{Experiments}
 
@@ -425,7 +423,7 @@ with spatial resolution from $.2^\circ$ to $1^\circ$ and a temporal
 resolution of 1 day.
 
 \begin{table}
-  \input{analysis/instance_table.tex}
+    \resizebox{\linewidth}{!}{\input{analysis/instance_table.tex}}
   \caption{Properties of the datasets. The domain is expressed in voxels
     and in MB. Spatial and temporal bandwidth are given in voxels.}
   \label{tab:instance}
@@ -434,12 +432,10 @@ resolution of 1 day.
 
 \subsection{Algorithm design}
 
-\begin{table*}
-  \begin{tabular}{|l|rrrr|r|}
-    \input{analysis/seq_table.tex}
-  \end{tabular}
-  \caption{Runtime of different algorithm. Times are in seconds. PB-SYM is the fastest.}
-\end{table*}
+\begin{table}
+  \resizebox{\linewidth}{!}{\input{analysis/seq_table.tex}}
+  \caption{Runtime of different algorithm. The speedup of PB-SYM over PB is given.}
+\end{table}
 
 
 \subsection{Domain-based parallelism}
@@ -470,9 +466,7 @@ resolution of 1 day.
 \subsection{Observation-based parallelism}
 
 \begin{table*}
-  \begin{tabular}{|l|r|rrrrrrr|}
     \input{analysis/parcol-t16.tex}
-  \end{tabular}
   \caption{obs decomposition}
 \end{table*}
 
