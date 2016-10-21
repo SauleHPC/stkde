@@ -34,20 +34,14 @@ do
     then
 	for t in 16 8 4 2 1
 	do
-	    for decompx in 64 32 16 8 4 1
+	    for decomp in 64 32 16 8 4 1
 	    do
-		for decompy in 64 32 16 8 4 1
-		do	
-		    for decompt in 64 32 16 8 4 1
-		    do
-			FILE=results/${INSTANCE}_$(basename $BANDWIDTH)_${method}_${decompx}_${decompy}_${decompt}_t${t}
-			if [ ! -f $FILE ]
-			then
-			    echo OMP_NUM_THREADS=$t  $BIN $BOUNDARY $OBSERVATIONS $BANDWIDTH $method $decompx $decompy $decompt
-			    OMP_NUM_THREADS=$t  $BIN $BOUNDARY $OBSERVATIONS $BANDWIDTH $method $decompx $decompy $decompt > $FILE 2>&1
-			fi
-		    done
-		done
+		FILE=results/${INSTANCE}_$(basename $BANDWIDTH)_${method}_${decomp}_${decomp}_${decomp}_t${t}
+		if [ ! -f $FILE ]
+		then
+		    echo OMP_NUM_THREADS=$t  $BIN $BOUNDARY $OBSERVATIONS $BANDWIDTH $method $decomp $decomp $decomp
+		    OMP_NUM_THREADS=$t  $BIN $BOUNDARY $OBSERVATIONS $BANDWIDTH $method $decomp $decomp $decomp > $FILE 2>&1
+		fi
 	    done
 	done
     else

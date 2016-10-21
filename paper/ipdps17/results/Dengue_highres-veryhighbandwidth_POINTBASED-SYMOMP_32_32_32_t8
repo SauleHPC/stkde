@@ -1,0 +1,13 @@
+hostname : sth-c10.uncc.edu
+bounding: [1053872.965;1068485.726]x[860186.8419;879395.9741]x[3;730]
+read 11056 observations
+res: 50 50 1 bw: 2500 2500 14
+voxsize: 294x386x728 size:315.156372MB
+voxBW: 50 14
+Initialization time: 0.030034
+intersect: 2638311
+decomposition time: 0.271436 seconds
+max load: 1109 avgloadperbox: 0.337402344 avgloadpercore: 1382
+compute: 0.838482 seconds
+evaluations: 2993338276
+time: 1.148469 seconds
