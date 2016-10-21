@@ -64,17 +64,33 @@ space-time kernel density; performance; distributed memory; gpu; shared-memory; 
 
 \section{Introduction}
 
+The rapid propagation of infectious diseases (e.g. zika, Ebola, H1N1,
+dengue fever) is conducive to serious, epidemic outbreaks, posing a
+threat to vulnerable populations. Such diseases have complex
+transmission cycles, and effective public health responses require the
+ability to monitor outbreaks in a timely
+manner~\cite{eisen2011using}. Space-time statistics facilitate the
+discovery of disease dynamics including rate of spread, seasonal
+cyclic patterns, direction, intensity –i.e. clusters-, and risk of
+diffusion to new regions.  However, obtaining accurate results from
+space-time statistics is computationally very demanding, which is
+problematic when public health interventions are promptly needed. The
+issues of computational efforts are exacerbated with spatiotemporal
+datasets of increasing size, diversity and
+availability~\cite{grubesic2014spatial}. High-performance computing
+reduces the effort required to identify these patterns, however
+heterogeneity in the data must be accounted for~\cite{Hohl16}.
+
 \section{Space-Time Kernel Density Estimation}
 
 \subsection{Description}
-
 
 Space-time kernel density (STKDE) is used for identifying
 spatiotemporal patterns of underlying datasets. It is a temporal
 extension of the traditional 2D kernel density
 estimation~\cite{Silverman86}, a popular spatial analysis technique to
-transform a set of points in geographic space into a density surface,
-also referred to as “heatmap”. We visualize the resulting density
+transform a set of $n$ points in geographic space into a density surface,
+also referred to as ``heatmap''. We visualize the resulting density
 estimates within the space-time cube framework using two spatial $(x,
 y)$ and a temporal dimension $(t)$~\cite{Nakaya10}. STKDE creates a 3D
 raster volume where each voxel (volumetric pixel) is assigned a
@@ -85,30 +101,26 @@ of~\cite{Hohl16}):
 $$ \hat{f} (x, y, t) = \frac{1}{n h_s^2 h_t} \sum_{i | d_i < h_s, t_i<h_t}
 k_s (\frac{x-x_i}{h_s},\frac{y-y_i}{h_s}) k_t(\frac{t-t_i}{h_t})$$
 
-Density of each voxel $s$ with coordinates $(x, y, t)$ is computed
+The density of each voxel $s$ with coordinates $(x, y, t)$ is computed
 based on neighboring data points $(x_i, y_i, t_i)$. A data point is in
 the neighborhood of the voxel if the spatial distance $d_i$ and
 temporal distance $t_i$ are smaller than the spatial ($h_s$) and
 temporal bandwidths ($h_t$) respectively. Each point that falls into
 the neighborhood of a voxel is weighted using spatial and temporal
 kernel functions, $k_s$ and $k_t$, respectively (weight increases with
-decreasing distance).
+decreasing distance):
 
+$$k_s (u,v) = \frac{\pi}{2} (1-u)^2 (1-v)^2$$
+$$k_t (w) = \frac{3}{4} (1-w)^2$$
 
+The domain of size $g_x$, $g_y$, $g_t$ is discretized in
+voxels using a spatial resolution $sres$ and a temporal resolution
+$tres$. Therefore the domain is represented by a grid of size $G_x=\ceil{\frac{g_x}{sres}}$,
+$G_y=\ceil{\frac{g_y}{sres}}$, $G_t=\ceil{\frac{g_t}{tres}}$. And we
+denote the spatial and temporal bandwidth in voxel $H_s=\ceil{\frac{h_s}{sres}}$,
+$H_t=\ceil{\frac{h_t}{tres}}$.
 
-
-
-
-\todo{Harmonize notation.}
-
-Notations: domainsize $gx$, $gy$, $gt$. bandwidth: $sbw$,
-$tbw$. Spatial resolution $sres$, temporal resolution $tres$. This
-forms a grid of size $GX=\ceil{\frac{gx}{sres}}$,
-$GY=\ceil{\frac{gy}{sres}}$, $GT=\ceil{\frac{gt}{tres}}$. And we
-denote the bandwidth in voxel $SBW=\ceil{\frac{sbw}{sres}}$,
-$TBW=\ceil{\frac{tbw}{tres}}$.
-
-There are $N$ observations.
+\todo{Notation table}
 
 \subsection{Gold Standard Implementation}
 
@@ -119,12 +131,12 @@ to the density of this particular voxel.
 
 \todo{include voxel based algorithm}
 
-The algorithm does $\theta(GX * GY * GT * N)$ distance test and computes
-$\theta(N * SBW^2 * TBW )$ density. Noticing that the bandwidth has to be
+The algorithm does $\theta(G_x * G_y * G_t * n)$ distance test and computes
+$\theta(n * H_s^2 * H_t )$ density. Noticing that the bandwidth has to be
 smaller than the grid size, the complexity of the algorithm is
-$\theta(GX * GY * GT * N )$.
+$\theta(G_x * G_y * G_t * n )$.
 
-Requires $\theta(GX * GY * GT)$ memory.
+Requires $\theta(G_x * G_y * G_t)$ memory.
 
 \subsection{Related Works}
 
@@ -142,16 +154,16 @@ based algorithm OB leverages that property.
 \todo{spell out algorithm}
 
 The algorithm OB incurs mostly two costs. Initializing the memory which costs
-$\Theta(GX * GY * GT)$ and computing the impact of each observation
-$\Theta(N * SBW^2 * TBW)$. Note that it is possible that either of these
+$\Theta(G_x * G_y * G_t)$ and computing the impact of each observation
+$\Theta(n * H_s^2 * H_t)$. Note that it is possible that either of these
 two term is significantly larger than the other. Therefore the
-complexity of the algorithm is $\Theta(GX * GY * GT + N * SBW^2 * TBW)$.
+complexity of the algorithm is $\Theta(G_x * G_y * G_t + n * H_s^2 * H_t)$.
 
 \subsection{Exploiting Symmetries}
 
 When the bandwidth is large computing the density contribution of each
 observation each voxel in the bandwidth is the most expensive
-operation. Each of these $N * (2 * SBW)^2 * 2 * TBW$ calculations costs
+operation. Each of these $n * (2 * H_s)^2 * 2 * H_t$ calculations costs
 approximately 40 floating point operations. (The exact cost is
 difficult to estimate since there are floating point additions,
 multiplications, divisions, and square root operations.)
@@ -174,8 +186,8 @@ computed once. The SYM variant computes independently the spatial
 invariant and the temporal invariant and then adds the density caused
 by the observation by taking the product of the two invariants. Notice
 that leveraging the symmetries in the calculation does not change the
-complexity. The SYM algorithm still has a complexity of $\Theta(GX *
-GY * GT + N * SBW^2 * TBW)$. However the number of flops reduced to 
+complexity. The SYM algorithm still has a complexity of $\Theta(G_x *
+G_y * G_t + n * H_s^2 * H_t)$. However the number of flops reduced to 
 \todo{estimate flop cost.}
 
 \todo{include pseudo code of the SYM variant.}
@@ -199,9 +211,9 @@ each of the $P$ computational unit aggregate the result on a local
 copy of the domain. Once all the observations have been processed, the
 $P$ copies need to be summed.
 
-This algorithm has a memory requirement of $\Theta (P * GX * GY * GT)$
-and a parallel amount of work of $\Theta (P * GX * GY * GT + N * SBW^2
-* TBW)$. Though the increase in work enables the parallelism to be
+This algorithm has a memory requirement of $\Theta (P * G_x * G_y * G_t)$
+and a parallel amount of work of $\Theta (P * G_x * G_y * G_t + n * H_s^2
+* H_t)$. Though the increase in work enables the parallelism to be
 pleasingly parallel. (It is actually in two pleasingly parallel phases,
 processing the observations and reducing the partial results.)
 
@@ -235,7 +247,7 @@ If the algorithms keeps the number of subdomain small such that each
 observation is not replicated more than a constant number of time then
 the work performed when expressed in Big-Oh notation does not change.
 (This can be achieved, for instance, by having subdomains larger than
-$SBW \times SBW \times TBW$.) However, the practical amount of work can
+$H_s \times H_s \times H_t$.) However, the practical amount of work can
 increase by a non negligable factor. (We will see factors of about 1.5
 in the experiments.)
 
@@ -259,12 +271,12 @@ space. To achieve that goal, we propose the SYM-OD algorithm that
 decomposes the observations in sets that can be safely performed
 simultaneously.
 
-As long as two observations are separated by $2*sbw$ in a spatial
-dimension or by $2*tbw$ in the temporal dimension then the cylinder
+As long as two observations are separated by $2*h_s$ in a spatial
+dimension or by $2*h_t$ in the temporal dimension then the cylinder
 induced by the two observations will not overlap. SYM-OD decomposes
 the observations in $A \times B \times C$ subdomain of identical
-size. As long as these subdomains are larger than $2*sbw$ in a spatial
-dimension and $2*tbw$ in the temporal dimension, then the observations
+size. As long as these subdomains are larger than $2*h_s$ in a spatial
+dimension and $2*h_t$ in the temporal dimension, then the observations
 in domain $x, y, z$ can be done concurently with the observations in
 $x+2, y, z$.
 
@@ -327,8 +339,19 @@ OpenMP 4.0, with optimization flags \texttt{-O3 -march=native -fopenmp
   -DNDEBUG}. All reported execution time exclude all IOs.
 
 \paragraph{Dataset} Three dataset are used in our experiments. Their
-key attributes are summarized in table~\ref{tab:instance}. The Dengue fever
-dataset~\cite{delmelle2013spatio}\todo{more}.
+key attributes are summarized in table~\ref{tab:instance}. 
+Out first dataset is Dengue which uses the space-time
+locations of dengue fever cases reported to the “Sistema de Vigilancia
+en Salud P\'{u}blica” for the city of Cali, Colombia during 2010 and 2011. The
+system is updated on a daily basis with records of individuals that
+have been diagnosed with dengue fever, including patient address and
+the date of diagnosis. Addresses are standardized to a common address
+format, and spelling and other syntactical errors are manually
+corrected~\cite{delmelle2013spatio}; they are then geocoded and masked
+to the nearest street intersection level to maintain
+privacy~\cite{Kwan04}. In 2010, 9606 were successfully geocoded
+(11,760 reported cases, or 81.7\%), whereas in 2011, 1562 cases were
+successfully geocoded (1822 reported cases, or 85.7\%).
 
 The Pollen dataset is composed of 588K tweets of US users from
 February 2016 to April 2016 related to Pollen (that mention keywords
@@ -429,7 +452,7 @@ resolution of 1 day.
 
 \section{Conclusion}
 
-\section*{Acknowledgment}
+%\section*{Acknowledgment}
 
 
 

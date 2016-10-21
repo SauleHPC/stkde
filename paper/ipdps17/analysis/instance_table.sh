@@ -9,7 +9,7 @@ RESULTDIR=../results
 (
     echo '\\begin{tabular}{|l|rrr|rr|}'
     echo \\hline
-    echo Instance \& N \& Grid \& Size \& SBW \& TBW  '\\\\'
+    echo Instance \& n \& \$G_x\$ x \$G_y\$ x \$G_t\$ \& Size \& \$H_s\$ \& \$H_t\$  '\\\\'
     echo \\hline
     for inst in $INSTANCES
     do
@@ -20,16 +20,15 @@ RESULTDIR=../results
 	     $(grep voxsize: $FILE | cut -d : -f 3 | awk '{printf "%dMB", $1}') \& \
 	     $(grep voxBW: $FILE | cut -d \   -f 2) \& \
 	     $(grep voxBW: $FILE | cut -d \   -f 3)  '\\\\'
-    done
+    done | sed 's/-Animal//' \
+	| sed 's/lowres/Lr/g' \
+	| sed 's/medres/Mr/g' \
+	| sed 's/highres/Hr/g' \
+	| sed 's/lowbw/Lb/g' \
+	| sed 's/medbw/Mb/g' \
+	| sed 's/highbw/Hb/g' \
+	| sed 's/veryhighbandwidth/VHb/g' \
+	| sed 's/_/\\_/g'
     echo \\hline
     echo '\\end{tabular}'
-) | sed 's/-Animal//' \
-  | sed 's/lowres/Lr/g' \
-  | sed 's/medres/Mr/g' \
-  | sed 's/highres/Hr/g' \
-  | sed 's/lowbw/Lb/g' \
-  | sed 's/medbw/Mb/g' \
-  | sed 's/highbw/Hb/g' \
-  | sed 's/veryhighbandwidth/VHb/g' \
-  | sed 's/_/\\_/g' \
-  > instance_table.tex
+) > instance_table.tex
