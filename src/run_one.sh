@@ -34,7 +34,7 @@ do
     then
 	for t in 16 8 4 2 1
 	do
-	    for decomp in 64 32 16 8 4 1
+	    for decomp in 64 32 16 8 4 2 1
 	    do
 		FILE=results/${INSTANCE}_$(basename $BANDWIDTH)_${method}_${decomp}_${decomp}_${decomp}_t${t}
 		if [ ! -f $FILE ]
