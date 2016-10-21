@@ -82,6 +82,8 @@ availability~\cite{grubesic2014spatial}. High-performance computing
 reduces the effort required to identify these patterns, however
 heterogeneity in the data must be accounted for~\cite{Hohl16}.
 
+\todo{write complete intro}
+
 \section{Space-Time Kernel Density Estimation}
 
 \subsection{Description}
@@ -159,6 +161,8 @@ All the notations are summarized in Table~\ref{tab:notation}.
 
 \subsection{Gold Standard Implementation}
 
+\todo{remove all these $*$ that look stupid with new notation}
+
 The gold standard implementation follows the exact definition of stkde
 as it is given above. It is a voxel-based algorithm we call VB. For
 each voxel, VB finds the close observations and calculate contribution
@@ -174,6 +178,12 @@ $\theta(G_x * G_y * G_t * n )$.
 Requires $\theta(G_x * G_y * G_t)$ memory.
 
 \subsection{Related Works}
+
+\todo{spatial partitioning a la zoltan}
+
+\todo{partile in cell ?}
+
+\todo{the hpc paper on gpu with a different expression crop and chop or something}
 
 \section{Algorithm Design and Engineering}
 
@@ -437,8 +447,35 @@ resolution of 1 day.
   \caption{Runtime of different algorithm. The speedup of PB-SYM over PB is given.}
 \end{table}
 
+\todo{presetn table}
+
+\todo{point that as expected PB-SYM is much faster. Though the ratio
+  depends on the bandwidth. a note on the slower case.}
 
 \subsection{Domain-based parallelism}
+
+\paragraph{PB-SYM-DR}
+
+\begin{table*}
+  \begin{tabular}{|l|r|rrrrr|}
+    \input{analysis/parpoint_table.tex}
+  \end{tabular}
+  \caption{domain replication. Times are in seconds. Missing data points run out of memory.}
+\end{table*}
+
+\todo{Make domain replication into a speedup figure}
+
+\todo{point out that reduction kills the performnace}
+
+\todo{poitn out OOM}
+
+\paragraph{PB-SYM-DD}
+
+\todo{make table for t=1 into clustered bar chart of relative time}
+
+\todo{point out point out some decomposition can be good for cache}
+
+\todo{point out point out too much decomposition induces ridiculous overhead}
 
 \begin{table*}
   \begin{tabular}{|l|r|rrrrrrrrr|}
@@ -449,6 +486,11 @@ resolution of 1 day.
     cache fitting. Overdecomposition can cause significant overhead.}
 \end{table*}
 
+\todo{make table for t=16 into clustered bar chart? of relative time}
+
+\todo{Note that it parallelizes relatively well, but overhead can kill
+  the run. Picking right decomposition probably important.}
+
 \begin{table*}
   \begin{tabular}{|l|r|rrrrrrrrr|}
     \input{analysis/parspace-t16.tex}
@@ -456,12 +498,6 @@ resolution of 1 day.
   \caption{different spatial decomposition at t=16}
 \end{table*}
 
-\begin{table*}
-  \begin{tabular}{|l|r|rrrrr|}
-    \input{analysis/parpoint_table.tex}
-  \end{tabular}
-  \caption{domain replication. Times are in seconds. Missing data points run out of memory.}
-\end{table*}
 
 \subsection{Observation-based parallelism}
 
