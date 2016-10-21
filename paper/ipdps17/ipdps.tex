@@ -221,7 +221,7 @@ decompose the domain more, but replication observation (described
 above) will incur an even higher overhead which may end up nullifying
 the gain in load balance.
 
-\section{Observation based parallelism}
+\section{Observation-based parallelism}
 
 \subsection{Observation Decomposition}
 
@@ -253,16 +253,33 @@ $8$ OpenMP parallel for construct.
 
 \todo{include algorithms}
 
+
+\subsection{Coloring and Scheduling}
+
 Note that such an implementation overconstrains the execution of the
 algorithm. Indeed, despite they are not in the same set, subdomain
 $1,0,0$ and $64, 64, 64$ can be computed at the same time. The real
 constraint is that the observations contained in a subdomain can be
-processed safely as long none of the observation contained in a
-neighboring are being processed running. Using the OpenMP tasking
-construct with dependency introduced in OpenMP 4.0, one can precisely
-express this constraint, which is a 27-point stencil constraint.
+processed safely as long as none of the observation contained in a
+neighboring subdomain is being processed. Using the OpenMP tasking
+construct with dependency introduced in OpenMP 4.0 \todo{cite
+  openmpspec}, one can precisely express this constraint, which is a
+27-point stencil constraint.
 
-\subsection{Coloring and Scheduling}
+Formally speaking, this problem is a combination of multiple very
+classical graphs and scheduling problem. Modeling the subdomains as a
+27-point stencil graph, identifying sets of subdomains to perform in
+parallel is coloring the vertices of the graph so that no two
+neighboring vertices share the same color. It differs from classical
+graph coloring problem (see survey in~\cite{}) in that the objective
+is not to minimize the number of color or to balance the number of
+vertices of each color but to minimize the execution time of the
+implied schedule.
+
+
+
+one can extract, out of a
+coloring of the subdomains, a dependency graph of which subdomain.
 
 Coloring and moldable scheduling.
 
