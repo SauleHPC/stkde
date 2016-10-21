@@ -66,13 +66,40 @@ space-time kernel density; performance; distributed memory; gpu; shared-memory; 
 
 \section{Space-Time Kernel Density Estimation}
 
-\subsection{Motivation}
+\subsection{Description}
 
-\todo{insert here some text to describe stkde, why it is important,
-  and where it applies.}
 
-\subsection{Problem Definition}
+Space-time kernel density (STKDE) is used for identifying
+spatiotemporal patterns of underlying datasets. It is a temporal
+extension of the traditional 2D kernel density
+estimation~\cite{Silverman86}, a popular spatial analysis technique to
+transform a set of points in geographic space into a density surface,
+also referred to as “heatmap”. We visualize the resulting density
+estimates within the space-time cube framework using two spatial $(x,
+y)$ and a temporal dimension $(t)$~\cite{Nakaya10}. STKDE creates a 3D
+raster volume where each voxel (volumetric pixel) is assigned a
+density estimate based on the surrounding point data. The space-time
+density is estimated by the following equation (using the notations
+of~\cite{Hohl16}):
 
+$$ \hat{f} (x, y, t) = \frac{1}{n h_s^2 h_t} \sum_{i | d_i < h_s, t_i<h_t}
+k_s (\frac{x-x_i}{h_s},\frac{y-y_i}{h_s}) k_t(\frac{t-t_i}{h_t})$$
+
+Density of each voxel $s$ with coordinates $(x, y, t)$ is computed
+based on neighboring data points $(x_i, y_i, t_i)$. A data point is in
+the neighborhood of the voxel if the spatial distance $d_i$ and
+temporal distance $t_i$ are smaller than the spatial ($h_s$) and
+temporal bandwidths ($h_t$) respectively. Each point that falls into
+the neighborhood of a voxel is weighted using spatial and temporal
+kernel functions, $k_s$ and $k_t$, respectively (weight increases with
+decreasing distance).
+
+
+
+
+
+
+\todo{Harmonize notation.}
 
 Notations: domainsize $gx$, $gy$, $gt$. bandwidth: $sbw$,
 $tbw$. Spatial resolution $sres$, temporal resolution $tres$. This
