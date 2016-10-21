@@ -7,6 +7,7 @@
 %\usepackage{amsmath}
 %\theoremstyle{plain}
 
+\usepackage{subfigure}
 \usepackage{hyperref}
 \usepackage[noend]{algorithm2e}
 \usepackage{algorithmicx}
@@ -121,6 +122,14 @@ denote the spatial and temporal bandwidth in voxel $H_s=\ceil{\frac{h_s}{sres}}$
 $H_t=\ceil{\frac{h_t}{tres}}$.
 
 \todo{Notation table}
+
+\begin{figure}
+  \subfigure[$h_s = 2500m$, $h_t = 14 days$]{\includegraphics[page=1, width=.45\linewidth, trim={8cm 3.8cm 8cm 10cm}, clip]{figures/dengue-viz.pdf}}
+%
+  \subfigure[$h_s=750m$, $h_t = 7 days$]{\includegraphics[page=2, width=.45\linewidth, trim={8cm 3.8cm 8cm 10cm}, clip]{figures/dengue-viz.pdf}}
+  \caption{Visualization of Dengue fever cases in Cali, Colombia in
+    2010 and 2011 for different spatial bandwidth and temporal bandwidth.}
+\end{figure}
 
 \subsection{Gold Standard Implementation}
 
