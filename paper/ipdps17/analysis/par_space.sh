@@ -16,7 +16,7 @@ RESULTDIR=../results
 DECOMP="1_1_1 2_2_2 4_4_4 8_8_8 16_16_16 32_32_32 64_64_64"
 
 (
-    echo -n instance \& seq \ 
+    echo -n Instance \& PB-SYM \ 
     for dec in $DECOMP
     do
 	echo -n \& $dec \  
@@ -52,7 +52,7 @@ DECOMP="1_1_1 2_2_2 4_4_4 8_8_8 16_16_16 32_32_32 64_64_64"
 
 
 (
-    echo -n instance \& seq \ 
+    echo -n Instance \& PB-SYM \ 
     for dec in $DECOMP
     do
 	echo -n \& $dec \  

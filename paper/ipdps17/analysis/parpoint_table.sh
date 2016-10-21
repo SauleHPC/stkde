@@ -11,7 +11,7 @@ gettime() {
 RESULTDIR=../results
 
 (
-    echo instance \& seq \& t1 \& t2 \& t4 \& t8 \& t16 '\\\\'
+    echo Instance \& PB-SYM \& t1 \& t2 \& t4 \& t8 \& t16 '\\\\'
     
     for inst in Dengue_lowres-lowbw Dengue_lowres-highbw Dengue_highres-lowbw Dengue_highres-highbw Dengue_highres-veryhighbandwidth \
 				    Pollen_lowres-lowbw Pollen_highres-lowbw Pollen_highres-medbw Pollen_highres-highbw \
