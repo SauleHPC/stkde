@@ -22,6 +22,7 @@
 #include "point-based-symomp-obsdecomp-colorsched-rep.hpp"
 #include "voxel-based.hpp"
 #include "voxel-based-obsdecomp.hpp"
+#include "voxel-based-omp-obsdecomp.hpp"
 
 int main (int argc, char* argv[]) {
 
@@ -47,6 +48,7 @@ int main (int argc, char* argv[]) {
     decompY = atoi(argv[6]);
     decompT = atoi(argv[7]);
   }
+  
   
   bounding_box bb = load_bounding_box(bbfile);
 
@@ -129,6 +131,8 @@ int main (int argc, char* argv[]) {
     dens = stkde_voxelbased(bb, inst, param);
   if (method.compare("VOXELBASED-OBSDECOMP") == 0) 
     dens = stkde_voxelbased_obsdecomp(bb, inst, param, decompX, decompY, decompT);
+  if (method.compare("VOXELBASED-OMP-OBSDECOMP") == 0)
+    dens = stkde_voxelbased_omp_obsdecomp(bb, inst, param, decompX, decompY, decompT);
   
   util::timestamp end;
 
