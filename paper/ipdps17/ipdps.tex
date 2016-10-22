@@ -177,6 +177,8 @@ $\theta(G_x * G_y * G_t * n )$.
 
 Requires $\theta(G_x * G_y * G_t)$ memory.
 
+\todo{harmonize observations => points.}
+
 \subsection{Related Works}
 
 \todo{spatial partitioning a la zoltan}
@@ -190,7 +192,7 @@ Requires $\theta(G_x * G_y * G_t)$ memory.
 \label{ref:algo-seq}
 
 \subsection{Observation-based Algorithm}
-
+\todo{harmonize OB => PB}
 The voxel-based algorithm suffers from a massive cost of computing
 distances. The gold implementation reduces them by extremely
 decomposition the domain, but that still incures a significant
@@ -477,7 +479,6 @@ in the same way as PB. Initialization is a predominant runtime cost in
 the Flu dataset since there were only 31K occurence of confirmed avian
 flu recorded in the last 15 years but they span most of the earth.
 
-
 \begin{figure}
   \includegraphics[width=\linewidth]{analysis/seq_breakup.pdf}
   \caption{Breakdown of the runtime of PB-SYM. Some instances are
@@ -485,9 +486,6 @@ flu recorded in the last 15 years but they span most of the earth.
   \label{fig:breakdown}
 \end{figure}
 
-
-\todo{point that as expected PB-SYM is much faster. Though the ratio
-  depends on the bandwidth. a note on the slower case.}
 
 \subsection{Domain-based parallelism}
 
@@ -500,13 +498,26 @@ flu recorded in the last 15 years but they span most of the earth.
 %%   \caption{domain replication. Times are in seconds. Missing data points run out of memory.}
 %% \end{table*}
 
-\begin{figure}
+The performance of the PB-SYM-DR algorithm is given in
+Figure~\ref{fig:sym-dr-speedup}. Because it replicates the domain
+space, PB-SYM-DR was not able to complete the calculations for
+Flu\_Hr-Lb and Flu\_Hr-Hb when using 8 threads and 16 threads as the
+memory requirement would exceed the 128GB available on the machine.
+
+All the instances are shown in a single chart to highlight that most
+instances do not get any speedup. Indeed, all the instances that have
+a high initialization cost get a speedup lesser than 1since the
+threads spends their time allocating extra memoy and reducing their
+content. Only 2 instances achieves a speedup higher than 6
+when using 16 threads: Pollen\_Hr-Hb and Pollen\_Hr-Mb
+
+\begin{figure}[tbh]
   \includegraphics[width=\linewidth]{analysis/SYM-DR-speedup.pdf}
   
-  \caption{Speedup of SYM-DR. Missing data points run out of memory.}
+  \caption{Speedup of SYM-DR. Flu\_Hr-Lb and Flu\_Hr-Hb run out of
+    memory for 8 and 16 threads.}
+  \label{fig:sym-dr-speedup}
 \end{figure}
-
-\todo{Make domain replication into a speedup figure}
 
 \todo{point out that reduction kills the performnace}
 
@@ -514,7 +525,7 @@ flu recorded in the last 15 years but they span most of the earth.
 
 \paragraph{PB-SYM-DD}
 
-\begin{figure*}
+\begin{figure*}[tbh]
   \includegraphics[width=\linewidth]{analysis/SYM-DD-overhead.pdf}
   
   \caption{Overhead of SYM-DD: runtime of SYM-DD with a single thread
