@@ -498,18 +498,12 @@ flu recorded in the last 15 years but they span most of the earth.
 %%   \caption{domain replication. Times are in seconds. Missing data points run out of memory.}
 %% \end{table*}
 
+
 The performance of the PB-SYM-DR algorithm is given in
 Figure~\ref{fig:sym-dr-speedup}. Because it replicates the domain
 space, PB-SYM-DR was not able to complete the calculations for
 Flu\_Hr-Lb and Flu\_Hr-Hb when using 8 threads and 16 threads as the
-memory requirement would exceed the 128GB available on the machine.
-
-All the instances are shown in a single chart to highlight that most
-instances do not get any speedup. Indeed, all the instances that have
-a high initialization cost get a speedup lesser than 1since the
-threads spends their time allocating extra memoy and reducing their
-content. Only 2 instances achieves a speedup higher than 6
-when using 16 threads: Pollen\_Hr-Hb and Pollen\_Hr-Mb
+memory requirement exceeds the 128GB available on the machine.
 
 \begin{figure}[tbh]
   \includegraphics[width=\linewidth]{analysis/SYM-DR-speedup.pdf}
@@ -519,26 +513,49 @@ when using 16 threads: Pollen\_Hr-Hb and Pollen\_Hr-Mb
   \label{fig:sym-dr-speedup}
 \end{figure}
 
-\todo{point out that reduction kills the performnace}
-
-\todo{poitn out OOM}
+All the instances are shown in a single chart to highlight that most
+instances do not get any speedup. Indeed, all the instances that have
+a high initialization cost get a speedup lesser than 1 since the
+threads spends their time allocating extra memory and reducing the
+content of that extra memory. Only 2 instances achieves a speedup
+higher than 6 when using 16 threads: Pollen\_Hr-Hb and
+Pollen\_Hr-Mb. Not surprisingly, they are the two instances with the
+largest fraction of computation. (See Figure~\ref{fig:breakdown} for
+reference.)
 
 \paragraph{PB-SYM-DD}
 
 \begin{figure*}[tbh]
   \includegraphics[width=\linewidth]{analysis/SYM-DD-overhead.pdf}
   
-  \caption{Overhead of SYM-DD: runtime of SYM-DD with a single thread
-    normalized to PB-SYM. Some decomposition improve performance dues
-    to better cache fitting. Overdecomposition can cause significant
-    overhead.}
+  \caption{Overhead of PB-SYM-DD: runtime of PB-SYM-DD with a single
+    thread normalized to PB-SYM. Some decomposition improve
+    performance dues to better cache fitting. Overdecomposition can
+    cause significant overhead.}
+  \label{fig:pb-sym-dd-speedup}
 \end{figure*}
 
-\todo{make table for t=1 into clustered bar chart of relative time}
+The PB-SYM-DD algorithm (described in Section~\ref{}) also has some
+overhead induced by cut cylinder surrounding a point. To measure the
+overhead beforehand, we run the decomposition algorithm using
+different number of subdomains ranging from a single subdomain (1x1x1)
+to a very fine grain decomposition in 64x64x64 subdomains. The results
+of that experiment is presented in
+Figure~\ref{fig:pb-sym-dd-speedup}. The figure presents the overhead
+of the decomposition relatively to PB-SYM. Two things are
+apparent. Some decomposition can actually reduce the runtime by
+providing better cache locality. Indeed the points becomes somewhat
+sorted in the process of decomposition.
 
-\todo{point out point out some decomposition can be good for cache}
-
-\todo{point out point out too much decomposition induces ridiculous overhead}
+However, in most cases, the decomposition actually increases the
+runtime. For instance, a 16x16x16 decomposition increases the amount
+of work by 80\%in the Flu-Hr cases, and a 64x64x64 decomposition
+induces an overhead of 300\%. Even on the Dengue\_Lr-Hb, a simple
+4x4x4 decomposition already induces a 5\% overhead which grows to 69\%
+for a 16x16x16 decomposition. Such large decomposition are likely to
+be necessary since the points in the datasets are often organized in
+clusters: a decomposition in 16 subdomains is unlikely to provide a
+load balanced execution.
 
 %% \begin{table*}
 %%   \begin{tabular}{|l|r|rrrrrrrrr|}
@@ -549,18 +566,36 @@ when using 16 threads: Pollen\_Hr-Hb and Pollen\_Hr-Mb
 %%     cache fitting. Overdecomposition can cause significant overhead.}
 %% \end{table*}
 
-\todo{make table for t=16 into clustered bar chart? of relative time}
+The speedup achieved by a parallel execution of PB-SYM-DD using 16
+threads is presented in Figure~\ref{fig:pb-sym-dd-16-speedup}. This
+algorithm achieves better speedup than PB-SYM-DR. It achieves a
+speedup greater than 6 on 4 instances. Let us note that a speedup of
+$16.3$ achieved on Dengue\_Hr-VHb using a 16x16x16 decomposition. A
+super linear speedup is possible on that instance, since the
+decomposition provides a work reduction of 23\% on that instance. A
+similar effect happens on Dengue\_Hr-Hb.
 
-\todo{Note that it parallelizes relatively well, but overhead can kill
-  the run. Picking right decomposition probably important.}
-
-\begin{figure*}
+\begin{figure*}[tbh]
   \includegraphics[width=\linewidth]{analysis/SYM-DD-speedup16.pdf}
   
-  \caption{Speedup of SYM-DD on 16 cores. While SYM-DD achieves good
+  \caption{Speedup of PB-SYM-DD on 16 cores. While PB-SYM-DD achieves good
     speedup in some cases, the overdecomposition overhead usually
     hinders the performance.}
+  \label{fig:pb-sym-dd-16-speedup}
 \end{figure*}
+
+
+Despite a significant overhead on the Pollen\_Hr instances, a speedup
+of 7.4 and 8.5 can be observed on the Mb and Hb cases using 8x8x8
+decomposition. This speedup is relatively impressive provided the
+decomposition induces an overhead of 28\% and 33\% in these two
+cases. The 8x8x8 decomposition in that case is still imbalanced and a
+finer decomposition can reach perfect load balance; however the
+overhead induced by the decomposition prevents taking advantages of
+that better load balance. It is clear that for PB-SYM-DD to be useful,
+it is important to carfully pick the decomposition to ensure load
+balance without suffering from an unbearable computational overhead
+
 
 
 %% \begin{table*}
@@ -603,13 +638,13 @@ when using 16 threads: Pollen\_Hr-Hb and Pollen\_Hr-Mb
 
 \begin{figure*}
   \includegraphics[width=\linewidth]{analysis/SYM-PD-COLOR-SCHED-speedup16.pdf}
-  \caption{Speedup of SYM-PD-COLOR-SCHED. Flu\_Hr-Lb and Flu\_Hr-Hb ran out of memory for small decomposition.}
+  \caption{Speedup of PB-SYM-PD-COLOR-SCHED. Flu\_Hr-Lb and Flu\_Hr-Hb ran out of memory for small decomposition.}
 \end{figure*}
 
 
 \begin{figure*}
   \includegraphics[width=\linewidth]{analysis/SYM-PD-COLOR-REP-speedup16.pdf}
-  \caption{Speedup of SYM-PD-COLOR-REP. Flu\_Hr-Lb and Flu\_Hr-Hb ran out of memory for small decomposition.}
+  \caption{Speedup of PB-SYM-PD-COLOR-REP. Flu\_Hr-Lb and Flu\_Hr-Hb ran out of memory for small decomposition.}
 \end{figure*}
 
 \section{Conclusion}
