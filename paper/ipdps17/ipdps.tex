@@ -506,12 +506,21 @@ resolution of 1 day.
 \todo{Note that it parallelizes relatively well, but overhead can kill
   the run. Picking right decomposition probably important.}
 
-\begin{table*}
-  \begin{tabular}{|l|r|rrrrrrrrr|}
-    \input{analysis/parspace-t16.tex}
-  \end{tabular}
-  \caption{different spatial decomposition at t=16}
-\end{table*}
+\begin{figure*}
+  \includegraphics[width=\linewidth]{analysis/SYM-DD-speedup16.pdf}
+  
+  \caption{Speedup of SYM-DD on 16 cores. While SYM-DD achieves good
+    speedup in some cases, the overdecomposition overhead usually
+    hinders the performance.}
+\end{figure*}
+
+
+%% \begin{table*}
+%%   \begin{tabular}{|l|r|rrrrrrrrr|}
+%%     \input{analysis/parspace-t16.tex}
+%%   \end{tabular}
+%%   \caption{different spatial decomposition at t=16}
+%% \end{table*}
 
 
 \subsection{Observation-based parallelism}
