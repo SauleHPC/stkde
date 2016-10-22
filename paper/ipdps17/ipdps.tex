@@ -456,12 +456,18 @@ resolution of 1 day.
 
 \paragraph{PB-SYM-DR}
 
-\begin{table*}
-  \begin{tabular}{|l|r|rrrrr|}
-    \input{analysis/parpoint_table.tex}
-  \end{tabular}
-  \caption{domain replication. Times are in seconds. Missing data points run out of memory.}
-\end{table*}
+%% \begin{table*}
+%%   \begin{tabular}{|l|r|rrrrr|}
+%%     \input{analysis/parpoint_table.tex}
+%%   \end{tabular}
+%%   \caption{domain replication. Times are in seconds. Missing data points run out of memory.}
+%% \end{table*}
+
+\begin{figure}
+  \includegraphics[width=\linewidth]{analysis/SYM-DR-speedup.pdf}
+  
+  \caption{Speedup of SYM-DR. Missing data points run out of memory.}
+\end{figure}
 
 \todo{Make domain replication into a speedup figure}
 
@@ -471,20 +477,29 @@ resolution of 1 day.
 
 \paragraph{PB-SYM-DD}
 
+\begin{figure*}
+  \includegraphics[width=\linewidth]{analysis/SYM-DD.pdf}
+  
+  \caption{Overhead of SYM-DD: runtime of SYM-DD with a single thread
+    normalized to PB-SYM. Some decomposition improve performance dues
+    to better cache fitting. Overdecomposition can cause significant
+    overhead.}
+\end{figure*}
+
 \todo{make table for t=1 into clustered bar chart of relative time}
 
 \todo{point out point out some decomposition can be good for cache}
 
 \todo{point out point out too much decomposition induces ridiculous overhead}
 
-\begin{table*}
-  \begin{tabular}{|l|r|rrrrrrrrr|}
-    \input{analysis/parspace-t1.tex}
-  \end{tabular}
-  \caption{Different spatial decomposition at t=1. Times are in
-    seconds. Some decomposition improve performance dues to better
-    cache fitting. Overdecomposition can cause significant overhead.}
-\end{table*}
+%% \begin{table*}
+%%   \begin{tabular}{|l|r|rrrrrrrrr|}
+%%     \input{analysis/parspace-t1.tex}
+%%   \end{tabular}
+%%   \caption{Different spatial decomposition at t=1. Times are in
+%%     seconds. Some decomposition improve performance dues to better
+%%     cache fitting. Overdecomposition can cause significant overhead.}
+%% \end{table*}
 
 \todo{make table for t=16 into clustered bar chart? of relative time}
 

@@ -36,3 +36,56 @@ RESULTDIR=../results
 
 
 ) >  parpoint_table.tex
+
+INSTANCES="Dengue_lowres-lowbw Dengue_lowres-highbw Dengue_highres-lowbw Dengue_highres-highbw Dengue_highres-veryhighbandwidth Pollen_lowres-lowbw Pollen_highres-lowbw Pollen_highres-medbw Pollen_highres-highbw Flu-Animal_lowres-lowbw Flu-Animal_lowres-highbw Flu-Animal_medres-lowbw Flu-Animal_medres-highbw Flu-Animal_highres-lowbw Flu-Animal_highres-highbw"
+
+for t in 1 2 4 8 16
+do
+    echo -n ${t} \ 
+
+    for inst in ${INSTANCES}
+    do
+	seq=$(gettime $inst POINTBASED-SYM) 
+	
+	meth="POINTBASED-SYMOMP-POINTDECOMP_t${t}"
+        algotime=$(gettime $inst $meth) 
+
+	echo -n $(echo ${seq} / ${algotime} | bc -l) \  
+	
+    done
+    echo
+
+    
+done > pointpointplot.data
+
+GNUPLOTCMD="plot "
+next="2"
+for inst in ${INSTANCES}
+do
+    GNUPLOTCMD="${GNUPLOTCMD} 'pointpointplot.data' u 1:${next} t '${inst}',"
+    next=$(echo $next + 1 | bc)
+done
+GNUPLOTCMD="${GNUPLOTCMD};"
+GNUPLOTCMD=$(echo ${GNUPLOTCMD} | sed 's/,;//'  | sed 's/-Animal//g' \
+	| sed 's/lowres/Lr/g' \
+	| sed 's/medres/Mr/g' \
+	| sed 's/highres/Hr/g' \
+	| sed 's/lowbw/Lb/g' \
+	| sed 's/medbw/Mb/g' \
+	| sed 's/highbw/Hb/g' \
+	| sed 's/veryhighbandwidth/VHb/g')
+
+gnuplot<<EOF
+set terminal pdf;
+set output 'SYM-DR-speedup.pdf';
+set xlabel 'Threads';
+set ylabel 'Speedup';
+set key top left;
+set key maxrows 8;
+
+set style data linespoints
+
+set yrange [0:10]
+
+$GNUPLOTCMD
+EOF
