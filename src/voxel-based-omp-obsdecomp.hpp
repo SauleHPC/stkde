@@ -104,12 +104,12 @@ std::shared_ptr<util::Compact3D<values>> stkde_voxelbased_omp_obsdecomp(const bo
 
   printf("[(%lf, %lf), (%lf %lf), (%lf %lf)]\n", bb.xl, bb.xh - bb.xl * 0, bb.yl, bb.yh - bb.yl, bb.tl, bb.th - bb.tl);
 
-  coordinate subd_x = (bb.xh - bb.xl) / decompsizeX;
-  coordinate subd_y = (bb.yh - bb.yl) / decompsizeY;
-  coordinate subd_t = (bb.th - bb.tl) / decompsizeT;
+  int subd_x = (bb.xh - bb.xl) / decompsizeX;
+  int subd_y = (bb.yh - bb.yl) / decompsizeY;
+  int subd_t = (bb.th - bb.tl) / decompsizeT;
 
-  printf("%lf, %lf, %lf\n", subd_x, subd_y, subd_t);
-  printf("%lf, %lf, %lf\n", pa.xbw, pa.ybw, pa.tbw);
+  // printf("%lf, %lf, %lf\n", subd_x, subd_y, subd_t);
+  // printf("%lf, %lf, %lf\n", pa.xbw, pa.ybw, pa.tbw);
   //
   //  long inter = 0;
   for (int i=0; i< inst.obsx.size(); ++i) {
@@ -162,7 +162,7 @@ std::shared_ptr<util::Compact3D<values>> stkde_voxelbased_omp_obsdecomp(const bo
               tbase >= 0 and tbase < decompsizeT) {
                 // points inside this box can affect 
                 // the grid points in the current box
-                #pragma omp parallel collapse(3) schedule(dynamic,1)
+                #pragma omp for collapse(3) schedule(dynamic,1)
                 for(int t = 0; t < subd_t; t++) {
                   for(int y = 0; y < subd_y; y++) {
                     for(int x = 0; x < subd_x; x++) {
