@@ -16,12 +16,17 @@ RESULTDIR=../results
 DECOMP="1_1_1 2_2_2 4_4_4 8_8_8 16_16_16 32_32_32 64_64_64"
 
 (
-    echo -n instance \& seq \ 
+    echo '\\begin{tabular}{|l|r|rrrrrrr|}'
+    echo \\hline
+
+    echo -n Instance \& PB-SYM \ 
     for dec in $DECOMP
     do
 	echo -n \& $dec \  
-    done 
+    done | tr _ x
     echo '\\\\'
+
+    echo \\hline
     
     for inst in $INSTANCES
     do
@@ -39,7 +44,19 @@ DECOMP="1_1_1 2_2_2 4_4_4 8_8_8 16_16_16 32_32_32 64_64_64"
 	    echo -n \& $tim \ 
 	done
 	echo '\\\\'
-    done
-) | sed 's/_/\\_/g' >  parcol-t16.tex
+    done| sed 's/-Animal//' \
+	| sed 's/lowres/Lr/g' \
+	| sed 's/medres/Mr/g' \
+	| sed 's/highres/Hr/g' \
+	| sed 's/lowbw/Lb/g' \
+	| sed 's/medbw/Mb/g' \
+	| sed 's/highbw/Hb/g' \
+	| sed 's/veryhighbandwidth/VHb/g' \
+	| sed 's/_/\\_/g'
+
+    echo \\hline
+    echo '\\end{tabular}'
+
+)  >  parcol-t16.tex
 
 

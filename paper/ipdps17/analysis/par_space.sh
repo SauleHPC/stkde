@@ -13,14 +13,14 @@ INSTANCES="Dengue_lowres-lowbw Dengue_lowres-highbw Dengue_highres-lowbw Dengue_
 
 RESULTDIR=../results
 
-DECOMP="1_1_1 1_1_4 1_1_8 4_4_1 4_4_4 4_4_8 8_8_1 8_8_4 8_8_8"
+DECOMP="1_1_1 2_2_2 4_4_4 8_8_8 16_16_16 32_32_32 64_64_64"
 
 (
-    echo -n instance \& seq \ 
+    echo -n Instance \& PB-SYM \ 
     for dec in $DECOMP
     do
 	echo -n \& $dec \  
-    done 
+    done |tr _ x
     echo '\\\\'
     
     for inst in $INSTANCES
@@ -39,16 +39,24 @@ DECOMP="1_1_1 1_1_4 1_1_8 4_4_1 4_4_4 4_4_8 8_8_1 8_8_4 8_8_8"
 	    echo -n \& $tim \ 
 	done
 	echo '\\\\'
-    done
-) | sed 's/_/\\_/g' >  parspace-t16.tex
+    done | sed 's/-Animal//' \
+	| sed 's/lowres/Lr/g' \
+	| sed 's/medres/Mr/g' \
+	| sed 's/highres/Hr/g' \
+	| sed 's/lowbw/Lb/g' \
+	| sed 's/medbw/Mb/g' \
+	| sed 's/highbw/Hb/g' \
+	| sed 's/veryhighbandwidth/VHb/g' \
+	| sed 's/_/\\_/g'
+) >  parspace-t16.tex
 
 
 (
-    echo -n instance \& seq \ 
+    echo -n Instance \& PB-SYM \ 
     for dec in $DECOMP
     do
 	echo -n \& $dec \  
-    done 
+    done |tr _ x
     echo '\\\\'
     
     for inst in $INSTANCES
@@ -67,10 +75,19 @@ DECOMP="1_1_1 1_1_4 1_1_8 4_4_1 4_4_4 4_4_8 8_8_1 8_8_4 8_8_8"
 	    echo -n \& $tim \ 
 	done
 	echo '\\\\'
-    done
-) | sed 's/_/\\_/g' >  parspace-t1.tex
+    done | sed 's/-Animal//' \
+	| sed 's/lowres/Lr/g' \
+	| sed 's/medres/Mr/g' \
+	| sed 's/highres/Hr/g' \
+	| sed 's/lowbw/Lb/g' \
+	| sed 's/medbw/Mb/g' \
+	| sed 's/highbw/Hb/g' \
+	| sed 's/veryhighbandwidth/VHb/g' \
+	| sed 's/_/\\_/g'
+    
+)  >  parspace-t1.tex
 
-#exit
+exit
 
 for inst in $INSTANCES
 do

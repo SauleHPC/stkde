@@ -11,9 +11,12 @@ gettime() {
 RESULTDIR=../results
 
 (
-    echo          \&    \&             \&           \&        \& SYM '\\\\'
-    echo Instance \& PB \&  PB-SYMDISK \& PB-SYMBAR \& PB-SYM \& speedup '\\\\'
-        
+    echo '\\begin{tabular}{|l|rrrr|r|}'
+    echo \\hline
+    echo          \& \\multicolumn{4}{c\|}{Time \(in seconds\)}        \& speedup'\\\\'
+    echo Instance \& PB \&  PB-DISK \& PB-BAR \& PB-SYM \& PB-SYM '\\\\'
+    echo \\hline
+	    
 
     for inst in Dengue_lowres-lowbw Dengue_lowres-highbw Dengue_highres-lowbw Dengue_highres-highbw Dengue_highres-veryhighbandwidth \
 				    Pollen_lowres-lowbw Pollen_highres-lowbw Pollen_highres-medbw Pollen_highres-highbw \
@@ -23,5 +26,16 @@ RESULTDIR=../results
 	     $(gettime ${inst} POINTBASED) \\t\& $(gettime ${inst} POINTBASED-SYMDISK) \\t\& \
 	     $(gettime ${inst} POINTBASED-SYMBAR) \\t\& $(gettime ${inst} POINTBASED-SYM) \\t\& \
 	     $(echo $(gettime ${inst} POINTBASED) / $(gettime ${inst} POINTBASED-SYM) | bc -l | awk '{printf "%.3f", $1}' ) '\\\\' 
-    done | sed 's/_/\\_/g' | sed 's/veryhighbandwidth/vhighbw/'
+    done | sed 's/-Animal//' \
+	| sed 's/lowres/Lr/g' \
+	| sed 's/medres/Mr/g' \
+	| sed 's/highres/Hr/g' \
+	| sed 's/lowbw/Lb/g' \
+	| sed 's/medbw/Mb/g' \
+	| sed 's/highbw/Hb/g' \
+	| sed 's/veryhighbandwidth/VHb/g' \
+	| sed 's/_/\\_/g'
+
+    echo \\hline
+    echo '\\end{tabular}'
 ) > seq_table.tex
