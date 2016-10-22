@@ -96,7 +96,8 @@ DECOMP="1_1_1 2_2_2 4_4_4 8_8_8 16_16_16 32_32_32 64_64_64"
     do
 	echo -n ${dec} \  
     done |tr _ x
-
+    echo
+    
     for inst in $INSTANCES
     do
 	seq=$(gettime ${inst} POINTBASED-SYM)
@@ -137,7 +138,7 @@ set style histogram cluster gap 2
 
 set xtics rotate by -45
 set style fill solid border rgb "black"
-set xrange [-.5:12.5]
+set xrange [-.5:14.5]
 set yrange [0:*]
 set ylabel 'Time relative to PB-SYM'
 
@@ -160,7 +161,8 @@ EOF
     do
 	echo -n ${dec} \  
     done |tr _ x
-
+    echo
+    
     for inst in $INSTANCES
     do
 	seq=$(gettime ${inst} POINTBASED-SYM)
@@ -201,7 +203,7 @@ set style histogram cluster gap 2
 
 set xtics rotate by -45
 set style fill solid border rgb "black"
-set xrange [-.5:12.5]
+set xrange [-.5:14.5]
 set yrange [0:*]
 set ylabel 'Speedup'
 

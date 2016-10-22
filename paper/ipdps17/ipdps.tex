@@ -187,6 +187,8 @@ Requires $\theta(G_x * G_y * G_t)$ memory.
 
 \section{Algorithm Design and Engineering}
 
+\label{ref:algo-seq}
+
 \subsection{Observation-based Algorithm}
 
 The voxel-based algorithm suffers from a massive cost of computing
@@ -396,7 +398,7 @@ OpenMP 4.0, with optimization flags \texttt{-O3 -march=native -fopenmp
   -DNDEBUG}. All reported execution time exclude all IOs.
 
 \paragraph{Dataset} Three dataset are used in our experiments. Their
-key attributes are summarized in table~\ref{tab:instance}. 
+key attributes are summarized in Table~\ref{tab:instance}. 
 Out first dataset is Dengue which uses the space-time
 locations of dengue fever cases reported to the “Sistema de Vigilancia
 en Salud P\'{u}blica” for the city of Cali, Colombia during 2010 and 2011. The
@@ -432,6 +434,10 @@ and as North as the Northern shore of Russia. The domain is modeled
 with spatial resolution from $.2^\circ$ to $1^\circ$ and a temporal
 resolution of 1 day.
 
+For all dataset, we created multiple instances of the problem coded
+Lr, Mr, Hr for low, medium, and high resolution and Lb, Hb, VHb for
+low, high and veryhigh bandwidth. See details in Table~\ref{tab:instance}. 
+
 \begin{table}
     \resizebox{\linewidth}{!}{\input{analysis/instance_table.tex}}
   \caption{Properties of the datasets. The domain is expressed in voxels
@@ -445,9 +451,40 @@ resolution of 1 day.
 \begin{table}
   \resizebox{\linewidth}{!}{\input{analysis/seq_table.tex}}
   \caption{Runtime of different algorithm. The speedup of PB-SYM over PB is given.}
+  \label{tab:seq_table}
 \end{table}
 
-\todo{presetn table}
+Table~\ref{tab:seq_table} presents the runtime of the point-based
+algorithms presented in Section~\ref{ref:algo-seq}. The runtime are
+given in seconds. As expected for each dataset, the runtime increases
+with resolution and bandwidth. Exploiting the disk invariant with
+PB-DISK provides a large reduction in the runtime, even more so when
+the temporal bandwidth is high. PB-BAR provides a more modest time
+reduction.
+
+PB-SYM combines the reductions of both PB-BAR and PB-DISK and achieves
+the best performance in most cases. PB-SYM provides improvements up to
+a factor of $6.898$ on the Polen\_Hr-Hb case. The case where PB-SYM
+provides little improvement are explained either by cases that have a
+low bandwidth, and therefore there is little redundant computation to
+take advantange of, or by the fact that the runtime is dominated by
+initialization cost. The breakdown of the runtime of PB-SYM is given
+in Figure~\ref{fig:breakdown} and shows that PB-SYM is composed of two
+phases, initializing the memory to store the density estimation of the
+voxels, and computing the density cylinder surrounding the
+points. PB-SYM reduces the computation cost but initializes the memory
+in the same way as PB. Initialization is a predominant runtime cost in
+the Flu dataset since there were only 31K occurence of confirmed avian
+flu recorded in the last 15 years but they span most of the earth.
+
+
+\begin{figure}
+  \includegraphics[width=\linewidth]{analysis/seq_breakup.pdf}
+  \caption{Breakdown of the runtime of PB-SYM. Some instances are
+    mostly Initialization.}
+  \label{fig:breakdown}
+\end{figure}
+
 
 \todo{point that as expected PB-SYM is much faster. Though the ratio
   depends on the bandwidth. a note on the slower case.}
@@ -478,7 +515,7 @@ resolution of 1 day.
 \paragraph{PB-SYM-DD}
 
 \begin{figure*}
-  \includegraphics[width=\linewidth]{analysis/SYM-DD.pdf}
+  \includegraphics[width=\linewidth]{analysis/SYM-DD-overhead.pdf}
   
   \caption{Overhead of SYM-DD: runtime of SYM-DD with a single thread
     normalized to PB-SYM. Some decomposition improve performance dues
@@ -523,42 +560,53 @@ resolution of 1 day.
 %% \end{table*}
 
 
+
 \subsection{Observation-based parallelism}
 
-\begin{table*}
-    \input{analysis/parcol-t16.tex}
-  \caption{obs decomposition}
-\end{table*}
+%% \begin{table*}
+%%     \input{analysis/parcol-t16.tex}
+%%   \caption{obs decomposition}
+%% \end{table*}
 
-\begin{table*}
-  \begin{tabular}{|l|r|rrrrrrr|}
-    \input{analysis/obssched-t16.tex}
-  \end{tabular}
-  \caption{obs decomposition - sched}
-\end{table*}
+%% \begin{table*}
+%%   \begin{tabular}{|l|r|rrrrrrr|}
+%%     \input{analysis/obssched-t16.tex}
+%%   \end{tabular}
+%%   \caption{obs decomposition - sched}
+%% \end{table*}
 
-\begin{table*}
-  \begin{tabular}{|l|r|rrrrrrr|}
-    \input{analysis/obscolorsched-t16.tex}
-  \end{tabular}
-  \caption{obs decomposition - color sched}
-\end{table*}
+%% \begin{table*}
+%%   \begin{tabular}{|l|r|rrrrrrr|}
+%%     \input{analysis/obscolorsched-t16.tex}
+%%   \end{tabular}
+%%   \caption{obs decomposition - color sched}
+%% \end{table*}
 
-\begin{table*}
-  \begin{tabular}{|l|r|rrrrrrr|}
-    \input{analysis/par_obs_mold-t16.tex}
-  \end{tabular}
-  \caption{obs decomposition - color sched mold. The missing item run out of memory becasue of a too high replication factor.}
-\end{table*}
+%% \begin{table*}
+%%   \begin{tabular}{|l|r|rrrrrrr|}
+%%     \input{analysis/par_obs_mold-t16.tex}
+%%   \end{tabular}
+%%   \caption{obs decomposition - color sched mold. The missing item run out of memory becasue of a too high replication factor.}
+%% \end{table*}
 
 
+\begin{figure*}
+  \includegraphics[width=\linewidth]{analysis/SYM-PD-COLOR-SCHED-speedup16.pdf}
+  \caption{Speedup of SYM-PD-COLOR-SCHED. Flu\_Hr-Lb and Flu\_Hr-Hb ran out of memory for small decomposition.}
+\end{figure*}
+
+
+\begin{figure*}
+  \includegraphics[width=\linewidth]{analysis/SYM-PD-COLOR-REP-speedup16.pdf}
+  \caption{Speedup of SYM-PD-COLOR-REP. Flu\_Hr-Lb and Flu\_Hr-Hb ran out of memory for small decomposition.}
+\end{figure*}
 
 \section{Conclusion}
 
-%\section*{Acknowledgment}
+\section*{Acknowledgment}
 
-
-
+The authors would like to thank Dr. Daniel Janies for pointing us to
+the Flu dataset.
 
 
 \bibliographystyle{IEEEtran}
