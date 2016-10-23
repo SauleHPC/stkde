@@ -163,7 +163,7 @@ All the notations are summarized in Table~\ref{tab:notation}.
 
 The gold standard implementation follows the exact definition of stkde
 as it is given above. It is a voxel-based algorithm we call VB. For
-each voxel, VB finds the close observations and calculate contribution
+each voxel, VB finds the close points and calculate contribution
 to the density of this particular voxel.
 
 \todo{include voxel based algorithm}
@@ -174,8 +174,6 @@ smaller than the grid size, the complexity of the algorithm is
 $\theta(G_x G_y G_t n )$.
 
 Requires $\theta(G_x G_y G_t)$ memory.
-
-\todo{harmonize observations => points.}
 
 \subsection{Related Works}
 
@@ -189,19 +187,17 @@ Requires $\theta(G_x G_y G_t)$ memory.
 
 \label{sec:algo-seq}
 
-\subsection{Observation-based Algorithm}
-\todo{harmonize OB => PB}
+\subsection{Point-based Algorithm}
 The voxel-based algorithm suffers from a massive cost of computing
 distances. The gold implementation reduces them by extremely
 decomposition the domain, but that still incures a significant
 overhead. These calculation are mostly unnecessary since we know
-exactly where each observation will radiate density. The observation
-based algorithm OB leverages that property.
+exactly where each point will radiate density. The point-based algorithm PB leverages that property.
 
 \todo{spell out algorithm}
 
-The algorithm OB incurs mostly two costs. Initializing the memory which costs
-$\Theta(G_x G_y G_t)$ and computing the impact of each observation
+The algorithm PB incurs mostly two costs. Initializing the memory which costs
+$\Theta(G_x G_y G_t)$ and computing the impact of each point
 $\Theta(n H_s^2 H_t)$. Note that it is possible that either of these
 two term is significantly larger than the other. Therefore the
 complexity of the algorithm is $\Theta(G_x G_y G_t + n H_s^2 H_t)$.
@@ -209,31 +205,31 @@ complexity of the algorithm is $\Theta(G_x G_y G_t + n H_s^2 H_t)$.
 \subsection{Exploiting Symmetries}
 
 When the bandwidth is large computing the density contribution of each
-observation each voxel in the bandwidth is the most expensive
+point each voxel in the bandwidth is the most expensive
 operation. Each of these $n (2  H_s)^2  2 H_t$ calculations costs
 approximately 40 floating point operations. (The exact cost is
 difficult to estimate since there are floating point additions,
 multiplications, divisions, and square root operations.)
 
 One can remark that the calculation is mostly redundant. \todo{give
-  precise formula.}  Indeed for one particular observation, its
+  precise formula.}  Indeed for one particular point, its
 contribution to the neighbooring vertices can be decomposed in two
 components. One that only depends on the spatial coordinate of the
-voxel with respect to the observation and does not depend on its
+voxel with respect to the point and does not depend on its
 temporal coordinate. And one that only depends on the temporal
 coordinate and not on the spatial coordinate.
 
 \todo{include figure.}
 
 Therefore, one can write an algorithm to leverage these symmetries in
-the problem. We wrote three variants, the OB-DISK variant ensures that
-the invariant on the spatial domain is only computed once. The OB-BAR
+the problem. We wrote three variants, the PB-DISK variant ensures that
+the invariant on the spatial domain is only computed once. The PB-BAR
 variant ensures that the invariant on the temporal domain is only
-computed once. The SYM variant computes independently the spatial
+computed once. The PB-SYM variant computes independently the spatial
 invariant and the temporal invariant and then adds the density caused
-by the observation by taking the product of the two invariants. Notice
+by the point by taking the product of the two invariants. Notice
 that leveraging the symmetries in the calculation does not change the
-complexity. The SYM algorithm still has a complexity of $\Theta(G_x 
+complexity. The PB-SYM algorithm still has a complexity of $\Theta(G_x 
 G_y  G_t + n  H_s^2  H_t)$. However the number of flops reduced to 
 \todo{estimate flop cost.}
 
@@ -251,42 +247,42 @@ based algorithm.
 \subsection{Domain Replication}
 
 The simplest way to parallelize this kind of computation is to split
-the observation equally among the $P$ different computational
-units. Though if two close-by observations are computed
+the points equally among the $P$ different computational
+units. Thosugh if two close-by points are computed
 simultaneously, the cylinder of density around it might collide and
 there is a race condition.
 
-The SYM-DR algorithm solves the data race issue by having
+The PB-SYM-DR algorithm solves the data race issue by having
 each of the $P$ computational unit aggregate the result on a local
-copy of the domain. Once all the observations have been processed, the
+copy of the domain. Once all the points have been processed, the
 $P$ copies need to be summed.
 
 This algorithm has a memory requirement of $\Theta (P  G_x  G_y  G_t)$
 and a parallel amount of work of $\Theta (P  G_x  G_y  G_t + n  H_s^2
  H_t)$. Though the increase in work enables the parallelism to be
 pleasingly parallel. (It is actually in two pleasingly parallel phases,
-processing the observations and reducing the partial results.)
+processing the points and reducing the partial results.)
 
 \todo{give pseudo code of the algorithm}
 
 \subsection{Domain Decomposition}
 
 An other strategy to avoid the data race is by computing the intensity
-of the voxels of different subdomains independently. The SYM-DD
+of the voxels of different subdomains independently. The PB-SYM-DD
 algorithm splits the domain in AxBxC subdomains. And each subdomain is
-associated the observations which cylinder intersects with a voxel of
+associated the points which cylinder intersects with a voxel of
 the subdomain. Then the algorithm proceeds with processing each
 subdomain independently by only considering the impact of the
-observation on the voxels within the subdomain.
+point on the voxels within the subdomain.
 
 \todo{include algorithm}
 
 The main problem with Domain Decomposition is that it requires some
-observations to be replicated across multiple subdomain which incurs
-additional work. Indeed for a particular observation replicated in two
+points to be replicated across multiple subdomain which incurs
+additional work. Indeed for a particular point replicated in two
 subdomains (if it is replicated in more, a similar effect happens),
 its cylinder is split across two subdomain. Assume the split is
-temporal, then using SYM each subdomain will need to compute part of
+temporal, then using PB-SYM in each subdomain will need to compute part of
 the temporal invariant, the entire spatial invariant, and part of the
 cylinder. Therefore both subdomain needed to compute the entire
 spatial invariant.
@@ -294,7 +290,7 @@ spatial invariant.
 \todo{draw figure that examplify the issue}
 
 If the algorithms keeps the number of subdomain small such that each
-observation is not replicated more than a constant number of time then
+point is not replicated more than a constant number of time then
 the work performed when expressed in Big-Oh notation does not change.
 (This can be achieved, for instance, by having subdomains larger than
 $H_s \times H_s \times H_t$.) However, the practical amount of work can
@@ -302,11 +298,11 @@ increase by a non negligable factor. (We will see factors of about 1.5
 in the experiments.)
 
 An other issue with Domain Decomposition is load imbalance. The
-observations are unlikely well distributed in the domain space, but
+points are unlikely well distributed in the domain space, but
 more likely clustered around some locations. The subdomain containing
 such a location will have a significantly higher work than other
 subdomains. And this work is not executed in parallel. One could
-decompose the domain more, but replication observation (described
+decompose the domain more, but replication point (described
 above) will incur an even higher overhead which may end up nullifying
 the gain in load balance.
 
@@ -318,16 +314,16 @@ Both of the previous strategies increase the amount of work
 significantly. We want to achieve parallelism without cutting a
 cylinder and without requiring each thread to have its own memory
 space. To achieve that goal, we propose the PB-SYM-PD algorithm that
-decomposes the observations in sets that can be safely performed
+decomposes the points in sets that can be safely performed
 simultaneously.
 
-As long as two observations are separated by $2 h_s$ in a spatial
+As long as two points are separated by $2 h_s$ in a spatial
 dimension or by $2 h_t$ in the temporal dimension then the cylinder
-induced by the two observations will not overlap. PB-SYM-PD decomposes
-the observations in $A \times B \times C$ subdomain of identical
+induced by the two points will not overlap. PB-SYM-PD decomposes
+the points in $A \times B \times C$ subdomain of identical
 size. As long as these subdomains are larger than $2 h_s$ in a spatial
-dimension and $2 h_t$ in the temporal dimension, then the observations
-in domain $x, y, z$ can be done concurently with the observations in
+dimension and $2 h_t$ in the temporal dimension, then the points
+in domain $x, y, z$ can be done concurently with the points in
 $x + 2, y, z$.
 
 \todo{include figure that show the decomposition}
@@ -348,8 +344,8 @@ $8$ OpenMP parallel for construct.
 Note that such an implementation overconstrains the execution of the
 algorithm. Indeed, despite they are not in the same set, subdomain
 $1, 0, 0$ and $64, 64, 64$ can be computed at the same time. The real
-constraint is that the observations contained in a subdomain can be
-processed safely as long as none of the observation contained in a
+constraint is that the points contained in a subdomain can be
+processed safely as long as none of the point contained in a
 neighboring subdomain is being processed. Using the OpenMP tasking
 construct with dependency introduced in OpenMP 4.0 \todo{cite
   openmpspec}, one can precisely express this constraint, which is a
@@ -369,7 +365,7 @@ The implied schedule is actually a scheduling of a graph of dependency
 which is extracted from the coloring. Each edge of the stencil graph
 is oriented from the vertex of the lowest color to the vertex with the
 highest color. Each vertex is associated with a processing time which
-is somewhat proportional to the number of observation inside the
+is somewhat proportional to the number of points inside the
 sub-domain the vertex represents and the neighboring subdomains. This
 construction is represented in Figure~\ref{}.
 
@@ -644,7 +640,7 @@ speedup on the entire calculation would only be $3.54$.
 %%   \caption{different spatial decomposition at t=16}
 %% \end{table*}
 
-\subsection{Observation-based parallelism}
+\subsection{Point-based parallelism}
 
 %% \begin{table*}
 %%     \input{analysis/parcol-t16.tex}
