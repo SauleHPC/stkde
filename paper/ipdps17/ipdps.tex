@@ -50,20 +50,22 @@ Email: \{esaule,dpanchan,ahohl,wtang4,eric.delmelle\}@uncc.edu}
   first step of the visualization pipeline, space-time kernel density
   estimation, which is most computationally expensive.  Starting from
   a gold standard implementation, we show how algorithm design and
-  engineering, parallel decomposition, and acceleration can be applied
-  to bring real-time computing to space-time kernel density
+  engineering, parallel decomposition, and scheduling can be applied
+  to bring near real-time computing to space-time kernel density
   estimation. We validate our techniques on real world datasets
   extracted from infectious disease, social media, and ornithology.
 \end{abstract}
 
 \begin{IEEEkeywords}
-space-time kernel density; performance; distributed memory; gpu; shared-memory; scheduling
+space-time kernel density; performance; spatial algorithm; shared-memory; scheduling
 \end{IEEEkeywords}
 
 
 \IEEEpeerreviewmaketitle
 
 \section{Introduction}
+
+\todo{preamble}
 
 The rapid propagation of infectious diseases (e.g. zika, Ebola, H1N1,
 dengue fever) is conducive to serious, epidemic outbreaks, posing a
@@ -82,9 +84,49 @@ availability~\cite{grubesic2014spatial}. High-performance computing
 reduces the effort required to identify these patterns, however
 heterogeneity in the data must be accounted for~\cite{Hohl16}.
 
-\todo{write complete intro}
+%
+In this paper, we present the space-time kernel density estimation
+application which essentially builds a 3D density map of events
+located in space and time. We revise the sequential algorithm to
+significantly decrease its complexity and identify symmetries in the
+problem that can be used to reduce the runtime by a constant but
+significant factor. Then we investigate different shared memory
+strategies for parallelizing the application and discuss their impact
+on memory requirement, work overhead, and load balance. Interestingly,
+one of the decomposition involves solving a combinatorial problem that
+is similar to a fusion of graph coloring and DAG scheduling of
+moldable tasks.
+
+Section~\ref{sec:stkde} present the stkde application along with a
+reference implementation that uses a voxel-based algorithm VB to
+compute stkde. In Section~\ref{sec:algo-seq} we investigate the
+sequential problem and develop a point-based algorithm PB that
+significantly reduce the complexity compared to VB. We also identify
+invariants linked to the structure of the kernel density estimate
+function that allows to reduce the computational cost by an additional
+factor and build the PB-SYM algorithm based on that observation. We
+develop two parallelization strategies (PB-SYM-DR and PB-SYM-DD) in
+Section~\ref{sec:pb-sym-domain} that are designed to make the
+computation pleasingly parallel. However both strategies are not work
+efficient and can cause significant work overhead in some cases. That
+is why we introduce PB-SYM-PD in Section~\ref{sec:pb-sym-point} that
+provide a work-efficient decomposition of the points. However that
+algorithm has internal depencies which can have a long critical path
+and cause load imbalance; and we develop PB-SYM-PD-SCHED to leverage
+alternative ordering of the work to reduce the critical path. To
+reduce the critical path, we propose the PB-SYM-PD-REP algorithm which
+leverages some form moldable scheduling. It introduces some work
+overhead only where is needed to achieve a short critical path and
+load balance. Section~\ref{sec:experiments} presents experimental
+results on three different datasets and 15 instances extracted from
+these datasets. The experiments highlights that the sequential
+strategies are efficient. The parallel strategies have their pros and
+cons and different strategies appear to be best in different
+scenarios. Section~\ref{sec:soa} discusses related problems and
+techniques, and discuss their applicability.
 
 \section{Space-Time Kernel Density Estimation}
+\label{sec:stkde}
 
 \subsection{Description}
 
@@ -135,9 +177,11 @@ Computationally, the domain of size $g_x$, $g_y$, $g_t$ is discretized
 in voxels using a spatial resolution $sres$ and a temporal resolution
 $tres$. Therefore the domain is represented by a grid of size
 $G_x=\ceil{\frac{g_x}{sres}}$, $G_y=\ceil{\frac{g_y}{sres}}$,
-$G_t=\ceil{\frac{g_t}{tres}}$. And we denote the spatial and temporal
-bandwidth in voxel $H_s=\ceil{\frac{h_s}{sres}}$,
-$H_t=\ceil{\frac{h_t}{tres}}$.
+$G_t=\ceil{\frac{g_t}{tres}}$. Each point causes a density increase in
+the voxel that are wihin a cylinder centered on the point of spatial
+radius equal to the spatial bandwidth in voxels
+$H_s=\ceil{\frac{h_s}{sres}}$, and of half height equal to the
+temporal bandwidth $H_t=\ceil{\frac{h_t}{tres}}$.
 
 All the notations are summarized in Table~\ref{tab:notation}.
 
@@ -175,13 +219,10 @@ $\theta(G_x G_y G_t n )$.
 
 Requires $\theta(G_x G_y G_t)$ memory.
 
-\subsection{Related Works}
+\todo{make sure cylinder is properly explaine somewhere}
 
-\todo{spatial partitioning a la zoltan}
 
-\todo{partile in cell ?}
 
-\todo{the hpc paper on gpu with a different expression crop and chop or something}
 
 \section{Algorithm Design and Engineering}
 
@@ -242,7 +283,7 @@ based algorithm.
 
 
 \section{Domain-based parallelism}
-
+\label{sec:pb-sym-domain}
 
 \subsection{Domain Replication}
 
@@ -307,6 +348,7 @@ above) will incur an even higher overhead which may end up nullifying
 the gain in load balance.
 
 \section{Point-based parallelism}
+\label{sec:pb-sym-point}
 
 \subsection{Point Decomposition}
 
@@ -410,6 +452,8 @@ problem is similar to scheduling a DAG of moldable tasks~\cite{}.
 \todo{check sascha's paper and ref therein.}
 
 \section{Experiments}
+
+\label{sec:experiments}
 
 \subsection{Experimental Setting}
 
@@ -740,6 +784,41 @@ the execution has similar drawbacks as PB-SYM-DR.
   \caption{Speedup of PB-SYM-PD-REP using 16 threads for different decompositions . Flu\_Hr-Lb and Flu\_Hr-Hb ran out of memory for small decomposition.}
   \label{fig:PB-SYM-PD-REP-speedup}
 \end{figure*}
+
+\subsection{Discussion}
+
+\todo{A table with best parallel case and times}
+
+\todo{discussion on prediction of the best case}
+
+\todo{discussion on }
+
+\section{Related Works}
+
+\label{sec:soa}
+
+
+On the particular topic of executing stkde in parallel. There are
+little related works. Mostly, \todo{...}
+
+In parallel computing community the two most common spatial algorithm
+are N-body interactions~\cite{} and Particle in Cell
+simulations~\cite{}. Though stkde is different in the sense that there
+is no iterating over the problem multiple times as we see in the
+timesteps of N-body or particle in cell, no direct interation between
+points, and no field updates as in Particle in Cell (unless you
+consider a field discretized at a one voxel size which makes the
+analogy not quite useful).
+
+Spatial application can use spatial partitioning techniques either
+using recursive bisection~\cite{}, jagged partition~\cite{}, or
+rectilinear partitioning~\cite{}. Depending on the algorithms used for
+stkde, the objective function is different. A partitioning for
+PB-SYM-DD needs a good load balance and to minimize the number of cut
+cylinder and could take arbitrarily shaped partitioning. But PB-SYM-PD
+needs a decomposition where the subdomains have a size larger than a
+threshold and the load balance critirion is harder to express since
+neighboring subdomains can not be processed simultaneously.
 
 \section{Conclusion}
 
