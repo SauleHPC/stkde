@@ -161,8 +161,6 @@ All the notations are summarized in Table~\ref{tab:notation}.
 
 \subsection{Gold Standard Implementation}
 
-\todo{remove all these $*$ that look stupid with new notation}
-
 The gold standard implementation follows the exact definition of stkde
 as it is given above. It is a voxel-based algorithm we call VB. For
 each voxel, VB finds the close observations and calculate contribution
@@ -263,9 +261,9 @@ each of the $P$ computational unit aggregate the result on a local
 copy of the domain. Once all the observations have been processed, the
 $P$ copies need to be summed.
 
-This algorithm has a memory requirement of $\Theta (P * G_x * G_y * G_t)$
-and a parallel amount of work of $\Theta (P * G_x * G_y * G_t + n * H_s^2
-* H_t)$. Though the increase in work enables the parallelism to be
+This algorithm has a memory requirement of $\Theta (P  G_x  G_y  G_t)$
+and a parallel amount of work of $\Theta (P  G_x  G_y  G_t + n  H_s^2
+ H_t)$. Though the increase in work enables the parallelism to be
 pleasingly parallel. (It is actually in two pleasingly parallel phases,
 processing the observations and reducing the partial results.)
 
@@ -323,21 +321,21 @@ space. To achieve that goal, we propose the PB-SYM-PD algorithm that
 decomposes the observations in sets that can be safely performed
 simultaneously.
 
-As long as two observations are separated by $2*h_s$ in a spatial
-dimension or by $2*h_t$ in the temporal dimension then the cylinder
+As long as two observations are separated by $2 h_s$ in a spatial
+dimension or by $2 h_t$ in the temporal dimension then the cylinder
 induced by the two observations will not overlap. PB-SYM-PD decomposes
 the observations in $A \times B \times C$ subdomain of identical
-size. As long as these subdomains are larger than $2*h_s$ in a spatial
-dimension and $2*h_t$ in the temporal dimension, then the observations
+size. As long as these subdomains are larger than $2 h_s$ in a spatial
+dimension and $2 h_t$ in the temporal dimension, then the observations
 in domain $x, y, z$ can be done concurently with the observations in
-$x+2, y, z$.
+$x + 2, y, z$.
 
 \todo{include figure that show the decomposition}
 
 We implemented a first version of this algorithm that organizes the
 subdomain in 8 sets where the first set is composed of the subdomains
-$2*i, 2*j, 2*k$, the second of all the subdomains $2*i+1, 2*j, 2*k$,
-the third of all the subdomains $2*i, 2*j+1, 2*k$, etc.. The algorithm
+$2i, 2j, 2k$, the second of all the subdomains $2 i + 1, 2 j, 2 k$,
+the third of all the subdomains $2 i, 2 j + 1, 2 k$, etc.. The algorithm
 processes the sets the one after the other by doing each subdomain
 within a set in parallel. In practice, this is implemented using
 $8$ OpenMP parallel for construct.
@@ -349,7 +347,7 @@ $8$ OpenMP parallel for construct.
 
 Note that such an implementation overconstrains the execution of the
 algorithm. Indeed, despite they are not in the same set, subdomain
-$1,0,0$ and $64, 64, 64$ can be computed at the same time. The real
+$1, 0, 0$ and $64, 64, 64$ can be computed at the same time. The real
 constraint is that the observations contained in a subdomain can be
 processed safely as long as none of the observation contained in a
 neighboring subdomain is being processed. Using the OpenMP tasking
