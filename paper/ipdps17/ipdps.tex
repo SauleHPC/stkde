@@ -738,7 +738,7 @@ memory requirement exceeds the 128GB available on the machine.
 \begin{figure}[tbh]
   \includegraphics[width=\linewidth]{analysis/SYM-DR-speedup.pdf}
   
-  \caption{Speedup of SYM-DR. Flu\_Hr-Lb and Flu\_Hr-Hb run out of
+  \caption{Speedup of PB-SYM-DR. Flu\_Hr-Lb and Flu\_Hr-Hb run out of
     memory for 8 and 16 threads.}
   \label{fig:sym-dr-speedup}
 \end{figure}
@@ -808,7 +808,7 @@ similar effect happens on Dengue\_Hr-Hb.
 \begin{figure*}[tbh]
   \includegraphics[width=\linewidth]{analysis/SYM-DD-speedup16.pdf}
   
-  \caption{Speedup of PB-SYM-DD on 16 cores. While PB-SYM-DD achieves good
+  \caption{Speedup of PB-SYM-DD with 16 threads. While PB-SYM-DD achieves good
     speedup in some cases, the overdecomposition overhead usually
     hinders the performance.}
   \label{fig:pb-sym-dd-16-speedup}
@@ -886,8 +886,8 @@ the required size.
 
 \begin{figure*}
   \includegraphics[width=\linewidth]{analysis/SYM-PD-speedup16.pdf}
-  \caption{Speedup of PB-SYM-PD. Not that decomposition that leads to
-    subdomain size smaller that twice the bandwidth are adjusted to
+  \caption{Speedup of PB-SYM-PD using 16 threads. Note that decompositions of
+    subdomain smaller that twice the bandwidths are adjusted to
     that threshold.}
   \label{fig:pb-sym-pd}
 \end{figure*}
@@ -909,7 +909,7 @@ the limited scalability in the initialization phase as outlined above.
 \begin{figure}
   \includegraphics[width=\linewidth]{analysis/PB-SYM-PD-imbalance.pdf}
   \caption{Length of the critical path of the parallel algorithms
-    PB-SYM-PD and PB-SYM-PD-SCHED.}
+    PB-SYM-PD and PB-SYM-PD-SCHED for a 64x64x64 decomposition}
   \label{fig:PB-SYM-PD-loadbalance}
 \end{figure}
 
@@ -943,7 +943,9 @@ the execution has similar drawbacks as PB-SYM-DR.
 
 \begin{figure*}
   \includegraphics[width=\linewidth]{analysis/SYM-PD-COLOR-REP-speedup16.pdf}
-  \caption{Speedup of PB-SYM-PD-REP using 16 threads for different decompositions . Flu\_Hr-Lb and Flu\_Hr-Hb ran out of memory for small decomposition.}
+  \caption{Speedup of PB-SYM-PD-REP using 16 threads for different
+    decompositions. Flu\_Hr-Lb and Flu\_Hr-Hb run out of memory for
+    small decomposition.}
   \label{fig:PB-SYM-PD-REP-speedup}
 \end{figure*}
 
