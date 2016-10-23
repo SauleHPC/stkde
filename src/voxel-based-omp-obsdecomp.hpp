@@ -65,7 +65,6 @@ std::shared_ptr<util::Compact3D<values>> stkde_voxelbased_omp_obsdecomp(const bo
 
   }
   
-  std::cout << decompsizeX << ", " << decompsizeY << ", " << decompsizeT << std::endl;
   std::cerr.precision(9);
   
   std::cerr<<"voxsize: "<<c.voxX<<"x"<<c.voxY<<"x"<<c.voxT<<" size:"<<c.voxX*c.voxY*c.voxT*sizeof(values)/1024./1024.<<"MB"<<std::endl;
@@ -94,24 +93,10 @@ std::shared_ptr<util::Compact3D<values>> stkde_voxelbased_omp_obsdecomp(const bo
     }
   }
   
-    
   util::Compact3D<std::vector<coordinate>> decompX (decompsizeX, decompsizeY, decompsizeT);
   util::Compact3D<std::vector<coordinate>> decompY (decompsizeX, decompsizeY, decompsizeT);
   util::Compact3D<std::vector<coordinate>> decompT (decompsizeX, decompsizeY, decompsizeT);
 
-  std::cout << "3D box stats" << std::endl;
-  std::cout << decompsizeX << ", " << decompsizeY << ", " << decompsizeT << std::endl;
-
-  printf("[(%lf, %lf), (%lf %lf), (%lf %lf)]\n", bb.xl, bb.xh - bb.xl * 0, bb.yl, bb.yh - bb.yl, bb.tl, bb.th - bb.tl);
-
-  int subd_x = (bb.xh - bb.xl) / decompsizeX;
-  int subd_y = (bb.yh - bb.yl) / decompsizeY;
-  int subd_t = (bb.th - bb.tl) / decompsizeT;
-
-  // printf("%lf, %lf, %lf\n", subd_x, subd_y, subd_t);
-  // printf("%lf, %lf, %lf\n", pa.xbw, pa.ybw, pa.tbw);
-  //
-  //  long inter = 0;
   for (int i=0; i< inst.obsx.size(); ++i) {
     auto ox = inst.obsx[i];
     auto oy = inst.obsy[i];
@@ -143,17 +128,39 @@ std::shared_ptr<util::Compact3D<values>> stkde_voxelbased_omp_obsdecomp(const bo
   coordinate xl, xh, yl, yh, tl, th;
   coordinate px, py, pt, obsx, obsy, obst;
   
-  for(int dt = 0; dt < decompsizeT; ++dt) {
-    tl = bb.tl + dt * subd_t;
-    th = std::min(bb.th, tl + subd_t);
-    for(int dy = 0; dy < decompsizeY; ++dy) {
-      yl = bb.yl + dy * subd_y;
-      yh = std::min(bb.yh, yl + subd_y);
-      for(int dx = 0; dx < decompsizeX; ++dx) {
-        // current box
-        xl = bb.xl + dx * subd_x;
-        xh = std::min(bb.xh, xl + subd_x);
+  coordinate next_x = bb.xl;
+  coordinate next_y = bb.yl;
+  coordinate next_t = bb.tl;
+  coordinate bb_xh = floor((bb.xh - bb.xl) / pa.xres) * pa.xres + bb.xl;
+  coordinate bb_yh = floor((bb.yh - bb.yl) / pa.yres) * pa.yres + bb.yl;
+  coordinate bb_th = floor((bb.th - bb.tl) / pa.tres) * pa.tres + bb.tl;
+
+  coordinate subd_x = (bb_xh - bb.xl) / decompsizeX;
+  coordinate subd_y = (bb_yh - bb.yl) / decompsizeY;
+  coordinate subd_t = (bb_th - bb.tl) / decompsizeT;
   
+  int points_x, points_y, points_t;
+  
+  for(int dt = 0; dt < decompsizeT; ++dt) {
+    tl = next_t;
+    th = std::min(bb_th, bb.tl + (int)(((dt+1) * subd_t) / pa.tres) * pa.tres);
+    next_t = th + pa.tres;
+    points_t = (th - tl) / pa.tres + 1;
+    
+    next_y = bb.yl;
+    for(int dy = 0; dy < decompsizeY; ++dy) {
+      yl = next_y;
+      yh = std::min(bb_yh, bb.yl + (int)(((dy+1) * subd_y) / pa.yres) * pa.yres);
+      next_y = yh + pa.yres;
+      points_y = (yh - yl) / pa.yres + 1;
+      next_x = bb.xl;
+      // std::cout << std::endl;
+      for(int dx = 0; dx < decompsizeX; ++dx) {
+        xl = next_x;
+        xh = std::min(bb_xh, bb.xl + (int)((1+dx) * subd_x / pa.xres) * pa.xres);
+        next_x = xh + pa.xres;
+        points_x = (xh - xl) / pa.xres + 1;  
+    
         for(int xbase = dx-1; xbase < dx+2; xbase++) {
           for(int ybase = dy-1; ybase < dy+2; ybase++) {
             for(int tbase = dt-1; tbase < dt+2; tbase++) {
@@ -163,12 +170,13 @@ std::shared_ptr<util::Compact3D<values>> stkde_voxelbased_omp_obsdecomp(const bo
                 // points inside this box can affect 
                 // the grid points in the current box
                 #pragma omp for collapse(3) schedule(dynamic,1)
-                for(int t = 0; t < subd_t; t++) {
-                  for(int y = 0; y < subd_y; y++) {
-                    for(int x = 0; x < subd_x; x++) {
+                for(int t = 0; t < points_t; t++) {
+                  for(int y = 0; y < points_y; y++) {
+                    for(int x = 0; x < points_x; x++) {
                       pt = tl + t * pa.tres;
                       py = yl + y * pa.yres;
                       px = xl + x * pa.xres;
+                      // std::cout << px << ", " << py << ", " << pt << std::endl;
                       int n = decompX(xbase, ybase, tbase).size();
                       for(int o = 0; o < n; o++)  {
                         obsx = decompX(xbase, ybase, tbase)[o];
@@ -176,6 +184,7 @@ std::shared_ptr<util::Compact3D<values>> stkde_voxelbased_omp_obsdecomp(const bo
                         obst = decompT(xbase, ybase, tbase)[o];
                         if(abs(obst - pt) <= pa.tres) {
                           if(sqrt((px - obsx) * (px - obsx) + (py - obsy) * (py - obsy)) <= pa.xres) {
+                            eval++;
                             co(x, y, t) += densityF(obsx, obsy, obst, px, py, pt, inst.obsx.size(), pa.xres, pa.tres);
                           }
                         }
@@ -188,11 +197,8 @@ std::shared_ptr<util::Compact3D<values>> stkde_voxelbased_omp_obsdecomp(const bo
           }
         }
       } 
-      // break;
     }
-    // break;
   }
-  
   util::timestamp compend;
 
   //std::cerr<<"intersect: "<<inter<<std::endl;
