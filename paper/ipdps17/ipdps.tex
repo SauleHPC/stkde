@@ -462,20 +462,28 @@ points to be replicated across multiple subdomain which incurs
 additional work. Indeed for a particular point replicated in two
 subdomains (if it is replicated in more, a similar effect happens),
 its cylinder is split across two subdomain. Assume the split is
-temporal, then using PB-SYM in each subdomain will need to compute part of
-the temporal invariant, the entire spatial invariant, and part of the
-cylinder. Therefore both subdomain needed to compute the entire
-spatial invariant.
+temporal, then using PB-SYM in each subdomain will need to compute
+part of the temporal invariant, the entire spatial invariant, and part
+of the cylinder. Therefore both subdomain needed to compute the entire
+spatial invariant. See Figure~\ref{fig:pb-sym-dd-overhead} for a
+graphical depiction of this phenomenon.
 
-\todo{draw figure that examplify the issue}
+\begin{figure}
+  \centering
+  \includegraphics[width=.7\linewidth]{figures/PB-SYM-DD-overhead.pdf}
+  \caption{When a cylinder is split among two subdomains, PB-SYM-DD
+    causes an overhead because one of the invariant needs to be
+    recomputed. Here here subdomain compute part of the temporal
+    invariant $K_s$, but both need to compute the spatial invariant $K_t$.}
+  \label{fig:pb-sym-dd-overhead}
+\end{figure}
 
 If the algorithms keeps the number of subdomain small such that each
 point is not replicated more than a constant number of time then
 the work performed when expressed in Big-Oh notation does not change.
 (This can be achieved, for instance, by having subdomains larger than
 $H_s \times H_s \times H_t$.) However, the practical amount of work can
-increase by a non negligable factor. (We will see factors of about 1.5
-in the experiments.)
+increase by a non negligable factor. 
 
 An other issue with Domain Decomposition is load imbalance. The
 points are unlikely well distributed in the domain space, but
