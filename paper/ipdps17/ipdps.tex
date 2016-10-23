@@ -9,8 +9,6 @@
 
 \usepackage{subfigure}
 \usepackage{hyperref}
-\usepackage[noend]{algorithm2e}
-\usepackage{algorithmicx}
 \usepackage{graphicx}
 \usepackage{amssymb}
 \usepackage{amsmath}
@@ -19,8 +17,13 @@
 \let\endproof\relax
 \usepackage{amsthm}
 
+\usepackage{xspace}
+\usepackage{algorithm}% http://ctan.org/pkg/algorithm
+\usepackage[noend]{algpseudocode}% http://ctan.org/pkg/algorithmicx
+
 \newcommand{\todo}[1]{\color{red}\textbf{\hl{\{ #1 \}}}\color{black}\xspace}
 \newcommand{\ceil}[1]{\left\lceil #1 \right\rceil}
+\newcommand{\floor}[1]{\left\lfloor #1 \right\rfloor}
 
 \begin{document}
 \title{High Performance Space-Time Kernel Density Estimation}
@@ -130,6 +133,8 @@ techniques, and discuss their applicability.
 
 \subsection{Description}
 
+\todo{paraphrase}
+
 Space-time kernel density (STKDE) is used for identifying
 spatiotemporal patterns of underlying datasets. It is a temporal
 extension of the traditional 2D kernel density
@@ -162,7 +167,8 @@ Figure~\ref{fig:stkde-ex} presents the different 3-Dimensional heat
 maps that results from this process. Different spatial and temporal
 bandwidth where used when computing the STKDE which highlights how
 changing the bandwidth helps focusing the graphical visualization of
-Dengue fever cases in Cali, Colombia.
+Dengue fever cases in Cali, Colombia. While Figure~\ref{fig:stkde}
+shows the impact of a single point on the neighboring space.
 
 \begin{figure}
   \subfigure[$h_s = 2500m$, $h_t = 14 days$]{\includegraphics[page=1, width=.45\linewidth, trim={8cm 3.8cm 8cm 10cm}, clip]{figures/dengue-viz.pdf}}
@@ -171,6 +177,16 @@ Dengue fever cases in Cali, Colombia.
   \caption{Visualization of Dengue fever cases in Cali, Colombia in
     2010 and 2011 for different spatial bandwidth and temporal bandwidth.}
   \label{fig:stkde-ex}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=.5\linewidth]{figures/stkde.pdf}
+  \caption{The computation of STKDE happens in a domain space of size
+    $g_x,g_y,g_t$. Each point impacts the neighboring space at a
+    distance $h_s$ in space and $h_t$ in time; forming a cylinder of
+    diameter $2 h_s$ and of height $2 h_t$.}
+  \label{fig:stkde}
 \end{figure}
 
 Computationally, the domain of size $g_x$, $g_y$, $g_t$ is discretized
@@ -183,18 +199,23 @@ radius equal to the spatial bandwidth in voxels
 $H_s=\ceil{\frac{h_s}{sres}}$, and of half height equal to the
 temporal bandwidth $H_t=\ceil{\frac{h_t}{tres}}$.
 
-All the notations are summarized in Table~\ref{tab:notation}.
+All the notations are summarized in Table~\ref{tab:notation}. As a
+convention all uppercase notation denote quantities in voxels and all
+lowercase notation denote quantities in domain space.
 
 \begin{table}
   \centering
   \begin{tabular}{|l|l|}
     \hline 
     $n$ & Number of points\\
+    $s = (x,y,t)$ & A voxel and sampling coordinate\\
     $(x_i, y_i, t_i)$ & Coordinate of point $i$\\
     $h_s$, $h_t$ & Spatial and temporal bandwidth \\ 
     $g_x, g_y, g_t$ & Real size of the domain (in meters) \\
     \hline
     $sres$, $tres$ & Resolution (in meters) \\
+    $s = (X,Y,T)$ & A voxel in voxel space\\
+    $(X_i, Y_i, T_i)$ & Voxel of point $i$\\
     $G_x, G_y, G_t$ & Size of the domain (in voxels)\\
     $H_s, H_t$ & Bandwidth (in voxels) \\
     \hline 
@@ -203,26 +224,38 @@ All the notations are summarized in Table~\ref{tab:notation}.
   \label{tab:notation}
 \end{table}
 
+
+
 \subsection{Gold Standard Implementation}
 
-The gold standard implementation follows the exact definition of stkde
+The gold standard implementation follows the exact definition of STKDE
 as it is given above. It is a voxel-based algorithm we call VB. For
 each voxel, VB finds the close points and calculate contribution
-to the density of this particular voxel.
+to the density of this particular voxel. The pseudo code is given in Algorithm~\ref{alg:vb}.
 
-\todo{include voxel based algorithm}
+\begin{algorithm}
+\caption{\textsc{VB}}
+\scriptsize
+\begin{algorithmic}
+\For{all voxels $s=(x,y,t)$}
+\State $sum = 0$
+  \For{all points $i$ at $x_i, y_i, t_i$}
+    \If{$\sqrt{(x_i-x)^2+(y_i-y)^2}< h_s$ and $|t_i-t| \leq h_t$}
+    \State $sum += k_s(\frac{x-x_i}{h_s},\frac{y-y_i}{h_s}) k_t(\frac{t-t_i}{h_t})$
+    \EndIf
+  \EndFor
+  \State $stkde[X][Y][T] = \frac{sum}{n h_s^2h_t}$
+\EndFor
+\end{algorithmic}
+\label{alg:vb}
+\end{algorithm}
+
 
 The algorithm does $\theta(G_x G_y G_t n)$ distance test and computes
 $\theta(n H_s^2 H_t )$ density. Noticing that the bandwidth has to be
 smaller than the grid size, the complexity of the algorithm is
-$\theta(G_x G_y G_t n )$.
-
-Requires $\theta(G_x G_y G_t)$ memory.
-
-\todo{make sure cylinder is properly explaine somewhere}
-
-
-
+$\theta(G_x G_y G_t n )$. And it requires $\theta(G_x G_y G_t)$
+memory.
 
 \section{Algorithm Design and Engineering}
 
@@ -233,9 +266,32 @@ The voxel-based algorithm suffers from a massive cost of computing
 distances. The gold implementation reduces them by extremely
 decomposition the domain, but that still incures a significant
 overhead. These calculation are mostly unnecessary since we know
-exactly where each point will radiate density. The point-based algorithm PB leverages that property.
+exactly where each point will radiate density. The point-based
+algorithm PB, given in Algorithm~\ref{alg:pb}, leverages that
+property.
 
-\todo{spell out algorithm}
+\begin{algorithm}
+\caption{\textsc{PB}}
+\scriptsize
+\begin{algorithmic}
+\For{all voxels $s=(x,y,t)$}
+  \State $stkde[X][Y][T] = 0$
+\EndFor
+%
+\For{each points $i$ at $x_i, y_i, t_i$}
+  \For{$X_i - H_s\leq X \leq X_i+H_s$}
+    \For{$Y_i - H_s\leq Y \leq Y_i+H_s$}
+      \For{$T_i - T_s\leq T \leq T_i+H_s$}
+        \If{$\sqrt{(x_i-x)^2+(y_i-y)^2}< h_s$ and $|t_i-t| \leq h_t$}
+        \State $stkde[X][Y][T] += \frac{k_s(\frac{x-x_i}{h_s},\frac{y-y_i}{h_s}) k_t(\frac{t-t_i}{h_t})}{n h_s^2h_t}$
+        \EndIf
+      \EndFor
+    \EndFor
+  \EndFor
+\EndFor
+\end{algorithmic}
+\label{alg:pb}
+\end{algorithm}
 
 The algorithm PB incurs mostly two costs. Initializing the memory which costs
 $\Theta(G_x G_y G_t)$ and computing the impact of each point
@@ -252,15 +308,22 @@ approximately 40 floating point operations. (The exact cost is
 difficult to estimate since there are floating point additions,
 multiplications, divisions, and square root operations.)
 
-One can remark that the calculation is mostly redundant. \todo{give
-  precise formula.}  Indeed for one particular point, its
-contribution to the neighbooring vertices can be decomposed in two
-components. One that only depends on the spatial coordinate of the
-voxel with respect to the point and does not depend on its
-temporal coordinate. And one that only depends on the temporal
-coordinate and not on the spatial coordinate.
+One can remark that the calculation is mostly redundant since for one
+particular point, its contribution to the neighbooring vertices can be
+decomposed in two components. $K_s(x,y)$ that only depends on the
+spatial coordinate of the voxel with respect to the point and does not
+depend on its temporal coordinate. And $K_t(t)$ that only depends on
+the temporal coordinate and not on the spatial coordinate. See
+Figure~\ref{fig:pb-sym-decomposition} for a graphical depiction.
 
-\todo{include figure.}
+\begin{figure}
+  \centering
+  \includegraphics[width=.7\linewidth]{figures/PB-SYM.pdf}
+  \caption{The contribution to the density estimate of each voxel of a
+    cylinder can be decomposed in two terms, one temporally invariant
+    $K_s(x,y)$ and one spatially invariant $K_t(t)$.}
+  \label{fig:pb-sym-decomposition}
+\end{figure}
 
 Therefore, one can write an algorithm to leverage these symmetries in
 the problem. We wrote three variants, the PB-DISK variant ensures that
@@ -268,13 +331,48 @@ the invariant on the spatial domain is only computed once. The PB-BAR
 variant ensures that the invariant on the temporal domain is only
 computed once. The PB-SYM variant computes independently the spatial
 invariant and the temporal invariant and then adds the density caused
-by the point by taking the product of the two invariants. Notice
-that leveraging the symmetries in the calculation does not change the
-complexity. The PB-SYM algorithm still has a complexity of $\Theta(G_x 
-G_y  G_t + n  H_s^2  H_t)$. However the number of flops reduced to 
-\todo{estimate flop cost.}
+by the point by taking the product of the two invariants. See pseudocode in Algorithm~\ref{alg:pb-sym}.
+Notice that leveraging the symmetries in the calculation does not change the
+complexity (PB-SYM still has a complexity of $\Theta(G_x 
+G_y  G_t + n  H_s^2  H_t)$) but reduces the number of flops.
 
-\todo{include pseudo code of the SYM variant.}
+\begin{algorithm}
+\caption{\textsc{PB-SYM}}
+\scriptsize
+\begin{algorithmic}
+\For{all voxels $s=(x,y,t)$}
+  \State $stkde[X][Y][T] = 0$
+\EndFor
+%
+\For{each points $i$ at $x_i, y_i, t_i$}
+  \For{$X_i - H_s\leq X \leq X_i+H_s$}
+    \For{$Y_i - H_s\leq Y \leq Y_i+H_s$}
+      \If{$\sqrt{(x_i-x)^2+(y_i-y)^2}< h_s$ }
+        \State $K_s[X][Y] = \frac{k_s(\frac{x-x_i}{h_s},\frac{y-y_i}{h_s})}{n h_s^2h_t}$
+      \Else
+        \State $K_s[X][Y] = 0$
+      \EndIf
+    \EndFor
+  \EndFor
+  \For{$T_i - T_s\leq T \leq T_i+H_s$}
+    \If{$|t_i-t| \leq h_t$}
+      \State $K_t[T] = k_t(\frac{t-t_i}{h_t})$
+    \Else
+      \State $K_t[T] = 0$
+    \EndIf
+  \EndFor
+%
+  \For{$X_i - H_s\leq X \leq X_i+H_s$}
+    \For{$Y_i - H_s\leq Y \leq Y_i+H_s$}
+      \For{$T_i - T_s\leq T \leq T_i+H_s$}
+        \State $stkde[X][Y][T] +=  K_s[X][Y] K_t[T]$
+      \EndFor
+    \EndFor
+  \EndFor
+\EndFor
+\end{algorithmic}
+\label{alg:pb-sym}
+\end{algorithm}
 
 Notice that this exploitation of symmetries is not possible in a voxel
 based algorithm.
@@ -293,20 +391,44 @@ units. Thosugh if two close-by points are computed
 simultaneously, the cylinder of density around it might collide and
 there is a race condition.
 
-The PB-SYM-DR algorithm solves the data race issue by having
-each of the $P$ computational unit aggregate the result on a local
-copy of the domain. Once all the points have been processed, the
-$P$ copies need to be summed.
+The PB-SYM-DR algorithm solves the data race issue by having each of
+the $P$ computational unit aggregate the result on a local copy of the
+domain. Once all the points have been processed, the $P$ copies need
+to be summed. The pseudo code of PB-SYM-DR is given in
+Algorithm~\ref{alg:pb-sym-dr}.
 
 This algorithm has a memory requirement of $\Theta (P  G_x  G_y  G_t)$
 and a parallel amount of work of $\Theta (P  G_x  G_y  G_t + n  H_s^2
  H_t)$. Though the increase in work enables the parallelism to be
-pleasingly parallel. (It is actually in two pleasingly parallel phases,
-processing the points and reducing the partial results.)
+pleasingly parallel. (It is actually in three pleasingly parallel phases:
+initializing the memory, processing the points, and reducing the partial results.)
 
-\todo{give pseudo code of the algorithm}
+\begin{algorithm}
+\caption{\textsc{PB-SYM-DR}}
+\scriptsize
+\begin{algorithmic}
+\For{all processor $p \leq P$ in parallel}
+  \For{all voxels $s=(x,y,t)$}
+    \State $stkdel[p][X][Y][T] = 0$
+  \EndFor
+\EndFor
+%
+\For{each points $i$ at $x_i, y_i, t_i$ distributed among the $P$ processors}
+  \State Processor $p$ processes $i$ using PB-SYM and aggregate it in $stkdel[p]$
+\EndFor
+%
+\For{all voxels $s=(x,y,t)$ in parallel}
+  \State $stkde[X][Y][T] = 0$
+  \For{all processor $p \leq P$}
+    \State $stkde[X][Y][T] += stkdel[p][X][Y][T]$
+  \EndFor
+\EndFor
+\end{algorithmic}
+\label{alg:pb-sym-dr}
+\end{algorithm}
 
 \subsection{Domain Decomposition}
+\label{sec:pb-sym-dd}
 
 An other strategy to avoid the data race is by computing the intensity
 of the voxels of different subdomains independently. The PB-SYM-DD
@@ -314,9 +436,26 @@ algorithm splits the domain in AxBxC subdomains. And each subdomain is
 associated the points which cylinder intersects with a voxel of
 the subdomain. Then the algorithm proceeds with processing each
 subdomain independently by only considering the impact of the
-point on the voxels within the subdomain.
+point on the voxels within the subdomain. See Algorithm~\ref{alg:pb-sym-dd} for pseudo code.
 
-\todo{include algorithm}
+\begin{algorithm}
+\caption{\textsc{PB-SYM-DD}}
+\scriptsize
+\begin{algorithmic}
+\For{all points $i=(x_i,y_i,t_i)$}
+  \For{each subdomain $(a,b,c)$}
+        \If{$(X,Y,T) \pm (H_s,H_s,H_T)$ intersects \\$(\floor{\frac{a G_x}{A}}:\ceil{\frac{(a+1) G_x}{A}}, \floor{\frac{b G_y}{B}}:\ceil{\frac{(b+1) G_y}{B}}, \floor{\frac{c G_t}{C}}:\ceil{\frac{(c+1) G_t}{C}})$}
+          \State $localpoints[a][b][c].add(x_i,y_i,t_i)$
+        \EndIf
+  \EndFor
+\EndFor
+%
+\For{each subdomain $(a,b,c)$ in parallel}
+  \State Process subdomain $(a,b,c)$ using PB-SYM
+\EndFor
+\end{algorithmic}
+\label{alg:pb-sym-dd}
+\end{algorithm}
 
 The main problem with Domain Decomposition is that it requires some
 points to be replicated across multiple subdomain which incurs
@@ -351,6 +490,7 @@ the gain in load balance.
 \label{sec:pb-sym-point}
 
 \subsection{Point Decomposition}
+\label{sec:pb-sym-pd}
 
 Both of the previous strategies increase the amount of work
 significantly. We want to achieve parallelism without cutting a
@@ -378,20 +518,44 @@ processes the sets the one after the other by doing each subdomain
 within a set in parallel. In practice, this is implemented using
 $8$ OpenMP parallel for construct.
 
-\todo{include algorithm}
+\begin{algorithm}
+\caption{\textsc{PB-SYM-PD}}
+\scriptsize
+\begin{algorithmic}
+\For{all points $i=(x_i,y_i,t_i)$}
+  \State $localpoints[\floor{\frac{A X}{G_x}}][\floor{\frac{B Y}{G_y}}][\floor{\frac{C T}{G_t}}].add(x_i,y_i,t_i)$
+\EndFor
+%
+\For{$abase \in \{-1;0;+1\}$}
+  \For{$bbase \in \{-1;0;+1\}$}
+    \For{$cbase \in \{-1;0;+1\}$}
+      \State Do the work of the next three loops in parallel
+      \For{$a = abase; a \leq A; a+=2$}
+        \For{$b = bbase; b \leq B; b+=2$}
+          \For{$c = cbase; c \leq C; c+=2$}
+            \State Process points in $localpoints[a][b][c]$ using PB-SYM
+          \EndFor
+        \EndFor
+      \EndFor
+    \EndFor
+  \EndFor
+\EndFor
+\end{algorithmic}
+\label{alg:pb-sym-pd}
+\end{algorithm}
 
 
 \subsection{Coloring and Scheduling}
 
 Note that such an implementation overconstrains the execution of the
-algorithm. Indeed, despite they are not in the same set, subdomain
-$1, 0, 0$ and $64, 64, 64$ can be computed at the same time. The real
+algorithm. Indeed, despite they are not in the same set, subdomain $1,
+0, 0$ and $64, 64, 64$ can be computed at the same time. The real
 constraint is that the points contained in a subdomain can be
 processed safely as long as none of the point contained in a
 neighboring subdomain is being processed. Using the OpenMP tasking
-construct with dependency introduced in OpenMP 4.0 \todo{cite
-  openmpspec}, one can precisely express this constraint, which is a
-27-point stencil constraint.
+construct with dependency introduced in OpenMP 4.0~\cite{OpenMP4}, one
+can precisely express this constraint, which is a 27-point stencil
+constraint.
 
 Formally speaking, this problem is a combination of multiple very
 classical graphs and scheduling problem. Modeling the subdomains as a
@@ -427,7 +591,7 @@ of the subdomain. We will use a greedy coloring algorithm which will
 consider the subdomains in a particular order and for each subdomain
 will color it with the smallest color that does not conflict with the
 already colored neighbors. Such greedy coloring algorithm are commonly
-used in parallel computing application~\cite{}. However, we will use
+used in parallel computing application~\cite{GMP05,Boman05-EuroPar,Deveci2016}. However, we will use
 an ordering that color the vertices in non-increasing order of the
 number of point contained in the subdomain. While this algorithm is a
 heuristic, it is likely to obtain a coloring that minimizes the
@@ -447,9 +611,7 @@ subdomain causes to have to initialize additional subdomains and to
 reduce them which increases the work in a similar way
 PB-SYM-DR. However, the replication should be limited to a few chains
 in the graph and therefore should limit the overhead. Note that this
-problem is similar to scheduling a DAG of moldable tasks~\cite{}.
-
-\todo{check sascha's paper and ref therein.}
+problem is similar to scheduling a DAG of moldable tasks~\cite{Lepere02,Hunold13}.
 
 \section{Experiments}
 
@@ -525,7 +687,7 @@ low, high and veryhigh bandwidth. See details in Table~\ref{tab:instance}.
 \end{table}
 
 Table~\ref{tab:seq_table} presents the runtime of the point-based
-algorithms presented in Section~\ref{ref:algo-seq}. The runtime are
+algorithms presented in Section~\ref{sec:algo-seq}. The runtime are
 given in seconds. As expected for each dataset, the runtime increases
 with resolution and bandwidth. Exploiting the disk invariant with
 PB-DISK provides a large reduction in the runtime, even more so when
@@ -603,7 +765,7 @@ reference.)
   \label{fig:pb-sym-dd-speedup}
 \end{figure*}
 
-The PB-SYM-DD algorithm (described in Section~\ref{}) also has some
+The PB-SYM-DD algorithm (described in Section~\ref{sec:pb-sym-dd}) also has some
 overhead induced by cut cylinder surrounding a point. To measure the
 overhead beforehand, we run the decomposition algorithm using
 different number of subdomains ranging from a single subdomain (1x1x1)
@@ -715,10 +877,10 @@ speedup on the entire calculation would only be $3.54$.
 PB-SYM-DD does not achieve linear speedup on many of the instances
 because the domain decomposition induces redundant calculations. But a
 point decomposition would not have that kind of overhead. The
-performance of PB-SYM-PD if shown in Figure~\ref{fig:pb-sym-pd} for
+performance of PB-SYM-PD is shown in Figure~\ref{fig:pb-sym-pd} for
 different decomposition. Note that there is a requirement in PB-SYM-PD
 that the subdomain be larger than twice the bandwidth (see details in
-Section~\ref{sec:algo-pb-sym}). Therefore if the number of subdomain
+Section~\ref{sec:pb-sym-pd}). Therefore if the number of subdomain
 leads to too small subdomains, the decomposition is adjusted to fit
 the required size.
 
@@ -802,17 +964,17 @@ On the particular topic of executing stkde in parallel. There are
 little related works. Mostly, \todo{...}
 
 In parallel computing community the two most common spatial algorithm
-are N-body interactions~\cite{} and Particle in Cell
-simulations~\cite{}. Though stkde is different in the sense that there
+are N-body interactions~\cite{Aaseth03} and Particle in Cell
+simulations~\cite{karimabadi06}. Though stkde is different in the sense that there
 is no iterating over the problem multiple times as we see in the
 timesteps of N-body or particle in cell, no direct interation between
 points, and no field updates as in Particle in Cell (unless you
 consider a field discretized at a one voxel size which makes the
 analogy not quite useful).
 
-Spatial application can use spatial partitioning techniques either
-using recursive bisection~\cite{}, jagged partition~\cite{}, or
-rectilinear partitioning~\cite{}. Depending on the algorithms used for
+Spatial application can use spatial partitioning techniques 
+such as recursive bisection~\cite{berger87}, jagged partition~\cite{ujaldon96,pinar97,Deveci15}, or
+rectilinear partitioning~\cite{nicol94,manne96}. Depending on the algorithms used for
 stkde, the objective function is different. A partitioning for
 PB-SYM-DD needs a good load balance and to minimize the number of cut
 cylinder and could take arbitrarily shaped partitioning. But PB-SYM-PD
