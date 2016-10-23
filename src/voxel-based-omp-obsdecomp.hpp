@@ -169,7 +169,7 @@ std::shared_ptr<util::Compact3D<values>> stkde_voxelbased_omp_obsdecomp(const bo
               tbase >= 0 and tbase < decompsizeT) {
                 // points inside this box can affect 
                 // the grid points in the current box
-                #pragma omp for collapse(3) schedule(dynamic,1)
+                #pragma omp for collapse(3) schedule(dynamic,1024)
                 for(int t = 0; t < points_t; t++) {
                   for(int y = 0; y < points_y; y++) {
                     for(int x = 0; x < points_x; x++) {
