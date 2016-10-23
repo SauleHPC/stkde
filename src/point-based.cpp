@@ -43,6 +43,7 @@ int main (int argc, char* argv[]) {
       || method.compare("POINTBASED-SYMOMP-OBSDECOMP") == 0
       || method.compare("POINTBASED-SYMOMP-OBSDECOMP-COLORSCHED") == 0
       || method.compare("POINTBASED-SYMOMP-OBSDECOMP-COLORSCHED-REP") == 0
+      || method.compare("VOXELBASED-OMP-OBSDECOMP") == 0
       || method.compare("POINTBASED-SYMOMP-OBSDECOMP-SCHED") == 0) {
     decompX = atoi(argv[5]);
     decompY = atoi(argv[6]);
