@@ -514,16 +514,24 @@ the points in $A \times B \times C$ subdomain of identical
 size. As long as these subdomains are larger than $2 h_s$ in a spatial
 dimension and $2 h_t$ in the temporal dimension, then the points
 in domain $x, y, z$ can be done concurently with the points in
-$x + 2, y, z$.
+$x + 2, y, z$. See Figure~\ref{fig:PB-SYM-PD-str} for a graphical depiction.
 
-\todo{include figure that show the decomposition}
+\begin{figure}
+  \centering
+  \includegraphics[width=.6\linewidth]{figures/PB-SYM-PD-str.pdf}
+  \caption{Provided the subdomains are larger than twice the
+    bandwidth, the points contained in each blue boxes can be
+    performed simultaneously.}
+  \label{fig:PB-SYM-PD-str}
+\end{figure}
 
 We implemented a first version of this algorithm that organizes the
 subdomain in 8 sets where the first set is composed of the subdomains
 $2i, 2j, 2k$, the second of all the subdomains $2 i + 1, 2 j, 2 k$,
-the third of all the subdomains $2 i, 2 j + 1, 2 k$, etc.. The algorithm
-processes the sets the one after the other by doing each subdomain
-within a set in parallel. In practice, this is implemented using
+the third of all the subdomains $2 i, 2 j + 1, 2 k$, etc.. The
+algorithm processes the sets the one after the other by doing each
+subdomain within a set in parallel. Two such sets are depicted in
+Figure~\ref{fig:PB-SYM-PD-str}. In practice, this is implemented using
 $8$ OpenMP parallel for construct.
 
 \begin{algorithm}
