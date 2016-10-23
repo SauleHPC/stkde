@@ -384,14 +384,14 @@ $8$ OpenMP parallel for construct.
 \subsection{Coloring and Scheduling}
 
 Note that such an implementation overconstrains the execution of the
-algorithm. Indeed, despite they are not in the same set, subdomain
-$1, 0, 0$ and $64, 64, 64$ can be computed at the same time. The real
+algorithm. Indeed, despite they are not in the same set, subdomain $1,
+0, 0$ and $64, 64, 64$ can be computed at the same time. The real
 constraint is that the points contained in a subdomain can be
 processed safely as long as none of the point contained in a
 neighboring subdomain is being processed. Using the OpenMP tasking
-construct with dependency introduced in OpenMP 4.0 \todo{cite
-  openmpspec}, one can precisely express this constraint, which is a
-27-point stencil constraint.
+construct with dependency introduced in OpenMP 4.0~\cite{OpenMP4}, one
+can precisely express this constraint, which is a 27-point stencil
+constraint.
 
 Formally speaking, this problem is a combination of multiple very
 classical graphs and scheduling problem. Modeling the subdomains as a
@@ -427,7 +427,7 @@ of the subdomain. We will use a greedy coloring algorithm which will
 consider the subdomains in a particular order and for each subdomain
 will color it with the smallest color that does not conflict with the
 already colored neighbors. Such greedy coloring algorithm are commonly
-used in parallel computing application~\cite{}. However, we will use
+used in parallel computing application~\cite{GMP05,Boman05-EuroPar,Deveci2016}. However, we will use
 an ordering that color the vertices in non-increasing order of the
 number of point contained in the subdomain. While this algorithm is a
 heuristic, it is likely to obtain a coloring that minimizes the
@@ -447,9 +447,7 @@ subdomain causes to have to initialize additional subdomains and to
 reduce them which increases the work in a similar way
 PB-SYM-DR. However, the replication should be limited to a few chains
 in the graph and therefore should limit the overhead. Note that this
-problem is similar to scheduling a DAG of moldable tasks~\cite{}.
-
-\todo{check sascha's paper and ref therein.}
+problem is similar to scheduling a DAG of moldable tasks~\cite{Lepere02,Hunold13}.
 
 \section{Experiments}
 
@@ -802,17 +800,17 @@ On the particular topic of executing stkde in parallel. There are
 little related works. Mostly, \todo{...}
 
 In parallel computing community the two most common spatial algorithm
-are N-body interactions~\cite{} and Particle in Cell
-simulations~\cite{}. Though stkde is different in the sense that there
+are N-body interactions~\cite{Aaseth03} and Particle in Cell
+simulations~\cite{karimabadi06}. Though stkde is different in the sense that there
 is no iterating over the problem multiple times as we see in the
 timesteps of N-body or particle in cell, no direct interation between
 points, and no field updates as in Particle in Cell (unless you
 consider a field discretized at a one voxel size which makes the
 analogy not quite useful).
 
-Spatial application can use spatial partitioning techniques either
-using recursive bisection~\cite{}, jagged partition~\cite{}, or
-rectilinear partitioning~\cite{}. Depending on the algorithms used for
+Spatial application can use spatial partitioning techniques 
+such as recursive bisection~\cite{berger87}, jagged partition~\cite{ujaldon96,pinar97,Deveci15}, or
+rectilinear partitioning~\cite{nicol94,manne96}. Depending on the algorithms used for
 stkde, the objective function is different. A partitioning for
 PB-SYM-DD needs a good load balance and to minimize the number of cut
 cylinder and could take arbitrarily shaped partitioning. But PB-SYM-PD
