@@ -160,22 +160,23 @@ std::shared_ptr<util::Compact3D<values>> stkde_voxelbased_omp_obsdecomp(const bo
         xh = std::min(bb_xh, bb.xl + (int)((1+dx) * subd_x / pa.xres) * pa.xres);
         next_x = xh + pa.xres;
         points_x = (xh - xl) / pa.xres + 1;  
-    
-        for(int xbase = dx-1; xbase < dx+2; xbase++) {
-          for(int ybase = dy-1; ybase < dy+2; ybase++) {
-            for(int tbase = dt-1; tbase < dt+2; tbase++) {
-              if(xbase >= 0 and xbase < decompsizeX && 
-              ybase >= 0 and ybase < decompsizeY &&
-              tbase >= 0 and tbase < decompsizeT) {
-                // points inside this box can affect 
-                // the grid points in the current box
-                #pragma omp for collapse(3) schedule(dynamic,1)
-                for(int t = 0; t < points_t; t++) {
-                  for(int y = 0; y < points_y; y++) {
-                    for(int x = 0; x < points_x; x++) {
-                      pt = tl + t * pa.tres;
-                      py = yl + y * pa.yres;
-                      px = xl + x * pa.xres;
+        
+        #pragma omp for collapse(3) schedule(dynamic,1024)
+        for(int t = 0; t < points_t; t++) {
+          for(int y = 0; y < points_y; y++) {
+            for(int x = 0; x < points_x; x++) {
+              pt = tl + t * pa.tres;
+              py = yl + y * pa.yres;
+              px = xl + x * pa.xres;
+        
+              for(int xbase = dx-1; xbase < dx+2; xbase++) {
+                for(int ybase = dy-1; ybase < dy+2; ybase++) {
+                  for(int tbase = dt-1; tbase < dt+2; tbase++) {
+                    if(xbase >= 0 and xbase < decompsizeX && 
+                      ybase >= 0 and ybase < decompsizeY &&
+                      tbase >= 0 and tbase < decompsizeT) {
+                      // points inside this box can affect 
+                      // the grid points in the current box
                       // std::cout << px << ", " << py << ", " << pt << std::endl;
                       int n = decompX(xbase, ybase, tbase).size();
                       for(int o = 0; o < n; o++)  {
