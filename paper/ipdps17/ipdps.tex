@@ -409,6 +409,7 @@ initializing the memory, processing the points, and reducing the partial results
 \end{algorithm}
 
 \subsection{Domain Decomposition}
+\label{sec:pb-sym-dd}
 
 An other strategy to avoid the data race is by computing the intensity
 of the voxels of different subdomains independently. The PB-SYM-DD
@@ -470,6 +471,7 @@ the gain in load balance.
 \label{sec:pb-sym-point}
 
 \subsection{Point Decomposition}
+\label{sec:pb-sym-pd}
 
 Both of the previous strategies increase the amount of work
 significantly. We want to achieve parallelism without cutting a
@@ -666,7 +668,7 @@ low, high and veryhigh bandwidth. See details in Table~\ref{tab:instance}.
 \end{table}
 
 Table~\ref{tab:seq_table} presents the runtime of the point-based
-algorithms presented in Section~\ref{ref:algo-seq}. The runtime are
+algorithms presented in Section~\ref{sec:algo-seq}. The runtime are
 given in seconds. As expected for each dataset, the runtime increases
 with resolution and bandwidth. Exploiting the disk invariant with
 PB-DISK provides a large reduction in the runtime, even more so when
@@ -744,7 +746,7 @@ reference.)
   \label{fig:pb-sym-dd-speedup}
 \end{figure*}
 
-The PB-SYM-DD algorithm (described in Section~\ref{}) also has some
+The PB-SYM-DD algorithm (described in Section~\ref{sec:pb-sym-dd}) also has some
 overhead induced by cut cylinder surrounding a point. To measure the
 overhead beforehand, we run the decomposition algorithm using
 different number of subdomains ranging from a single subdomain (1x1x1)
@@ -856,10 +858,10 @@ speedup on the entire calculation would only be $3.54$.
 PB-SYM-DD does not achieve linear speedup on many of the instances
 because the domain decomposition induces redundant calculations. But a
 point decomposition would not have that kind of overhead. The
-performance of PB-SYM-PD if shown in Figure~\ref{fig:pb-sym-pd} for
+performance of PB-SYM-PD is shown in Figure~\ref{fig:pb-sym-pd} for
 different decomposition. Note that there is a requirement in PB-SYM-PD
 that the subdomain be larger than twice the bandwidth (see details in
-Section~\ref{sec:algo-pb-sym}). Therefore if the number of subdomain
+Section~\ref{sec:pb-sym-pd}). Therefore if the number of subdomain
 leads to too small subdomains, the decomposition is adjusted to fit
 the required size.
 
