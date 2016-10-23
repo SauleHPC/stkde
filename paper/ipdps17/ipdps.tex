@@ -260,6 +260,10 @@ property.
 \caption{\textsc{PB}}
 \scriptsize
 \begin{algorithmic}
+\For{all voxels $s=(x,y,t)$}
+  \State $stkde[X][Y][T] = 0$
+\EndFor
+%
 \For{each points $i$ at $x_i, y_i, t_i$}
   \For{$X_i - H_s\leq X \leq X_i+H_s$}
     \For{$Y_i - H_s\leq Y \leq Y_i+H_s$}
@@ -316,17 +320,25 @@ G_y  G_t + n  H_s^2  H_t)$. However the number of flops reduced to
 \caption{\textsc{PB-SYM}}
 \scriptsize
 \begin{algorithmic}
+\For{all voxels $s=(x,y,t)$}
+  \State $stkde[X][Y][T] = 0$
+\EndFor
+%
 \For{each points $i$ at $x_i, y_i, t_i$}
   \For{$X_i - H_s\leq X \leq X_i+H_s$}
     \For{$Y_i - H_s\leq Y \leq Y_i+H_s$}
       \If{$\sqrt{(x_i-x)^2+(y_i-y)^2}< h_s$ }
         \State $K_s[X][Y] = \frac{k_s(\frac{x-x_i}{h_s},\frac{y-y_i}{h_s})}{n h_s^2h_t}$
+      \Else
+        \State $K_s[X][Y] = 0$
       \EndIf
     \EndFor
   \EndFor
   \For{$T_i - T_s\leq T \leq T_i+H_s$}
     \If{$|t_i-t| \leq h_t$}
       \State $K_t[T] = k_t(\frac{t-t_i}{h_t})$
+    \Else
+      \State $K_t[T] = 0$
     \EndIf
   \EndFor
 %
@@ -359,18 +371,41 @@ units. Thosugh if two close-by points are computed
 simultaneously, the cylinder of density around it might collide and
 there is a race condition.
 
-The PB-SYM-DR algorithm solves the data race issue by having
-each of the $P$ computational unit aggregate the result on a local
-copy of the domain. Once all the points have been processed, the
-$P$ copies need to be summed.
+The PB-SYM-DR algorithm solves the data race issue by having each of
+the $P$ computational unit aggregate the result on a local copy of the
+domain. Once all the points have been processed, the $P$ copies need
+to be summed. The pseudo code of PB-SYM-DR is given in
+Algorithm~\ref{alg:pb-sym-dr}.
 
 This algorithm has a memory requirement of $\Theta (P  G_x  G_y  G_t)$
 and a parallel amount of work of $\Theta (P  G_x  G_y  G_t + n  H_s^2
  H_t)$. Though the increase in work enables the parallelism to be
-pleasingly parallel. (It is actually in two pleasingly parallel phases,
-processing the points and reducing the partial results.)
+pleasingly parallel. (It is actually in three pleasingly parallel phases:
+initializing the memory, processing the points, and reducing the partial results.)
 
-\todo{give pseudo code of the algorithm}
+\begin{algorithm}
+\caption{\textsc{PB-SYM-DR}}
+\scriptsize
+\begin{algorithmic}
+\For{all processor $p \leq P$ in parallel}
+  \For{all voxels $s=(x,y,t)$}
+    \State $stkdel[p][X][Y][T] = 0$
+  \EndFor
+\EndFor
+%
+\For{each points $i$ at $x_i, y_i, t_i$ distributed among the $P$ processors}
+  \State Processor $p$ processes $i$ using PB-SYM and aggregate it in $stkdel[p]$
+\EndFor
+%
+\For{all voxels $s=(x,y,t)$ in parallel}
+  \State $stkde[X][Y][T] = 0$
+  \For{all processor $p \leq P$}
+    \State $stkde[X][Y][T] += stkdel[p][X][Y][T]$
+  \EndFor
+\EndFor
+\end{algorithmic}
+\label{alg:pb-sym-dr}
+\end{algorithm}
 
 \subsection{Domain Decomposition}
 
