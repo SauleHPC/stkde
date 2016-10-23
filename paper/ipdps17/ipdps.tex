@@ -23,6 +23,7 @@
 
 \newcommand{\todo}[1]{\color{red}\textbf{\hl{\{ #1 \}}}\color{black}\xspace}
 \newcommand{\ceil}[1]{\left\lceil #1 \right\rceil}
+\newcommand{\floor}[1]{\left\lfloor #1 \right\rfloor}
 
 \begin{document}
 \title{High Performance Space-Time Kernel Density Estimation}
@@ -415,9 +416,26 @@ algorithm splits the domain in AxBxC subdomains. And each subdomain is
 associated the points which cylinder intersects with a voxel of
 the subdomain. Then the algorithm proceeds with processing each
 subdomain independently by only considering the impact of the
-point on the voxels within the subdomain.
+point on the voxels within the subdomain. See Algorithm~\ref{alg:pb-sym-dd} for pseudo code.
 
-\todo{include algorithm}
+\begin{algorithm}
+\caption{\textsc{PB-SYM-DD}}
+\scriptsize
+\begin{algorithmic}
+\For{all points $i=(x_i,y_i,t_i)$}
+  \For{each subdomain $(a,b,c)$}
+        \If{$(X,Y,T) \pm (H_s,H_s,H_T)$ intersects \\$(\floor{\frac{a G_x}{A}}:\ceil{\frac{(a+1) G_x}{A}}, \floor{\frac{b G_y}{B}}:\ceil{\frac{(b+1) G_y}{B}}, \floor{\frac{c G_t}{C}}:\ceil{\frac{(c+1) G_t}{C}})$}
+          \State $localpoints[a][b][c].add(x_i,y_i,t_i)$
+        \EndIf
+  \EndFor
+\EndFor
+%
+\For{each subdomain $a,b,c$ in parallel}
+  \State process $a,b,c$ using PB-SYM and aggregate it in $stkde$
+\EndFor
+\end{algorithmic}
+\label{alg:pb-sym-dd}
+\end{algorithm}
 
 The main problem with Domain Decomposition is that it requires some
 points to be replicated across multiple subdomain which incurs
