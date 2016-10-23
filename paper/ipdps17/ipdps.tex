@@ -170,12 +170,12 @@ to the density of this particular voxel.
 
 \todo{include voxel based algorithm}
 
-The algorithm does $\theta(G_x * G_y * G_t * n)$ distance test and computes
-$\theta(n * H_s^2 * H_t )$ density. Noticing that the bandwidth has to be
+The algorithm does $\theta(G_x G_y G_t n)$ distance test and computes
+$\theta(n H_s^2 H_t )$ density. Noticing that the bandwidth has to be
 smaller than the grid size, the complexity of the algorithm is
-$\theta(G_x * G_y * G_t * n )$.
+$\theta(G_x G_y G_t n )$.
 
-Requires $\theta(G_x * G_y * G_t)$ memory.
+Requires $\theta(G_x G_y G_t)$ memory.
 
 \todo{harmonize observations => points.}
 
@@ -189,7 +189,7 @@ Requires $\theta(G_x * G_y * G_t)$ memory.
 
 \section{Algorithm Design and Engineering}
 
-\label{ref:algo-seq}
+\label{sec:algo-seq}
 
 \subsection{Observation-based Algorithm}
 \todo{harmonize OB => PB}
@@ -203,16 +203,16 @@ based algorithm OB leverages that property.
 \todo{spell out algorithm}
 
 The algorithm OB incurs mostly two costs. Initializing the memory which costs
-$\Theta(G_x * G_y * G_t)$ and computing the impact of each observation
-$\Theta(n * H_s^2 * H_t)$. Note that it is possible that either of these
+$\Theta(G_x G_y G_t)$ and computing the impact of each observation
+$\Theta(n H_s^2 H_t)$. Note that it is possible that either of these
 two term is significantly larger than the other. Therefore the
-complexity of the algorithm is $\Theta(G_x * G_y * G_t + n * H_s^2 * H_t)$.
+complexity of the algorithm is $\Theta(G_x G_y G_t + n H_s^2 H_t)$.
 
 \subsection{Exploiting Symmetries}
 
 When the bandwidth is large computing the density contribution of each
 observation each voxel in the bandwidth is the most expensive
-operation. Each of these $n * (2 * H_s)^2 * 2 * H_t$ calculations costs
+operation. Each of these $n (2  H_s)^2  2 H_t$ calculations costs
 approximately 40 floating point operations. (The exact cost is
 difficult to estimate since there are floating point additions,
 multiplications, divisions, and square root operations.)
@@ -235,14 +235,17 @@ computed once. The SYM variant computes independently the spatial
 invariant and the temporal invariant and then adds the density caused
 by the observation by taking the product of the two invariants. Notice
 that leveraging the symmetries in the calculation does not change the
-complexity. The SYM algorithm still has a complexity of $\Theta(G_x *
-G_y * G_t + n * H_s^2 * H_t)$. However the number of flops reduced to 
+complexity. The SYM algorithm still has a complexity of $\Theta(G_x 
+G_y  G_t + n  H_s^2  H_t)$. However the number of flops reduced to 
 \todo{estimate flop cost.}
 
 \todo{include pseudo code of the SYM variant.}
 
 Notice that this exploitation of symmetries is not possible in a voxel
 based algorithm.
+
+\label{sec:algo-pb-sym}
+
 
 \section{Domain-based parallelism}
 
@@ -309,20 +312,20 @@ decompose the domain more, but replication observation (described
 above) will incur an even higher overhead which may end up nullifying
 the gain in load balance.
 
-\section{Observation-based parallelism}
+\section{Point-based parallelism}
 
-\subsection{Observation Decomposition}
+\subsection{Point Decomposition}
 
 Both of the previous strategies increase the amount of work
 significantly. We want to achieve parallelism without cutting a
 cylinder and without requiring each thread to have its own memory
-space. To achieve that goal, we propose the SYM-OD algorithm that
+space. To achieve that goal, we propose the PB-SYM-PD algorithm that
 decomposes the observations in sets that can be safely performed
 simultaneously.
 
 As long as two observations are separated by $2*h_s$ in a spatial
 dimension or by $2*h_t$ in the temporal dimension then the cylinder
-induced by the two observations will not overlap. SYM-OD decomposes
+induced by the two observations will not overlap. PB-SYM-PD decomposes
 the observations in $A \times B \times C$ subdomain of identical
 size. As long as these subdomains are larger than $2*h_s$ in a spatial
 dimension and $2*h_t$ in the temporal dimension, then the observations
@@ -336,10 +339,10 @@ subdomain in 8 sets where the first set is composed of the subdomains
 $2*i, 2*j, 2*k$, the second of all the subdomains $2*i+1, 2*j, 2*k$,
 the third of all the subdomains $2*i, 2*j+1, 2*k$, etc.. The algorithm
 processes the sets the one after the other by doing each subdomain
-within a set in parallel. In practice, this is implementation using
+within a set in parallel. In practice, this is implemented using
 $8$ OpenMP parallel for construct.
 
-\todo{include algorithms}
+\todo{include algorithm}
 
 
 \subsection{Coloring and Scheduling}
@@ -383,7 +386,34 @@ $$T_P \leq \frac{T_1 - T_\infty}{P} + T_{\infty},$$
 where $T_1$ is the total amount of work to perform and $T_\infty$ is
 the length of the longest chain in the dependency graph.
 
-\todo{Coloring and moldable scheduling.}
+We propose to reduce the critical path by using a load-aware coloring
+of the subdomain. We will use a greedy coloring algorithm which will
+consider the subdomains in a particular order and for each subdomain
+will color it with the smallest color that does not conflict with the
+already colored neighbors. Such greedy coloring algorithm are commonly
+used in parallel computing application~\cite{}. However, we will use
+an ordering that color the vertices in non-increasing order of the
+number of point contained in the subdomain. While this algorithm is a
+heuristic, it is likely to obtain a coloring that minimizes the
+critical path\footnote{The complexity of this problem is currently
+  unknown to the authors. The general case of an arbitrary graph is
+  NP-Hard by reduction to graph coloring. But the case of a 1D stencil
+  is clearly polynomial.}. We call this algorithm to compute stkde:
+PB-SYM-PD-SCHED.
+
+To decrease the critical path further, we propose an other algorithm
+PB-SYM-PD-REP which replicates the subdomains that are on the critical
+path (and its neighbors) of the graph so that the points of a
+subdomain can be performed in parallel. As long as the critical path
+is longer than $\frac{n}{2P}$, the tasks on the path are replicated an
+additional time and the critical path is recomputed. Replication of
+subdomain causes to have to initialize additional subdomains and to
+reduce them which increases the work in a similar way
+PB-SYM-DR. However, the replication should be limited to a few chains
+in the graph and therefore should limit the overhead. Note that this
+problem is similar to scheduling a DAG of moldable tasks~\cite{}.
+
+\todo{check sascha's paper and ref therein.}
 
 \section{Experiments}
 
@@ -584,7 +614,6 @@ similar effect happens on Dengue\_Hr-Hb.
   \label{fig:pb-sym-dd-16-speedup}
 \end{figure*}
 
-
 Despite a significant overhead on the Pollen\_Hr instances, a speedup
 of 7.4 and 8.5 can be observed on the Mb and Hb cases using 8x8x8
 decomposition. This speedup is relatively impressive provided the
@@ -596,7 +625,19 @@ that better load balance. It is clear that for PB-SYM-DD to be useful,
 it is important to carfully pick the decomposition to ensure load
 balance without suffering from an unbearable computational overhead
 
-
+A more modest speedup between $2$ and $6$ can be observed on the
+instances with higher initialization cost, such as on the Flu
+dataset. Indeed, most of the time is spent on initializing the memory
+to hold the density estimates. Even if the algorithm performs memory
+initialization in parallel, there is not much room for parallelism in
+memory operation. Even more so since the initialization is when the
+memory is touched for the first time, which makes the operating system
+allocated the pages in physical memory. The speedup of the
+initialization phase using 16 threads is about the same for all
+instances and is at about $2.5$. The small speedup of PB-SYM-DD on
+instances with high initialization cost is completely explained by
+this phenomenon. Even if the compute phase was reduced to $0$, the
+speedup on the entire calculation would only be $3.54$.
 
 %% \begin{table*}
 %%   \begin{tabular}{|l|r|rrrrrrrrr|}
@@ -604,8 +645,6 @@ balance without suffering from an unbearable computational overhead
 %%   \end{tabular}
 %%   \caption{different spatial decomposition at t=16}
 %% \end{table*}
-
-
 
 \subsection{Observation-based parallelism}
 
@@ -635,16 +674,77 @@ balance without suffering from an unbearable computational overhead
 %%   \caption{obs decomposition - color sched mold. The missing item run out of memory becasue of a too high replication factor.}
 %% \end{table*}
 
+PB-SYM-DD does not achieve linear speedup on many of the instances
+because the domain decomposition induces redundant calculations. But a
+point decomposition would not have that kind of overhead. The
+performance of PB-SYM-PD if shown in Figure~\ref{fig:pb-sym-pd} for
+different decomposition. Note that there is a requirement in PB-SYM-PD
+that the subdomain be larger than twice the bandwidth (see details in
+Section~\ref{sec:algo-pb-sym}). Therefore if the number of subdomain
+leads to too small subdomains, the decomposition is adjusted to fit
+the required size.
+
+\begin{figure*}
+  \includegraphics[width=\linewidth]{analysis/SYM-PD-speedup16.pdf}
+  \caption{Speedup of PB-SYM-PD. Not that decomposition that leads to
+    subdomain size smaller that twice the bandwidth are adjusted to
+    that threshold.}
+  \label{fig:pb-sym-pd}
+\end{figure*}
+
+PB-SYM-PD does not scale very well. The highest speedup is achieved on
+Pollen\_Lr-Lb where the speedup is $4$. It is interesting to notice
+that the speedup usually increases with decomposition size. However,
+the speedup is limited because of load
+imbalance. Figure~\ref{fig:PB-SYM-PD-loadbalance} shows the implicit
+critical path within the PB-SYM-PD algorithm for the highest
+decomposition used in the experiment (64x64x64). Most instances have a
+critical path of about 10\% of the total work. If Graham's bound is
+reached, that implies a speedup lesser than $6.15$. Dengue\_Hr-VHb has
+a critical path of 28\% which implies a speedup lesser than $2.9$; and
+Pollen\_Hr-Hb has a critical path of 55\% which implies a speedup
+lesser than $1.6$. However, the speedup is typically lower because of
+the limited scalability in the initialization phase as outlined above.
+
+\begin{figure}
+  \includegraphics[width=\linewidth]{analysis/PB-SYM-PD-imbalance.pdf}
+  \caption{Length of the critical path of the parallel algorithms
+    PB-SYM-PD and PB-SYM-PD-SCHED.}
+  \label{fig:PB-SYM-PD-loadbalance}
+\end{figure}
+
+PB-SYM-PD-SCHED aims at improving the load balance by arranging the
+execution to execute the most loaded subdomain
+first. Figure~\ref{fig:PB-SYM-PD-loadbalance} shows that
+PB-SYM-PD-SCHED marginally decreases the critical path in all but one
+case. Even if that decrease is marginal, PB-SYM-PD-SCHED ensures that
+the highest loaded subdomain are executed first which tends to
+construct a better execution in practice. And one can see from
+Figure~\ref{fig:PB-SYM-PD-SCHED-speedup} that this scheduling improves
+parallelism significantly for the Pollen instance. 
 
 \begin{figure*}
   \includegraphics[width=\linewidth]{analysis/SYM-PD-COLOR-SCHED-speedup16.pdf}
-  \caption{Speedup of PB-SYM-PD-COLOR-SCHED.}
+  \caption{Speedup of PB-SYM-PD-SCHED with 16 threads.}
+  \label{fig:PB-SYM-PD-SCHED-speedup}
 \end{figure*}
 
+\todo{make sure all caption indicate number of threads}
+
+However, the parallelism is still constrained by load
+imbalance. PB-SYM-PD-REP performs domain decomposition on the
+subdomain of the most loaded chains in the dependency graph until the
+critical is small. Figure~\ref{fig:PB-SYM-PD-REP-speedup} shows the
+speedup achieved by PB-SYM-PD-REP. Using PB-SYM-PD-REP achieves a
+speedup larger than 8 on 7 instances. Though the speedup is close to 0
+for small decompositions and on certain instances. Indeed, when there
+is no (or little) decomposition, most of the domain is replicated and
+the execution has similar drawbacks as PB-SYM-DR.
 
 \begin{figure*}
   \includegraphics[width=\linewidth]{analysis/SYM-PD-COLOR-REP-speedup16.pdf}
-  \caption{Speedup of PB-SYM-PD-COLOR-REP. Flu\_Hr-Lb and Flu\_Hr-Hb ran out of memory for small decomposition.}
+  \caption{Speedup of PB-SYM-PD-REP using 16 threads for different decompositions . Flu\_Hr-Lb and Flu\_Hr-Hb ran out of memory for small decomposition.}
+  \label{fig:PB-SYM-PD-REP-speedup}
 \end{figure*}
 
 \section{Conclusion}
