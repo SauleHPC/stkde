@@ -587,11 +587,18 @@ The implied schedule is actually a scheduling of a graph of dependency
 which is extracted from the coloring. Each edge of the stencil graph
 is oriented from the vertex of the lowest color to the vertex with the
 highest color. Each vertex is associated with a processing time which
-is somewhat proportional to the number of points inside the
-sub-domain the vertex represents and the neighboring subdomains. This
-construction is represented in Figure~\ref{}.
+is somewhat proportional to the number of points inside the sub-domain
+the vertex represents and the neighboring subdomains. This
+construction is represented in Figure~\ref{fig:PB-SYM-PD-graph}.
 
-\todo{Figure to highlight the process.}
+\begin{figure}
+  \centering
+  \includegraphics[width=.7\linewidth]{figures/PB-SYM-PD-graph.pdf}
+  \caption{Dependency structure implied by a coloring of the
+    subdomain. (Shown for a 2D decomposition for simplicity.)}
+  \label{fig:PB-SYM-PD-graph}
+\end{figure}
+
 
 The OpenMP scheduler is not explicit in which order tasks that are
 available are performed. Though it is reasonable to assume that the
