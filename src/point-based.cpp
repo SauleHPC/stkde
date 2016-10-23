@@ -131,6 +131,7 @@ int main (int argc, char* argv[]) {
     dens = stkde_voxelbased(bb, inst, param);
   if (method.compare("VOXELBASED-OBSDECOMP") == 0) 
     dens = stkde_voxelbased_obsdecomp(bb, inst, param, decompX, decompY, decompT);
+    
   if (method.compare("VOXELBASED-OMP-OBSDECOMP") == 0)
     dens = stkde_voxelbased_omp_obsdecomp(bb, inst, param, decompX, decompY, decompT);
   
