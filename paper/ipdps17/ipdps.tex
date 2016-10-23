@@ -133,6 +133,8 @@ techniques, and discuss their applicability.
 
 \subsection{Description}
 
+\todo{paraphrase}
+
 Space-time kernel density (STKDE) is used for identifying
 spatiotemporal patterns of underlying datasets. It is a temporal
 extension of the traditional 2D kernel density
@@ -165,7 +167,8 @@ Figure~\ref{fig:stkde-ex} presents the different 3-Dimensional heat
 maps that results from this process. Different spatial and temporal
 bandwidth where used when computing the STKDE which highlights how
 changing the bandwidth helps focusing the graphical visualization of
-Dengue fever cases in Cali, Colombia.
+Dengue fever cases in Cali, Colombia. While Figure~\ref{fig:stkde}
+shows the impact of a single point on the neighboring space.
 
 \begin{figure}
   \subfigure[$h_s = 2500m$, $h_t = 14 days$]{\includegraphics[page=1, width=.45\linewidth, trim={8cm 3.8cm 8cm 10cm}, clip]{figures/dengue-viz.pdf}}
@@ -174,6 +177,16 @@ Dengue fever cases in Cali, Colombia.
   \caption{Visualization of Dengue fever cases in Cali, Colombia in
     2010 and 2011 for different spatial bandwidth and temporal bandwidth.}
   \label{fig:stkde-ex}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=.5\linewidth]{figures/stkde.pdf}
+  \caption{The computation of STKDE happens in a domain space of size
+    $g_x,g_y,g_t$. Each point impacts the neighboring space at a
+    distance $h_s$ in space and $h_t$ in time; forming a cylinder of
+    diameter $2 h_s$ and of height $2 h_t$.}
+  \label{fig:stkde}
 \end{figure}
 
 Computationally, the domain of size $g_x$, $g_y$, $g_t$ is discretized
@@ -185,8 +198,6 @@ the voxel that are wihin a cylinder centered on the point of spatial
 radius equal to the spatial bandwidth in voxels
 $H_s=\ceil{\frac{h_s}{sres}}$, and of half height equal to the
 temporal bandwidth $H_t=\ceil{\frac{h_t}{tres}}$.
-
-\todo{make sure cylinder is properly explaine somewhere}
 
 All the notations are summarized in Table~\ref{tab:notation}. As a
 convention all uppercase notation denote quantities in voxels and all
@@ -212,6 +223,8 @@ lowercase notation denote quantities in domain space.
   \caption{Notations}
   \label{tab:notation}
 \end{table}
+
+
 
 \subsection{Gold Standard Implementation}
 
@@ -295,15 +308,22 @@ approximately 40 floating point operations. (The exact cost is
 difficult to estimate since there are floating point additions,
 multiplications, divisions, and square root operations.)
 
-One can remark that the calculation is mostly redundant. \todo{give
-  precise formula.}  Indeed for one particular point, its
-contribution to the neighbooring vertices can be decomposed in two
-components. One that only depends on the spatial coordinate of the
-voxel with respect to the point and does not depend on its
-temporal coordinate. And one that only depends on the temporal
-coordinate and not on the spatial coordinate.
+One can remark that the calculation is mostly redundant since for one
+particular point, its contribution to the neighbooring vertices can be
+decomposed in two components. $K_s(x,y)$ that only depends on the
+spatial coordinate of the voxel with respect to the point and does not
+depend on its temporal coordinate. And $K_t(t)$ that only depends on
+the temporal coordinate and not on the spatial coordinate. See
+Figure~\ref{fig:pb-sym-decomposition} for a graphical depiction.
 
-\todo{include figure.}
+\begin{figure}
+  \centering
+  \includegraphics[width=.7\linewidth]{figures/PB-SYM.pdf}
+  \caption{The contribution to the density estimate of each voxel of a
+    cylinder can be decomposed in two terms, one temporally invariant
+    $K_s(x,y)$ and one spatially invariant $K_t(t)$.}
+  \label{fig:pb-sym-decomposition}
+\end{figure}
 
 Therefore, one can write an algorithm to leverage these symmetries in
 the problem. We wrote three variants, the PB-DISK variant ensures that
@@ -313,9 +333,8 @@ computed once. The PB-SYM variant computes independently the spatial
 invariant and the temporal invariant and then adds the density caused
 by the point by taking the product of the two invariants. See pseudocode in Algorithm~\ref{alg:pb-sym}.
 Notice that leveraging the symmetries in the calculation does not change the
-complexity: PB-SYM still has a complexity of $\Theta(G_x 
-G_y  G_t + n  H_s^2  H_t)$. However the number of flops reduced to 
-\todo{estimate flop cost.}
+complexity (PB-SYM still has a complexity of $\Theta(G_x 
+G_y  G_t + n  H_s^2  H_t)$) but reduces the number of flops.
 
 \begin{algorithm}
 \caption{\textsc{PB-SYM}}
