@@ -430,8 +430,8 @@ point on the voxels within the subdomain. See Algorithm~\ref{alg:pb-sym-dd} for 
   \EndFor
 \EndFor
 %
-\For{each subdomain $a,b,c$ in parallel}
-  \State process $a,b,c$ using PB-SYM and aggregate it in $stkde$
+\For{each subdomain $(a,b,c)$ in parallel}
+  \State Process subdomain $(a,b,c)$ using PB-SYM
 \EndFor
 \end{algorithmic}
 \label{alg:pb-sym-dd}
@@ -497,7 +497,31 @@ processes the sets the one after the other by doing each subdomain
 within a set in parallel. In practice, this is implemented using
 $8$ OpenMP parallel for construct.
 
-\todo{include algorithm}
+\begin{algorithm}
+\caption{\textsc{PB-SYM-PD}}
+\scriptsize
+\begin{algorithmic}
+\For{all points $i=(x_i,y_i,t_i)$}
+  \State $localpoints[\floor{\frac{A X}{G_x}}][\floor{\frac{B Y}{G_y}}][\floor{\frac{C T}{G_t}}].add(x_i,y_i,t_i)$
+\EndFor
+%
+\For{$abase \in \{-1;0;+1\}$}
+  \For{$bbase \in \{-1;0;+1\}$}
+    \For{$cbase \in \{-1;0;+1\}$}
+      \State Do the work of the next three loops in parallel
+      \For{$a = abase; a \leq A; a+=2$}
+        \For{$b = bbase; b \leq B; b+=2$}
+          \For{$c = cbase; c \leq C; c+=2$}
+            \State Process points in $localpoints[a][b][c]$ using PB-SYM
+          \EndFor
+        \EndFor
+      \EndFor
+    \EndFor
+  \EndFor
+\EndFor
+\end{algorithmic}
+\label{alg:pb-sym-pd}
+\end{algorithm}
 
 
 \subsection{Coloring and Scheduling}
