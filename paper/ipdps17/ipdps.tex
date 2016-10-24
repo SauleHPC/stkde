@@ -915,8 +915,7 @@ the required size.
   \centering
   \includegraphics[width=.9\linewidth]{analysis/SYM-PD-speedup16.pdf}
   \caption{Speedup of PB-SYM-PD using 16 threads. Note that decompositions of
-    subdomain smaller that twice the bandwidths are adjusted to
-    that threshold.}
+    subdomain smaller that twice the bandwidths are adjusted.}
   \label{fig:pb-sym-pd}
 \end{figure*}
 
@@ -982,21 +981,19 @@ the execution has similar drawbacks as PB-SYM-DR.
 
 \label{sec:soa}
 
-On the particular topic of compute kernel density estimation, the most
-related work is the PhD Thesis of U. Lopez-Novoa~\cite{LopezNovoa} who is
-interested in arbitrarily shaped kernel density estimation. The crop
-and chop method presented revolved around cropping the voxel space
+The PhD Thesis of U. Lopez-Novoa~\cite{LopezNovoa} is on the topic of computing kernel density estimation for arbitrarily shaped kernels. The crop
+and chop method presented revolves around cropping the voxel space
 around a point with similar goal as PB, and compute the density
 estimates in parallel on a multi-core CPU or on a GPU before the data
-is aggregated back on the CPU. Their arbitrarily shaped density does
+is aggregated back on the CPU. The arbitrarily shaped density considered does
 not expose the invariants leveraged by PB-SYM which makes their work
 inapplicable to STKDE.
 
-In parallel computing community the two most common spatial algorithm
+The two most common spatial problems solved with parallel computing
 are N-body interactions~\cite{Aaseth03} and Particle in Cell
-simulations~\cite{karimabadi06}. Though stkde is different in the sense that there
+simulations~\cite{karimabadi06}. STKDE is different in the sense that there
 is no iterating over the problem multiple times as we see in the
-timesteps of N-body or particle in cell, no direct interation between
+timesteps of N-body or particle in cell, no direct interaction between
 points, and no field updates as in Particle in Cell (unless you
 consider a field discretized at a one voxel size which makes the
 analogy not quite useful).
@@ -1004,9 +1001,9 @@ analogy not quite useful).
 Spatial application can use spatial partitioning techniques 
 such as recursive bisection~\cite{berger87}, jagged partition~\cite{ujaldon96,pinar97,DeveciRDC16}, or
 rectilinear partitioning~\cite{nicol94,manne96}. Depending on the algorithms used for
-stkde, the objective function is different. A partitioning for
-PB-SYM-DD needs a good load balance and to minimize the number of cut
-cylinder and could take arbitrarily shaped partitioning. But PB-SYM-PD
+STKDE, the objective function is different. A partitioning for
+PB-SYM-DD needs a good load balance, to minimize the number of cut
+cylinders, and could take arbitrarily shaped partitioning. But PB-SYM-PD
 needs a decomposition where the subdomains have a size larger than a
 threshold and the load balance critirion is harder to express since
 neighboring subdomains can not be processed simultaneously.
