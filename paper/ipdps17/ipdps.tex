@@ -60,15 +60,13 @@ Email: \{esaule,dpanchan,ahohl,wtang4,eric.delmelle\}@uncc.edu}
 \end{abstract}
 
 \begin{IEEEkeywords}
-space-time kernel density; performance; spatial algorithm; shared-memory; scheduling
+space-time kernel density; performance; spatial algorithm; shared-memory parallelism; scheduling
 \end{IEEEkeywords}
 
 
 \IEEEpeerreviewmaketitle
 
 \section{Introduction}
-
-\todo{preamble}
 
 The rapid propagation of infectious diseases (e.g. zika, Ebola, H1N1,
 dengue fever) is conducive to serious, epidemic outbreaks, posing a
@@ -87,22 +85,28 @@ availability~\cite{grubesic2014spatial}. High-performance computing
 reduces the effort required to identify these patterns, however
 heterogeneity in the data must be accounted for~\cite{Hohl16}.
 
+Epidemiology is only one of the application domain where it is
+important to understand how event occurring at different location and
+different time form clusters. Political analysis, social media
+analysis, or the study of migration pattern also requires
+understanding spatial and temporal locality of events. The massive
+amount of data we see nowadays is often analyzed using complex
+models. But these can be constructed data scientist often need to
+visualize and explore interactively the data to understand its
+structure and gain intuition.
+
 %
 In this paper, we present the space-time kernel density estimation
 application which essentially builds a 3D density map of events
-located in space and time. We revise the sequential algorithm to
-significantly decrease its complexity and identify symmetries in the
-problem that can be used to reduce the runtime by a constant but
-significant factor. Then we investigate different shared memory
-strategies for parallelizing the application and discuss their impact
-on memory requirement, work overhead, and load balance. Interestingly,
-one of the decomposition involves solving a combinatorial problem that
-is similar to a fusion of graph coloring and DAG scheduling of
-moldable tasks.
+located in space and time. This problem is computationally expensive
+using existing algorithms. That is why we developed better sequential
+algorithms for this problem that reduced the complexity by orders of
+magnitude. And to bring the runtime in the realm of near real-time, we
+designed parallel strategies for shared memory machines.
 
-Section~\ref{sec:stkde} present the stkde application along with a
+Section~\ref{sec:stkde} presents the STKDE application along with a
 reference implementation that uses a voxel-based algorithm VB to
-compute stkde. In Section~\ref{sec:algo-seq} we investigate the
+compute stkde. In Section~\ref{sec:algo-seq}, we investigate the
 sequential problem and develop a point-based algorithm PB that
 significantly reduce the complexity compared to VB. We also identify
 invariants linked to the structure of the kernel density estimate
