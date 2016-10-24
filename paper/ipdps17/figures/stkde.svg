@@ -51,7 +51,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -227,7 +227,7 @@
            id="path4116" /></g>    </g>
     <g
        id="g4184"
-       transform="matrix(0.30188304,0,0,0.25896024,150.25906,171.91394)">
+       transform="matrix(0.37730362,0,0,0.32365726,127.55049,151.16393)">
       <g
          word-spacing="normal"
          letter-spacing="normal"

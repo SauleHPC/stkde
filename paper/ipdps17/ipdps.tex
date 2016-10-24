@@ -26,7 +26,7 @@
 \newcommand{\floor}[1]{\left\lfloor #1 \right\rfloor}
 
 \begin{document}
-\title{High Performance Space-Time Kernel Density Estimation}
+\title{Parallel Space-Time Kernel Density Estimation}
 
 
 \author{\IEEEauthorblockN{Erik  Saule$^\dag$, Dinesh Panchananam$^\dag$, Alexander Hohl$^\ddag$, Wenwu Tang$^\ddag$, Eric Delmelle$^\ddag$}
@@ -40,10 +40,10 @@ Email: \{esaule,dpanchan,ahohl,wtang4,eric.delmelle\}@uncc.edu}
 
 
 \begin{abstract}
-  The exponential growth of available data, caused by the BigData era,
-  increased the interest in interactive exploratory analysis as dataset
-  can no longer be understood by crawling manually through it and
-  looking at a few statistics. In a Geographical Information Systems
+  The exponential growth of available data has
+  increased the need for interactive exploratory analysis. Dataset
+  can no longer be understood through  manual crawling  and
+ simple statistics. In Geographical Information Systems
   (GIS), the dataset is often composed of events localized in space
   and time; and visualizing such a dataset involves building a map of
   where the events occurred.
@@ -51,7 +51,7 @@ Email: \{esaule,dpanchan,ahohl,wtang4,eric.delmelle\}@uncc.edu}
   We focus in this paper on events that are localized among three
   dimensions (latitude, longitude, and time), and on computing the
   first step of the visualization pipeline, space-time kernel density
-  estimation, which is most computationally expensive.  Starting from
+  estimation (STKDE), which is most computationally expensive.  Starting from
   a gold standard implementation, we show how algorithm design and
   engineering, parallel decomposition, and scheduling can be applied
   to bring near real-time computing to space-time kernel density
@@ -75,7 +75,7 @@ transmission cycles, and effective public health responses require the
 ability to monitor outbreaks in a timely
 manner~\cite{eisen2011using}. Space-time statistics facilitate the
 discovery of disease dynamics including rate of spread, seasonal
-cyclic patterns, direction, intensity –i.e. clusters-, and risk of
+cyclic patterns, direction, intensity (i.e. clusters), and risk of
 diffusion to new regions.  However, obtaining accurate results from
 space-time statistics is computationally very demanding, which is
 problematic when public health interventions are promptly needed. The
@@ -86,12 +86,12 @@ reduces the effort required to identify these patterns, however
 heterogeneity in the data must be accounted for~\cite{Hohl16}.
 
 Epidemiology is only one of the application domain where it is
-important to understand how event occurring at different location and
-different time form clusters. Political analysis, social media
-analysis, or the study of migration pattern also requires
+important to understand how events occurring at different locations and
+different times form clusters. Political analysis, social media
+analysis, or the study of animal migration patterns also require
 understanding spatial and temporal locality of events. The massive
 amount of data we see nowadays is often analyzed using complex
-models. But these can be constructed data scientist often need to
+models. But before these can be constructed, data scientist often need to
 visualize and explore interactively the data to understand its
 structure and gain intuition.
 
@@ -106,7 +106,7 @@ designed parallel strategies for shared memory machines.
 
 Section~\ref{sec:stkde} presents the STKDE application along with a
 reference implementation that uses a voxel-based algorithm VB to
-compute stkde. In Section~\ref{sec:algo-seq}, we investigate the
+compute STKDE. In Section~\ref{sec:algo-seq}, we investigate the
 sequential problem and develop a point-based algorithm PB that
 significantly reduce the complexity compared to VB. We also identify
 invariants linked to the structure of the kernel density estimate
@@ -114,23 +114,23 @@ function that allows to reduce the computational cost by an additional
 factor and build the PB-SYM algorithm based on that observation. We
 develop two parallelization strategies (PB-SYM-DR and PB-SYM-DD) in
 Section~\ref{sec:pb-sym-domain} that are designed to make the
-computation pleasingly parallel. However both strategies are not work
-efficient and can cause significant work overhead in some cases. That
+computation pleasingly parallel. However both strategies are not work-efficient
+and can cause significant work overhead in some cases. That
 is why we introduce PB-SYM-PD in Section~\ref{sec:pb-sym-point} that
 provide a work-efficient decomposition of the points. However that
-algorithm has internal depencies which can have a long critical path
+algorithm has internal depencies which can induce a long critical path
 and cause load imbalance; and we develop PB-SYM-PD-SCHED to leverage
 alternative ordering of the work to reduce the critical path. To
-reduce the critical path, we propose the PB-SYM-PD-REP algorithm which
-leverages some form moldable scheduling. It introduces some work
-overhead only where is needed to achieve a short critical path and
-load balance. Section~\ref{sec:experiments} presents experimental
+reduce the critical path further, we propose the PB-SYM-PD-REP algorithm which
+introduces some work
+overhead only where is needed to achieve a short critical path.
+Section~\ref{sec:experiments} presents experimental
 results on three different datasets and 15 instances extracted from
 these datasets. The experiments highlights that the sequential
 strategies are efficient. The parallel strategies have their pros and
 cons and different strategies appear to be best in different
-scenarios. Section~\ref{sec:soa} discusses related problems and
-techniques, and discuss their applicability.
+scenarios. Section~\ref{sec:soa} discusses the applicability of related problems and
+techniques.
 
 \section{Space-Time Kernel Density Estimation}
 \label{sec:stkde}
@@ -164,12 +164,10 @@ decreasing distance):
 $$k_s (u,v) = \frac{\pi}{2} (1-u)^2 (1-v)^2$$
 $$k_t (w) = \frac{3}{4} (1-w)^2$$
 
-Figure~\ref{fig:stkde-ex} presents the different 3-Dimensional heat
-maps that results from this process. Different spatial and temporal
-bandwidth where used when computing the STKDE which highlights how
-changing the bandwidth helps focusing the graphical visualization of
-Dengue fever cases in Cali, Colombia. While Figure~\ref{fig:stkde}
-shows the impact of a single point on the neighboring space.
+Figure~\ref{fig:stkde-ex} illustrates how varying the bandwidths used
+in STKDE helps focusing the graphical visualization of Dengue fever
+cases in Cali, Colombia. Figure~\ref{fig:stkde} shows the impact
+of a single point on the neighboring space.
 
 \begin{figure}
   \subfigure[$h_s = 2500m$, $h_t = 14 days$]{\includegraphics[page=1, width=.45\linewidth, trim={8cm 3.8cm 8cm 10cm}, clip]{figures/dengue-viz.pdf}}
@@ -195,7 +193,7 @@ in voxels using a spatial resolution $sres$ and a temporal resolution
 $tres$. Therefore the domain is represented by a grid of size
 $G_x=\ceil{\frac{g_x}{sres}}$, $G_y=\ceil{\frac{g_y}{sres}}$,
 $G_t=\ceil{\frac{g_t}{tres}}$. Each point causes a density increase in
-the voxel that are wihin a cylinder centered on the point of spatial
+the voxel that are within a cylinder centered on the point of
 radius equal to the spatial bandwidth in voxels
 $H_s=\ceil{\frac{h_s}{sres}}$, and of half height equal to the
 temporal bandwidth $H_t=\ceil{\frac{h_t}{tres}}$.
@@ -252,8 +250,8 @@ to the density of this particular voxel. The pseudo code is given in Algorithm~\
 \end{algorithm}
 
 
-The algorithm does $\theta(G_x G_y G_t n)$ distance test and computes
-$\theta(n H_s^2 H_t )$ density. Noticing that the bandwidth has to be
+The algorithm performs $\theta(G_x G_y G_t n)$ distance tests and computes
+$\theta(n H_s^2 H_t )$ densities. Noticing that the bandwidth has to be
 smaller than the grid size, the complexity of the algorithm is
 $\theta(G_x G_y G_t n )$. And it requires $\theta(G_x G_y G_t)$
 memory.
@@ -264,9 +262,9 @@ memory.
 
 \subsection{Point-based Algorithm}
 The voxel-based algorithm suffers from a massive cost of computing
-distances. The gold implementation reduces them by extremely
-decomposition the domain, but that still incures a significant
-overhead. These calculation are mostly unnecessary since we know
+distances. The gold implementation reduces the number of distance computation by 
+decomposing the domain, but that still incures a significant
+overhead. These calculations are mostly unnecessary since we know
 exactly where each point will radiate density. The point-based
 algorithm PB, given in Algorithm~\ref{alg:pb}, leverages that
 property.
@@ -310,7 +308,7 @@ difficult to estimate since there are floating point additions,
 multiplications, divisions, and square root operations.)
 
 One can remark that the calculation is mostly redundant since for one
-particular point, its contribution to the neighbooring vertices can be
+particular point, its contribution to the neighboring voxels can be
 decomposed in two components. $K_s(x,y)$ that only depends on the
 spatial coordinate of the voxel with respect to the point and does not
 depend on its temporal coordinate. And $K_t(t)$ that only depends on
@@ -319,15 +317,15 @@ Figure~\ref{fig:pb-sym-decomposition} for a graphical depiction.
 
 \begin{figure}
   \centering
-  \includegraphics[width=.7\linewidth]{figures/PB-SYM.pdf}
+  \includegraphics[width=.6\linewidth]{figures/PB-SYM.pdf}
   \caption{The contribution to the density estimate of each voxel of a
     cylinder can be decomposed in two terms, one temporally invariant
     $K_s(x,y)$ and one spatially invariant $K_t(t)$.}
   \label{fig:pb-sym-decomposition}
 \end{figure}
 
-Therefore, one can write an algorithm to leverage these symmetries in
-the problem. We wrote three variants, the PB-DISK variant ensures that
+Therefore, we write an algorithm to leverage these symmetries in
+the problem. We present three variants, the PB-DISK variant ensures that
 the invariant on the spatial domain is only computed once. The PB-BAR
 variant ensures that the invariant on the temporal domain is only
 computed once. The PB-SYM variant computes independently the spatial
@@ -388,7 +386,7 @@ based algorithm.
 
 The simplest way to parallelize this kind of computation is to split
 the points equally among the $P$ different computational
-units. Thosugh if two close-by points are computed
+units. Though, if two close-by points are computed
 simultaneously, the cylinder of density around it might collide and
 there is a race condition.
 
@@ -400,8 +398,8 @@ Algorithm~\ref{alg:pb-sym-dr}.
 
 This algorithm has a memory requirement of $\Theta (P  G_x  G_y  G_t)$
 and a parallel amount of work of $\Theta (P  G_x  G_y  G_t + n  H_s^2
- H_t)$. Though the increase in work enables the parallelism to be
-pleasingly parallel. (It is actually in three pleasingly parallel phases:
+ H_t)$. Though the increase in work enables the computation to be
+pleasingly parallel. (There are actually in three pleasingly parallel phases:
 initializing the memory, processing the points, and reducing the partial results.)
 
 \begin{algorithm}
@@ -431,13 +429,13 @@ initializing the memory, processing the points, and reducing the partial results
 \subsection{Domain Decomposition}
 \label{sec:pb-sym-dd}
 
-An other strategy to avoid the data race is by computing the intensity
-of the voxels of different subdomains independently. The PB-SYM-DD
-algorithm splits the domain in AxBxC subdomains. And each subdomain is
+Another strategy to avoid the data race is to compute 
+voxel intensity  independently for different subdomains. We call this method PB-SYM-DD.
+It splits the domain in AxBxC subdomains and each subdomain is
 associated the points which cylinder intersects with a voxel of
-the subdomain. Then the algorithm proceeds with processing each
+the subdomain. Then the algorithm proceeds with handling each
 subdomain independently by only considering the impact of the
-point on the voxels within the subdomain. See Algorithm~\ref{alg:pb-sym-dd} for pseudo code.
+data-point on voxels within the subdomain. See Algorithm~\ref{alg:pb-sym-dd} for pseudo code.
 
 \begin{algorithm}
 \caption{\textsc{PB-SYM-DD}}
@@ -460,18 +458,17 @@ point on the voxels within the subdomain. See Algorithm~\ref{alg:pb-sym-dd} for 
 
 The main problem with Domain Decomposition is that it requires some
 points to be replicated across multiple subdomain which incurs
-additional work. Indeed for a particular point replicated in two
-subdomains (if it is replicated in more, a similar effect happens),
-its cylinder is split across two subdomain. Assume the split is
-temporal, then using PB-SYM in each subdomain will need to compute
+additional work. Indeed, if a point is replicated in multiple subdomains,
+its cylinder is split across multiple subdomains as well. Assuming the split is
+temporal, then using PB-SYM in each subdomain requires computing
 part of the temporal invariant, the entire spatial invariant, and part
-of the cylinder. Therefore both subdomain needed to compute the entire
+of the cylinder. Therefore both subdomains need to compute the entire
 spatial invariant. See Figure~\ref{fig:pb-sym-dd-overhead} for a
 graphical depiction of this phenomenon.
 
 \begin{figure}
   \centering
-  \includegraphics[width=.7\linewidth]{figures/PB-SYM-DD-overhead.pdf}
+  \includegraphics[width=.6\linewidth]{figures/PB-SYM-DD-overhead.pdf}
   \caption{When a cylinder is split among two subdomains, PB-SYM-DD
     causes an overhead because one of the invariant needs to be
     recomputed. Here here subdomain compute part of the temporal
@@ -479,17 +476,17 @@ graphical depiction of this phenomenon.
   \label{fig:pb-sym-dd-overhead}
 \end{figure}
 
-If the algorithms keeps the number of subdomain small such that each
-point is not replicated more than a constant number of time then
-the work performed when expressed in Big-Oh notation does not change.
+If the algorithms keeps the number of subdomains small such that each
+point is replicated less than a constant number of times, then
+the work expressed in Big-Oh notation does not change.
 (This can be achieved, for instance, by having subdomains larger than
 $H_s \times H_s \times H_t$.) However, the practical amount of work can
 increase by a non negligable factor. 
 
-An other issue with Domain Decomposition is load imbalance. The
-points are unlikely well distributed in the domain space, but
+Another issue with Domain Decomposition is load imbalance. The
+points are unlikely to be equally distributed in the domain space, but
 more likely clustered around some locations. The subdomain containing
-such a location will have a significantly higher work than other
+a cluster will have a significantly higher work than other
 subdomains. And this work is not executed in parallel. One could
 decompose the domain more, but replication point (described
 above) will incur an even higher overhead which may end up nullifying
@@ -519,7 +516,7 @@ $x + 2, y, z$. See Figure~\ref{fig:PB-SYM-PD-str} for a graphical depiction.
 
 \begin{figure}
   \centering
-  \includegraphics[width=.6\linewidth]{figures/PB-SYM-PD-str.pdf}
+  \includegraphics[width=.5\linewidth]{figures/PB-SYM-PD-str.pdf}
   \caption{Provided the subdomains are larger than twice the
     bandwidth, the points contained in each blue boxes can be
     performed simultaneously.}
@@ -734,7 +731,8 @@ the Flu dataset since there were only 31K occurence of confirmed avian
 flu recorded in the last 15 years but they span most of the earth.
 
 \begin{figure}
-  \includegraphics[width=\linewidth]{analysis/seq_breakup.pdf}
+  \centering
+  \includegraphics[width=.9\linewidth]{analysis/seq_breakup.pdf}
   \caption{Breakdown of the runtime of PB-SYM. Some instances are
     mostly Initialization.}
   \label{fig:breakdown}
@@ -760,7 +758,8 @@ Flu\_Hr-Lb and Flu\_Hr-Hb when using 8 threads and 16 threads as the
 memory requirement exceeds the 128GB available on the machine.
 
 \begin{figure}[tbh]
-  \includegraphics[width=\linewidth]{analysis/SYM-DR-speedup.pdf}
+  \centering
+  \includegraphics[width=.9\linewidth]{analysis/SYM-DR-speedup.pdf}
   
   \caption{Speedup of PB-SYM-DR. Flu\_Hr-Lb and Flu\_Hr-Hb run out of
     memory for 8 and 16 threads.}
@@ -780,7 +779,8 @@ reference.)
 \paragraph{PB-SYM-DD}
 
 \begin{figure*}[tbh]
-  \includegraphics[width=\linewidth]{analysis/SYM-DD-overhead.pdf}
+  \centering
+  \includegraphics[width=.9\linewidth]{analysis/SYM-DD-overhead.pdf}
   
   \caption{Overhead of PB-SYM-DD: runtime of PB-SYM-DD with a single
     thread normalized to PB-SYM. Some decomposition improve
@@ -830,7 +830,8 @@ decomposition provides a work reduction of 23\% on that instance. A
 similar effect happens on Dengue\_Hr-Hb.
 
 \begin{figure*}[tbh]
-  \includegraphics[width=\linewidth]{analysis/SYM-DD-speedup16.pdf}
+  \centering
+  \includegraphics[width=.9\linewidth]{analysis/SYM-DD-speedup16.pdf}
   
   \caption{Speedup of PB-SYM-DD with 16 threads. While PB-SYM-DD achieves good
     speedup in some cases, the overdecomposition overhead usually
@@ -909,7 +910,8 @@ leads to too small subdomains, the decomposition is adjusted to fit
 the required size.
 
 \begin{figure*}
-  \includegraphics[width=\linewidth]{analysis/SYM-PD-speedup16.pdf}
+  \centering
+  \includegraphics[width=.9\linewidth]{analysis/SYM-PD-speedup16.pdf}
   \caption{Speedup of PB-SYM-PD using 16 threads. Note that decompositions of
     subdomain smaller that twice the bandwidths are adjusted to
     that threshold.}
@@ -931,7 +933,8 @@ lesser than $1.6$. However, the speedup is typically lower because of
 the limited scalability in the initialization phase as outlined above.
 
 \begin{figure}
-  \includegraphics[width=\linewidth]{analysis/PB-SYM-PD-imbalance.pdf}
+  \centering
+  \includegraphics[width=.9\linewidth]{analysis/PB-SYM-PD-imbalance.pdf}
   \caption{Length of the critical path of the parallel algorithms
     PB-SYM-PD and PB-SYM-PD-SCHED for a 64x64x64 decomposition}
   \label{fig:PB-SYM-PD-loadbalance}
@@ -948,7 +951,8 @@ Figure~\ref{fig:PB-SYM-PD-SCHED-speedup} that this scheduling improves
 parallelism significantly for the Pollen instance. 
 
 \begin{figure*}
-  \includegraphics[width=\linewidth]{analysis/SYM-PD-COLOR-SCHED-speedup16.pdf}
+  \centering
+  \includegraphics[width=.9\linewidth]{analysis/SYM-PD-COLOR-SCHED-speedup16.pdf}
   \caption{Speedup of PB-SYM-PD-SCHED with 16 threads.}
   \label{fig:PB-SYM-PD-SCHED-speedup}
 \end{figure*}
@@ -964,7 +968,8 @@ is no (or little) decomposition, most of the domain is replicated and
 the execution has similar drawbacks as PB-SYM-DR.
 
 \begin{figure*}
-  \includegraphics[width=\linewidth]{analysis/SYM-PD-COLOR-REP-speedup16.pdf}
+  \centering
+  \includegraphics[width=.9\linewidth]{analysis/SYM-PD-COLOR-REP-speedup16.pdf}
   \caption{Speedup of PB-SYM-PD-REP using 16 threads for different
     decompositions. Flu\_Hr-Lb and Flu\_Hr-Hb run out of memory for
     small decomposition.}
@@ -995,7 +1000,7 @@ consider a field discretized at a one voxel size which makes the
 analogy not quite useful).
 
 Spatial application can use spatial partitioning techniques 
-such as recursive bisection~\cite{berger87}, jagged partition~\cite{ujaldon96,pinar97,Deveci15}, or
+such as recursive bisection~\cite{berger87}, jagged partition~\cite{ujaldon96,pinar97,DeveciRDC16}, or
 rectilinear partitioning~\cite{nicol94,manne96}. Depending on the algorithms used for
 stkde, the objective function is different. A partitioning for
 PB-SYM-DD needs a good load balance and to minimize the number of cut
