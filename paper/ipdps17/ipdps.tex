@@ -133,19 +133,16 @@ techniques, and discuss their applicability.
 
 \subsection{Description}
 
-\todo{paraphrase}
-
 Space-time kernel density (STKDE) is used for identifying
-spatiotemporal patterns of underlying datasets. It is a temporal
+spatiotemporal patterns in datasets. It is a temporal
 extension of the traditional 2D kernel density
-estimation~\cite{Silverman86}, a popular spatial analysis technique to
-transform a set of $n$ points in geographic space into a density surface,
-also referred to as ``heatmap''. We visualize the resulting density
-estimates within the space-time cube framework using two spatial $(x,
+estimation~\cite{Silverman86} which density surface,
+(``heatmap'') from a set of $n$ points located in a geographic space. The resulting density
+estimates is visualized within the space-time cube framework using two spatial $(x,
 y)$ and a temporal dimension $(t)$~\cite{Nakaya10}. STKDE creates a 3D
-raster volume where each voxel (volumetric pixel) is assigned a
-density estimate based on the surrounding point data. The space-time
-density is estimated by the following equation (using the notations
+raster volume where each voxel (3D equivalent of a pixel) is assigned a
+density estimate based on the surrounding points. The space-time
+density is estimated using (using the notations
 of~\cite{Hohl16}):
 
 $$ \hat{f} (x, y, t) = \frac{1}{n h_s^2 h_t} \sum_{i | d_i < h_s, t_i<h_t}
@@ -970,21 +967,19 @@ the execution has similar drawbacks as PB-SYM-DR.
   \label{fig:PB-SYM-PD-REP-speedup}
 \end{figure*}
 
-\subsection{Discussion}
-
-\todo{A table with best parallel case and times}
-
-\todo{discussion on prediction of the best case}
-
-\todo{discussion on }
-
 \section{Related Works}
 
 \label{sec:soa}
 
-
-On the particular topic of executing stkde in parallel. There are
-little related works. Mostly, \todo{...}
+On the particular topic of compute kernel density estimation, the most
+related work is the PhD Thesis of U. Lopez-Novoa~\cite{LopezNovoa} who is
+interested in arbitrarily shaped kernel density estimation. The crop
+and chop method presented revolved around cropping the voxel space
+around a point with similar goal as PB, and compute the density
+estimates in parallel on a multi-core CPU or on a GPU before the data
+is aggregated back on the CPU. Their arbitrarily shaped density does
+not expose the invariants leveraged by PB-SYM which makes their work
+inapplicable to STKDE.
 
 In parallel computing community the two most common spatial algorithm
 are N-body interactions~\cite{Aaseth03} and Particle in Cell
@@ -1006,6 +1001,25 @@ threshold and the load balance critirion is harder to express since
 neighboring subdomains can not be processed simultaneously.
 
 \section{Conclusion}
+
+We presented in this paper the space-time kernel density estimation
+problem which is useful in the visualization of events located in
+space and time. We proposed sequential algorithms to decrease the
+complexity of the problem. And we investigated four parallel
+algorithms, two of which are pleasingly parallel but at the cost of
+not being work efficient. We then designed a work-efficient parallel
+algorithm but the dependency structure tend to prevent high degree of
+parallelism. Using graph coloring and moldable scheduling techniques
+we made that latter parallel algorithm more parallel by adding some
+work-overhead.
+
+For each instance of the problem, one of the parallel algorithm
+achieved an interesting performance. However, it is clear that we need
+to model the instance and the platform to control the various overhead
+and be able to pick the parallel strategy that will derive the highest
+performance. It would also be interesting to look at distributed
+memory machines and accelerators to reduce the runtime further since
+real-time is desirable for interactive applications.
 
 \section*{Acknowledgment}
 
