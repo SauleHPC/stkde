@@ -505,14 +505,14 @@ space. To achieve that goal, we propose the PB-SYM-PD algorithm that
 decomposes the points in sets that can be safely performed
 simultaneously.
 
-As long as two points are separated by $2 h_s$ in a spatial
-dimension or by $2 h_t$ in the temporal dimension then the cylinder
+As long as two points are separated by $2 h_s$ in space
+dimension or by $2 h_t$ in time then the cylinder
 induced by the two points will not overlap. PB-SYM-PD decomposes
 the points in $A \times B \times C$ subdomain of identical
 size. As long as these subdomains are larger than $2 h_s$ in a spatial
 dimension and $2 h_t$ in the temporal dimension, then the points
-in domain $x, y, z$ can be done concurently with the points in
-$x + 2, y, z$. See Figure~\ref{fig:PB-SYM-PD-str} for a graphical depiction.
+in domain $(x, y, z)$ can be done concurently with the points in
+$(x + 2, y, z)$. See Figure~\ref{fig:PB-SYM-PD-str} for a graphical depiction.
 
 \begin{figure}
   \centering
@@ -525,12 +525,12 @@ $x + 2, y, z$. See Figure~\ref{fig:PB-SYM-PD-str} for a graphical depiction.
 
 We implemented a first version of this algorithm that organizes the
 subdomain in 8 sets where the first set is composed of the subdomains
-$2i, 2j, 2k$, the second of all the subdomains $2 i + 1, 2 j, 2 k$,
-the third of all the subdomains $2 i, 2 j + 1, 2 k$, etc.. The
+$(2i, 2j, 2k)$, the second of all the subdomains $(2 i + 1, 2 j, 2 k)$,
+the third of all the subdomains $(2 i, 2 j + 1, 2 k)$, etc.. The
 algorithm processes the sets the one after the other by doing each
 subdomain within a set in parallel. Two such sets are depicted in
 Figure~\ref{fig:PB-SYM-PD-str}. In practice, this is implemented using
-$8$ OpenMP parallel for construct.
+$8$ OpenMP parallel-for constructs.
 
 \begin{algorithm}
 \caption{\textsc{PB-SYM-PD}}
@@ -562,8 +562,8 @@ $8$ OpenMP parallel for construct.
 \subsection{Coloring and Scheduling}
 
 Note that such an implementation overconstrains the execution of the
-algorithm. Indeed, despite they are not in the same set, subdomain $1,
-0, 0$ and $64, 64, 64$ can be computed at the same time. The real
+algorithm. Indeed, despite they are not in the same set, subdomain $(1,
+0, 0)$ and $(64, 64, 64)$ can be computed at the same time. The real
 constraint is that the points contained in a subdomain can be
 processed safely as long as none of the point contained in a
 neighboring subdomain is being processed. Using the OpenMP tasking
@@ -584,8 +584,8 @@ implied schedule.
 The implied schedule is actually a scheduling of a graph of dependency
 which is extracted from the coloring. Each edge of the stencil graph
 is oriented from the vertex of the lowest color to the vertex with the
-highest color. Each vertex is associated with a processing time which
-is somewhat proportional to the number of points inside the sub-domain
+highest color. Each vertex is associated with a processing time 
+proportional to the number of points inside the sub-domain
 the vertex represents and the neighboring subdomains. This
 construction is represented in Figure~\ref{fig:PB-SYM-PD-graph}.
 
@@ -608,18 +608,18 @@ where $T_1$ is the total amount of work to perform and $T_\infty$ is
 the length of the longest chain in the dependency graph.
 
 We propose to reduce the critical path by using a load-aware coloring
-of the subdomain. We will use a greedy coloring algorithm which will
-consider the subdomains in a particular order and for each subdomain
+of the subdomain. We use a greedy coloring algorithm which 
+considers the subdomains in a particular order and for each subdomain
 will color it with the smallest color that does not conflict with the
 already colored neighbors. Such greedy coloring algorithm are commonly
-used in parallel computing application~\cite{GMP05,Boman05-EuroPar,Deveci2016}. However, we will use
+used in parallel computing applications~\cite{GMP05,Boman05-EuroPar,Deveci2016}. However, we will use
 an ordering that color the vertices in non-increasing order of the
 number of point contained in the subdomain. While this algorithm is a
 heuristic, it is likely to obtain a coloring that minimizes the
 critical path\footnote{The complexity of this problem is currently
   unknown to the authors. The general case of an arbitrary graph is
   NP-Hard by reduction to graph coloring. But the case of a 1D stencil
-  is clearly polynomial.}. We call this algorithm to compute stkde:
+  is clearly polynomial.}. We call this algorithm to compute STKDE:
 PB-SYM-PD-SCHED.
 
 To decrease the critical path further, we propose an other algorithm
