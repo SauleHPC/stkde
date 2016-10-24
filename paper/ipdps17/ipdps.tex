@@ -903,9 +903,7 @@ speedup on the entire calculation would only be $3.54$.
 %%   \caption{obs decomposition - color sched mold. The missing item run out of memory becasue of a too high replication factor.}
 %% \end{table*}
 
-PB-SYM-DD does not achieve linear speedup on many of the instances
-because the domain decomposition induces redundant calculations. But a
-point decomposition would not have that kind of overhead. The
+The
 performance of PB-SYM-PD is shown in Figure~\ref{fig:pb-sym-pd} for
 different decomposition. Note that there is a requirement in PB-SYM-PD
 that the subdomain be larger than twice the bandwidth (see details in
@@ -934,7 +932,7 @@ reached, that implies a speedup lesser than $6.15$. Dengue\_Hr-VHb has
 a critical path of 28\% which implies a speedup lesser than $2.9$; and
 Pollen\_Hr-Hb has a critical path of 55\% which implies a speedup
 lesser than $1.6$. However, the speedup is typically lower because of
-the limited scalability in the initialization phase as outlined above.
+the limited scalability in the initialization phase.
 
 \begin{figure}
   \centering
