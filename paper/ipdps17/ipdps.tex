@@ -140,13 +140,13 @@ techniques.
 Space-time kernel density (STKDE) is used for identifying
 spatiotemporal patterns in datasets. It is a temporal
 extension of the traditional 2D kernel density
-estimation~\cite{Silverman86} which density surface,
+estimation~\cite{Silverman86} which generates density surface
 (``heatmap'') from a set of $n$ points located in a geographic space. The resulting density
 estimates is visualized within the space-time cube framework using two spatial $(x,
 y)$ and a temporal dimension $(t)$~\cite{Nakaya10}. STKDE creates a 3D
 raster volume where each voxel (3D equivalent of a pixel) is assigned a
 density estimate based on the surrounding points. The space-time
-density is estimated using (using the notations
+density is estimated using (following the notations
 of~\cite{Hohl16}):
 
 $$ \hat{f} (x, y, t) = \frac{1}{n h_s^2 h_t} \sum_{i | d_i < h_s, t_i<h_t}
@@ -190,10 +190,10 @@ of a single point on the neighboring space.
 
 Computationally, the domain of size $g_x$, $g_y$, $g_t$ is discretized
 in voxels using a spatial resolution $sres$ and a temporal resolution
-$tres$. Therefore the domain is represented by a grid of size
+$tres$. Therefore, the domain is represented by a grid of size
 $G_x=\ceil{\frac{g_x}{sres}}$, $G_y=\ceil{\frac{g_y}{sres}}$,
 $G_t=\ceil{\frac{g_t}{tres}}$. Each point causes a density increase in
-the voxel that are within a cylinder centered on the point of
+the voxels that are within a cylinder centered on the point, of
 radius equal to the spatial bandwidth in voxels
 $H_s=\ceil{\frac{h_s}{sres}}$, and of half height equal to the
 temporal bandwidth $H_t=\ceil{\frac{h_t}{tres}}$.
