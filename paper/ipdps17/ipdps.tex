@@ -642,17 +642,16 @@ problem is similar to scheduling a DAG of moldable tasks~\cite{Lepere02,Hunold13
 
 \subsection{Experimental Setting}
 
-\paragraph{Execution environment} We are using the copperhead machine
-at UNC Charlotte to perform our experiments. A node of Copperhead is
-composed of two Intel Xeon E5-2667 v3 processors. There is a total of
+\paragraph{Execution environment} The machine used to perform the experiments is
+composed of two Intel Xeon E5-2667 v3 processors for a total of
 16 cores clocked at 3.2Ghz. Despite each core is capable of hosting 2
-hyperthreads, hyperthreading was disabled. Each node is equipped with
+hyperthreads, hyperthreading was disabled. The machine is equipped with
 128GB of DDR4 clocked at 2.133 Ghz. The node uses RHEL 7.2
-and Linux 3.10. All codes are compiled using gcc 5.3, which implements
+and Linux 3.10. All codes are compiled using GCC 5.3, which implements
 OpenMP 4.0, with optimization flags \texttt{-O3 -march=native -fopenmp
-  -DNDEBUG}. All reported execution time exclude all IOs.
+  -DNDEBUG}. All reported execution times exclude all IOs.
 
-\paragraph{Dataset} Three dataset are used in our experiments. Their
+\paragraph{Dataset} Three datasets are used in our experiments. Their
 key attributes are summarized in Table~\ref{tab:instance}. 
 Out first dataset is Dengue which uses the space-time
 locations of dengue fever cases reported to the “Sistema de Vigilancia
@@ -668,7 +667,7 @@ privacy~\cite{Kwan04}. In 2010, 9606 were successfully geocoded
 successfully geocoded (1822 reported cases, or 85.7\%).
 
 The Pollen dataset is composed of 588K tweets of US users from
-February 2016 to April 2016 related to Pollen (that mention keywords
+February 2016 to April 2016 related to Pollen (i.e., that mention keywords
 such as ``pollen'' and ``allergy''). Tweets that did not contain a
 precise localization were approximated by picking a random location in
 the approximated region provided by
@@ -680,8 +679,8 @@ resolution of 1 day.
 
 The Flu dataset was obtained from the Animal Surveillance
 database of the Influenza Research
-Database\footnote{\url{https://www.fludb.org/}} on October 3rd,
-2016. The dataset contains observations of birds tested positive for
+Database\footnote{\url{https://www.fludb.org/}}.
+The dataset contains observations of birds tested positive for
 carrying any strain the avian flu from 2001 to 2016. The birds were
 observed all over the world and the modeled region spans as West as
 Alaska and East as Japan, as South as the southern shore of Australia
