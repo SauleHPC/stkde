@@ -647,7 +647,7 @@ composed of two Intel Xeon E5-2667 v3 processors for a total of
 16 cores clocked at 3.2Ghz. Despite each core is capable of hosting 2
 hyperthreads, hyperthreading was disabled. The machine is equipped with
 128GB of DDR4 clocked at 2.133 Ghz. The node uses RHEL 7.2
-and Linux 3.10. All codes are compiled using GCC 5.3, which implements
+and Linux 3.10. All codes are written in C++ and are compiled using GCC 5.3, which implements
 OpenMP 4.0, with optimization flags \texttt{-O3 -march=native -fopenmp
   -DNDEBUG}. All reported execution times exclude all IOs.
 
@@ -739,6 +739,11 @@ flu recorded in the last 15 years but they span most of the earth.
   \label{fig:breakdown}
 \end{figure}
 
+We do not provide direct comparison with the gold implementation
+because it uses a different programming language, which would make a
+direct comparison unfair. But a reimplementation of the voxel based
+algorithm with a 64x64x64 decomposition in C++ shows that the
+voxel-based algorithm VB is about 20 times slower than PB on Dengue\_Lr-Lb.
 
 \subsection{Domain-based parallelism}
 
@@ -767,8 +772,7 @@ memory requirement exceeds the 128GB available on the machine.
   \label{fig:sym-dr-speedup}
 \end{figure}
 
-All the instances are shown in a single chart to highlight that most
-instances do not get any speedup. Indeed, all the instances that have
+All the instances that have
 a high initialization cost get a speedup lesser than 1 since the
 threads spends their time allocating extra memory and reducing the
 content of that extra memory. Only 2 instances achieves a speedup
@@ -799,12 +803,11 @@ of that experiment is presented in
 Figure~\ref{fig:pb-sym-dd-speedup}. The figure presents the overhead
 of the decomposition relatively to PB-SYM. Two things are
 apparent. Some decomposition can actually reduce the runtime by
-providing better cache locality. Indeed the points becomes somewhat
-sorted in the process of decomposition.
+providing better cache locality. 
 
 However, in most cases, the decomposition actually increases the
 runtime. For instance, a 16x16x16 decomposition increases the amount
-of work by 80\%in the Flu-Hr cases, and a 64x64x64 decomposition
+of work by 80\% in the Flu-Hr cases, and a 64x64x64 decomposition
 induces an overhead of 300\%. Even on the Dengue\_Lr-Hb, a simple
 4x4x4 decomposition already induces a 5\% overhead which grows to 69\%
 for a 16x16x16 decomposition. Such large decomposition are likely to
@@ -847,18 +850,18 @@ decomposition induces an overhead of 28\% and 33\% in these two
 cases. The 8x8x8 decomposition in that case is still imbalanced and a
 finer decomposition can reach perfect load balance; however the
 overhead induced by the decomposition prevents taking advantages of
-that better load balance. It is clear that for PB-SYM-DD to be useful,
-it is important to carfully pick the decomposition to ensure load
-balance without suffering from an unbearable computational overhead
+that better load balance. For PB-SYM-DD to be useful,
+it is important to pick the decomposition to ensure load
+balance without suffering from an unbearable computational overhead.
 
 A more modest speedup between $2$ and $6$ can be observed on the
 instances with higher initialization cost, such as on the Flu
 dataset. Indeed, most of the time is spent on initializing the memory
 to hold the density estimates. Even if the algorithm performs memory
 initialization in parallel, there is not much room for parallelism in
-memory operation. Even more so since the initialization is when the
-memory is touched for the first time, which makes the operating system
-allocated the pages in physical memory. The speedup of the
+memory operations. Even more so since the initialization touches the memory
+for the first time, which makes the operating system
+allocate the pages in physical memory. The speedup of the
 initialization phase using 16 threads is about the same for all
 instances and is at about $2.5$. The small speedup of PB-SYM-DD on
 instances with high initialization cost is completely explained by
