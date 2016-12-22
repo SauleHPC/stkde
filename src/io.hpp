@@ -42,6 +42,8 @@ bounding_box load_bounding_box(std::string filename) {
 //contains the string x y t. Then each line is composed of three
 //values separated with tabs.
 //
+//if filename is "-", read from stdin
+//
 // The output vectors are cleared before anything is added
 void load_observations (const std::string& filename,
 			std::vector<coordinate>& xout,
