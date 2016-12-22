@@ -48,7 +48,13 @@ void load_observations (const std::string& filename,
 			std::vector<coordinate>& yout,
 			std::vector<coordinate>& tout) {
 
+  
   std::ifstream in (filename.c_str());
+  std::istream *realin = NULL;
+  if (filename.compare("-") == 0)
+    realin = &(std::cin);
+  else
+    realin = &in;
   xout.clear();
   yout.clear();
   tout.clear();
@@ -56,12 +62,12 @@ void load_observations (const std::string& filename,
   //discard first line
   {
     std::string line;
-    std::getline(in, line);
+    std::getline(*realin, line);
   }
   
-  while (in) {
+  while (*realin) {
     std::string line;
-    std::getline(in, line);
+    std::getline(*realin, line);
     std::stringstream ss (line);
     coordinate x, y, t;
     ss>>x>>y>>t;
