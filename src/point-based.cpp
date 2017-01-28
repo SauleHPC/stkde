@@ -24,6 +24,33 @@
 #include "voxel-based-obsdecomp.hpp"
 #include "voxel-based-omp-obsdecomp.hpp"
 
+void density_compare(std::shared_ptr<util::Compact3D<values>> dens1, 
+		     std::shared_ptr<util::Compact3D<values>> dens2,
+		     values* dist_sum,
+		     values* dist_max) {
+  
+  assert (dens1->getSizeX() == dens2->getSizeX());
+  assert (dens1->getSizeY() == dens2->getSizeY());
+  assert (dens1->getSizeZ() == dens2->getSizeZ());
+
+  *dist_sum = 0;
+  *dist_max = 0;
+
+  for (long x = 0; x < dens1->getSizeX(); ++x)
+    for (long y = 0; y < dens1->getSizeY(); ++y)
+      for (long z = 0; z < dens1->getSizeZ(); ++z) {
+	values d = (*dens1)(x,y,z) - (*dens2)(x,y,z);
+	d = std::abs(d);
+
+	if (d > *dist_max)
+	  *dist_max = d;
+	
+	*dist_sum += d;
+      }
+
+}
+
+
 int main (int argc, char* argv[]) {
 
   if (argc < 5 ) {
@@ -48,6 +75,19 @@ int main (int argc, char* argv[]) {
     decompX = atoi(argv[5]);
     decompY = atoi(argv[6]);
     decompT = atoi(argv[7]);
+  }
+
+  bool compare = false;
+
+  if (argc > 8) {
+    //extra args to process
+    for (int i = 8; i< argc; ++i) {
+      std::string opt = argv[i] ;
+      if (opt.compare("compare") == 0) {
+	compare = true;
+      }
+    }
+    
   }
   
   
@@ -137,6 +177,16 @@ int main (int argc, char* argv[]) {
     dens = stkde_voxelbased_omp_obsdecomp(bb, inst, param, decompX, decompY, decompT);
   
   util::timestamp end;
+
+  if (compare) {
+    std::shared_ptr<util::Compact3D<values>> dens2 = stkde_pointbased (bb, inst, param);
+    
+    values dsum, dmax;
+
+    density_compare(dens, dens2, &dsum, &dmax);
+
+    std::cerr<<"Distance to POINT-BASED = "<<dsum<<" max= "<<dmax<<std::endl;
+  }
 
   if (0) {
     std::ofstream out ("log");
