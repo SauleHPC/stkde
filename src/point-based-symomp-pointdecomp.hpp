@@ -92,8 +92,8 @@ std::shared_ptr<util::Compact3D<values>> stkde_pointbased_symomp_point(const bou
       //std::cerr<<"obsv: "<<obsvx<<" "<<obsvy<<" "<<obsvt<<std::endl;
       
       
-      for (index i = std::max(obsvx - voxsbw, (index)0); i< std::min(obsvx + voxsbw, voxX); ++i) {
-	for (index j = std::max(obsvy - voxsbw, (index)0); j< std::min(obsvy + voxsbw, voxY); ++j) {
+      for (index i = std::max(obsvx - voxsbw, (index)0); i< std::min(obsvx + voxsbw+1, voxX); ++i) {
+	for (index j = std::max(obsvy - voxsbw, (index)0); j< std::min(obsvy + voxsbw+1, voxY); ++j) {
 	  coordinate vox_x = bb.xl + i*pa.xres;
 	  coordinate vox_y = bb.yl + j*pa.yres;
 	  
@@ -107,7 +107,7 @@ std::shared_ptr<util::Compact3D<values>> stkde_pointbased_symomp_point(const bou
 	}
       }
       
-      for (index k = std::max(obsvt - voxtbw, (index)0); k< std::min(obsvt + voxtbw, voxT); ++k) {
+      for (index k = std::max(obsvt - voxtbw, (index)0); k< std::min(obsvt + voxtbw+1, voxT); ++k) {
 	coordinate vox_t = bb.tl + k*pa.tres;
 	
 	if (std::abs(vox_t - ot) <= pa.tbw) {
@@ -120,10 +120,10 @@ std::shared_ptr<util::Compact3D<values>> stkde_pointbased_symomp_point(const bou
       
       
       //BW around observation
-      for (index i = std::max(obsvx - voxsbw, (index)0); i< std::min(obsvx + voxsbw, voxX); ++i) {
-	for (index j = std::max(obsvy - voxsbw, (index)0); j< std::min(obsvy + voxsbw, voxY); ++j) {
+      for (index i = std::max(obsvx - voxsbw, (index)0); i< std::min(obsvx + voxsbw+1, voxX); ++i) {
+	for (index j = std::max(obsvy - voxsbw, (index)0); j< std::min(obsvy + voxsbw+1, voxY); ++j) {
 	  
-	  for (index k = std::max(obsvt - voxtbw, (index)0); k< std::min(obsvt + voxtbw, voxT); ++k) {
+	  for (index k = std::max(obsvt - voxtbw, (index)0); k< std::min(obsvt + voxtbw+1, voxT); ++k) {
 	    values val = disk[i][j]*bar[k];
 	    
 	    //std::cerr<<vox_x<<" "<<vox_y<<" "<<vox_t<<" "<<val<<std::endl;
