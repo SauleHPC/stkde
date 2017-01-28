@@ -21,7 +21,7 @@ std::shared_ptr<util::Compact3D<values>> stkde_voxelbased(const bounding_box& bb
 
   std::shared_ptr<util::Compact3D<values>> p = std::make_shared<util::Compact3D<values>>(voxx, voxy, voxt);
   util::Compact3D<values>& co = *p;
-  co.zero();
+  //co.zero(); //This is unnecessary since the correct value is directly written
 
   for(index i = 0; i < voxx; i++) {
     for(index j = 0; j < voxy; j++) {
