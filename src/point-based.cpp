@@ -47,14 +47,13 @@ void density_compare(std::shared_ptr<util::Compact3D<values>> dens1,
 	
 	*dist_sum += d;
       }
-
 }
 
 
 int main (int argc, char* argv[]) {
 
   if (argc < 5 ) {
-    std::cerr<<"usage: "<<argv[0]<<" boundary observations param method"<<std::endl;
+    std::cerr<<"usage: "<<argv[0]<<" boundary observations param method [decompX] [decompY] [decompZ] [...]"<<std::endl;
     return -1;	
   }
     
