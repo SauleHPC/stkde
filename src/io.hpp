@@ -42,13 +42,21 @@ bounding_box load_bounding_box(std::string filename) {
 //contains the string x y t. Then each line is composed of three
 //values separated with tabs.
 //
+//if filename is "-", read from stdin
+//
 // The output vectors are cleared before anything is added
 void load_observations (const std::string& filename,
 			std::vector<coordinate>& xout,
 			std::vector<coordinate>& yout,
 			std::vector<coordinate>& tout) {
 
+  
   std::ifstream in (filename.c_str());
+  std::istream *realin = NULL;
+  if (filename.compare("-") == 0)
+    realin = &(std::cin);
+  else
+    realin = &in;
   xout.clear();
   yout.clear();
   tout.clear();
@@ -56,12 +64,12 @@ void load_observations (const std::string& filename,
   //discard first line
   {
     std::string line;
-    std::getline(in, line);
+    std::getline(*realin, line);
   }
   
-  while (in) {
+  while (*realin) {
     std::string line;
-    std::getline(in, line);
+    std::getline(*realin, line);
     std::stringstream ss (line);
     coordinate x, y, t;
     ss>>x>>y>>t;

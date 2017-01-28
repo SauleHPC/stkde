@@ -50,7 +50,7 @@ set output 'PB-SYM-PD-imbalance.pdf'
 
 set xtic rotate by -45
 
-set ylabel 'relative length of the critical path'
+set ylabel 'Relative length of the critical path'
 
 plot 'PB-SYM-PD-imbalance.data' u 2:xtic(1) title col, \
      '' u 3:xtic(1) title col lc 3
