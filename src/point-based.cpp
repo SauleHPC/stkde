@@ -28,18 +28,21 @@
 void density_compare(std::shared_ptr<util::Compact3D<values>> dens1, 
 		     std::shared_ptr<util::Compact3D<values>> dens2,
 		     values* dist_sum,
-		     values* dist_max) {
+		     values* dist_max,
+		     values* total_density) {
   
   assert (dens1->getSizeX() == dens2->getSizeX());
   assert (dens1->getSizeY() == dens2->getSizeY());
   assert (dens1->getSizeZ() == dens2->getSizeZ());
 
-  *dist_sum = 0;
-  *dist_max = 0;
+  *dist_sum = 0.;
+  *dist_max = 0.;
+  *total_density = 0.;
 
   for (long x = 0; x < dens1->getSizeX(); ++x)
     for (long y = 0; y < dens1->getSizeY(); ++y)
       for (long z = 0; z < dens1->getSizeZ(); ++z) {
+	*total_density += (*dens1)(x,y,z);
 	values d = (*dens1)(x,y,z) - (*dens2)(x,y,z);
 	d = std::abs(d);
 
@@ -183,11 +186,11 @@ int main (int argc, char* argv[]) {
   if (compare) {
     std::shared_ptr<util::Compact3D<values>> dens2 = stkde_pointbased (bb, inst, param);
     
-    values dsum, dmax;
+    values dsum, dmax, total_dens;
 
-    density_compare(dens, dens2, &dsum, &dmax);
+    density_compare(dens, dens2, &dsum, &dmax, &total_dens);
 
-    std::cerr<<"Distance to POINT-BASED = "<<dsum<<" max= "<<dmax<<std::endl;
+    std::cerr<<"Distance to POINT-BASED="<<dsum<<" max= "<<dmax<<" totaldensity="<<total_dens<<std::endl;
   }
 
   if (0) {
