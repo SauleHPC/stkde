@@ -190,7 +190,7 @@ int main (int argc, char* argv[]) {
 
     density_compare(dens, dens2, &dsum, &dmax, &total_dens);
 
-    std::cerr<<"Distance to POINT-BASED="<<dsum<<" max= "<<dmax<<" totaldensity="<<total_dens<<std::endl;
+    std::cerr<<"Distance to POINT-BASED="<<dsum<<" max="<<dmax<<" totaldensity="<<total_dens<<std::endl;
   }
 
   if (0) {
