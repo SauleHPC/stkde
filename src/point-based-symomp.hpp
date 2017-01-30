@@ -95,8 +95,8 @@ long process_observation_boxed_sym (computation& c,
     //std::cerr<<"obsv: "<<obsvx<<" "<<obsvy<<" "<<obsvt<<std::endl;
 
 
-    for (index i = std::max(obsvx - c.voxsbw, (index)voxXmin); i< std::min(obsvx + c.voxsbw, voxXmax); ++i) {
-      for (index j = std::max(obsvy - c.voxsbw, (index)voxYmin); j< std::min(obsvy + c.voxsbw, voxYmax); ++j) {
+    for (index i = std::max(obsvx - c.voxsbw, (index)voxXmin); i< std::min(obsvx + c.voxsbw+1, voxXmax); ++i) {
+      for (index j = std::max(obsvy - c.voxsbw, (index)voxYmin); j< std::min(obsvy + c.voxsbw+1, voxYmax); ++j) {
 	coordinate vox_x = c.bb.xl + i*c.pa.xres;
 	coordinate vox_y = c.bb.yl + j*c.pa.yres;
 
@@ -110,7 +110,7 @@ long process_observation_boxed_sym (computation& c,
       }
     }
 
-    for (index k = std::max(obsvt - c.voxtbw, (index)voxTmin); k< std::min(obsvt + c.voxtbw, voxTmax); ++k) {
+    for (index k = std::max(obsvt - c.voxtbw, (index)voxTmin); k< std::min(obsvt + c.voxtbw+1, voxTmax); ++k) {
       coordinate vox_t = c.bb.tl + k*c.pa.tres;
       
       if (std::abs(vox_t - ot) <= c.pa.tbw) { //is this test even necessary?
@@ -123,10 +123,10 @@ long process_observation_boxed_sym (computation& c,
     
     
     //BW around observation
-    for (index i = std::max(obsvx - c.voxsbw, (index)voxXmin); i< std::min(obsvx + c.voxsbw, voxXmax); ++i) {
-      for (index j = std::max(obsvy - c.voxsbw, (index)voxYmin); j< std::min(obsvy + c.voxsbw, voxYmax); ++j) {
+    for (index i = std::max(obsvx - c.voxsbw, (index)voxXmin); i< std::min(obsvx + c.voxsbw+1, voxXmax); ++i) {
+      for (index j = std::max(obsvy - c.voxsbw, (index)voxYmin); j< std::min(obsvy + c.voxsbw+1, voxYmax); ++j) {
 	
-	for (index k = std::max(obsvt - c.voxtbw, (index)voxTmin); k< std::min(obsvt + c.voxtbw, voxTmax); ++k) {
+	for (index k = std::max(obsvt - c.voxtbw, (index)voxTmin); k< std::min(obsvt + c.voxtbw+1, voxTmax); ++k) {
 	  values val = bufferdisk[i][j]*bufferbar[k];
 	  
 	  //std::cerr<<vox_x<<" "<<vox_y<<" "<<vox_t<<" "<<val<<std::endl;
