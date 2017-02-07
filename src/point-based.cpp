@@ -58,6 +58,14 @@ int main (int argc, char* argv[]) {
 
   if (argc < 5 ) {
     std::cerr<<"usage: "<<argv[0]<<" boundary observations param method [decompX] [decompY] [decompZ] [...]"<<std::endl;
+    std::cerr<<"Methods: POINTBASED,"<<std::endl
+	     <<"         POINTBASED-SYMDISK, POINTBASED-SYMBAR, POINTBASED-SYM"<<std::endl
+	     <<"         POINTBASED-SYMOMP, POINTBASED-SYMOMP-OBSDECOMP, POINTBASED-SYMOMP-OBSDECOMP-SCHED"<<std::endl
+	     <<"         POINTBASED-SYMOMP-OBSDECOMP-COLORSCHED, POINTBASED-SYMOMP-OBSDECOMP-COLORSCHED-REP"<<std::endl
+	     <<"         POINTBASED-SYMOMP-POINTDECOMP"<<std::endl<<std::endl
+	     <<"         VOXELBASED, VOXELBASED-OMP"<<std::endl
+	     <<"         VOXELBASED-OBSDECOMP, VOXELBASED-OMP-OBSDECOMP"<<std::endl;
+     
     return -1;	
   }
     
