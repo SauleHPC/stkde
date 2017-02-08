@@ -81,6 +81,7 @@ int main (int argc, char* argv[]) {
       || method.compare("POINTBASED-SYMOMP-OBSDECOMP") == 0
       || method.compare("POINTBASED-SYMOMP-OBSDECOMP-COLORSCHED") == 0
       || method.compare("POINTBASED-SYMOMP-OBSDECOMP-COLORSCHED-REP") == 0
+      || method.compare("VOXELBASED-OBSDECOMP") == 0
       || method.compare("VOXELBASED-OMP-OBSDECOMP") == 0
       || method.compare("POINTBASED-SYMOMP-OBSDECOMP-SCHED") == 0) {
     decompX = atoi(argv[5]);
@@ -191,7 +192,12 @@ int main (int argc, char* argv[]) {
   
   util::timestamp end;
 
+  std::cerr.precision(2);
+  std::cerr<<"time: "<<end-beg<<" seconds"<<std::endl;
+  
+  
   if (compare) {
+    std::cerr<<"========Comparing to POINT-BASED========="<<std::endl;
     std::shared_ptr<util::Compact3D<values>> dens2 = stkde_pointbased (bb, inst, param);
     
     values dsum, dmax, total_dens;
@@ -216,8 +222,6 @@ int main (int argc, char* argv[]) {
     }
   }
 
-  std::cerr.precision(2);
-  std::cerr<<"time: "<<end-beg<<" seconds"<<std::endl;
   
   return 0;
 }
