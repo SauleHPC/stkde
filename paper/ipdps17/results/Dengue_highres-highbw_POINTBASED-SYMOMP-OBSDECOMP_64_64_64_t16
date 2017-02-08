@@ -1,0 +1,69 @@
+hostname : sth-c5.uncc.edu
+bounding: [1053872.965;1068485.726]x[860186.8419;879395.9741]x[3;730]
+read 11056 observations
+res: 50 50 1 bw: 2500 2500 1
+decomposition should allow blocks larger than bandwidth. Adjusting decomposition to 2x3x64
+voxsize: 294x386x728 size:315.156372MB
+voxBW: 50 1
+Initialization time: 0.031437
+decomposition time: 0.000784 seconds
+0,1,1 : 82
+1,1,1 : 106
+1,2,1 : 74
+0,0,2 : 74
+0,1,2 : 124
+1,1,2 : 156
+1,2,2 : 122
+0,0,3 : 81
+0,1,3 : 165
+1,1,3 : 239
+1,2,3 : 169
+0,0,4 : 78
+0,1,4 : 162
+1,1,4 : 229
+1,2,4 : 171
+0,0,5 : 77
+0,1,5 : 211
+1,1,5 : 268
+1,2,5 : 151
+0,1,6 : 176
+1,1,6 : 208
+1,2,6 : 108
+0,1,7 : 150
+1,1,7 : 171
+1,2,7 : 93
+0,1,8 : 143
+1,1,8 : 151
+1,2,8 : 78
+0,1,9 : 98
+1,1,9 : 152
+1,2,9 : 84
+0,1,10 : 81
+1,1,10 : 129
+0,1,11 : 74
+1,1,11 : 124
+1,1,12 : 118
+0,1,13 : 98
+1,1,13 : 150
+0,1,14 : 75
+1,1,14 : 137
+1,1,15 : 133
+1,1,16 : 90
+1,1,18 : 104
+1,1,19 : 117
+1,1,20 : 113
+1,1,21 : 80
+1,1,22 : 86
+1,1,23 : 81
+max load: 268 avgloadperbox: 28.7916667 avgloadpercore: 691 total load: 11056
+maxin round:78
+maxin round:81
+maxin round:176
+maxin round:211
+maxin round:171
+maxin round:169
+maxin round:229
+maxin round:268
+compute: 0.268902 seconds
+evaluations: 328636729
+time: 0.301574 seconds

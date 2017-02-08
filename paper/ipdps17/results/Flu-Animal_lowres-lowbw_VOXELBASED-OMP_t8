@@ -1,0 +1,6 @@
+hostname : sth-c13.uncc.edu
+bounding: [-39;77]x[-159;148]x[0;5950]
+read 31478 observations
+res: 1 1 7 bw: 1 1 7
+evals: 204961
+time: 122.502290 seconds

@@ -1,0 +1,13 @@
+hostname : sth-c15.uncc.edu
+bounding: [-39;77]x[-159;148]x[0;5950]
+read 31478 observations
+res: 0.5 0.5 3 bw: 1 1 7
+voxsize: 233x615x1985 size:1085.05468MB
+voxBW: 2 3
+Initialization time: 0.104988
+intersect: 75789
+decomposition time: 0.019785 seconds
+max load: 1266 avgloadperbox: 0.960632324 avgloadpercore: 7869.5
+compute: 0.007434 seconds
+evaluations: 5396489
+time: 0.132915 seconds

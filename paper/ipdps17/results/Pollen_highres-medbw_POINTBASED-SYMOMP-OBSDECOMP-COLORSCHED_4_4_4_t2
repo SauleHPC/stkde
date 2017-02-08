@@ -1,0 +1,16 @@
+hostname : sth-c1.uncc.edu
+bounding: [-180;180]x[7;72]x[5875;5958]
+read 588189 observations
+res: 0.1 0.1 1 bw: 2.5 2.5 7
+voxsize: 3601x651x84 size:751.179062MB
+voxBW: 25 7
+decomposition time: 0.021045 seconds
+max load: 85119 avgloadperbox: 9190.45312 avgloadpercore: 294094.5 total load: 588189
+Initialization time: 0.100247
+mem: 216
+most loaded: 0 1 2
+load based longest path:396457
+schedule time: 0.000515 seconds
+compute: 39.227501 seconds
+evaluations: 0
+time: 39.349552 seconds

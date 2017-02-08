@@ -1,0 +1,21 @@
+hostname : sth-c18.uncc.edu
+bounding: [-39;77]x[-159;148]x[0;5950]
+read 31478 observations
+res: 0.2 0.2 1 bw: 2 2 21
+decomposition should allow blocks larger than bandwidth. Adjusting decomposition to 28x32x32
+voxsize: 581x1536x5951 size:20258.9707MB
+voxBW: 10 21
+Initialization time: 4.484697
+decomposition time: 0.002598 seconds
+max load: 1001 avgloadperbox: 1.09786551 avgloadpercore: 31478 total load: 31478
+maxin round:262
+maxin round:164
+maxin round:474
+maxin round:1001
+maxin round:387
+maxin round:291
+maxin round:612
+maxin round:989
+compute: 2.203613 seconds
+evaluations: 596650362
+time: 6.691651 seconds

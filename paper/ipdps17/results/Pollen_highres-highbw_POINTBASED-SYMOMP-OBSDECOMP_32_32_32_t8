@@ -1,0 +1,40 @@
+hostname : sth-c2.uncc.edu
+bounding: [-180;180]x[7;72]x[5875;5958]
+read 588189 observations
+res: 0.1 0.1 1 bw: 5 5 14
+decomposition should allow blocks larger than bandwidth. Adjusting decomposition to 32x6x2
+voxsize: 3601x651x84 size:751.179062MB
+voxBW: 50 14
+Initialization time: 0.071066
+decomposition time: 0.023019 seconds
+8,1,0 : 12101
+5,2,0 : 23016
+6,2,0 : 11747
+7,2,0 : 39088
+8,2,0 : 35983
+9,2,0 : 13421
+7,3,0 : 7845
+8,3,0 : 28957
+9,3,0 : 32911
+8,1,1 : 19659
+5,2,1 : 53404
+6,2,1 : 13012
+7,2,1 : 49584
+8,2,1 : 65281
+9,2,1 : 23876
+5,3,1 : 17272
+7,3,1 : 10855
+8,3,1 : 46317
+9,3,1 : 54797
+max load: 65281 avgloadperbox: 1531.74219 avgloadpercore: 73523.625 total load: 588189
+maxin round:35983
+maxin round:65281
+maxin round:28957
+maxin round:46317
+maxin round:39088
+maxin round:53404
+maxin round:32911
+maxin round:54797
+compute: 233.443629 seconds
+evaluations: 165700270408
+time: 233.538311 seconds

@@ -1,0 +1,11 @@
+hostname : sth-c14.uncc.edu
+bounding: [-39;77]x[-159;148]x[0;5950]
+read 31478 observations
+res: 1 1 7 bw: 2 2 21
+voxsize: 117x308x851 size:117MB
+voxBW: 2 3
+Initialization time: 0.027853
+compute: 0.016985 seconds
+reduce: 0.034986 seconds
+evaluations: 5506895
+time: 0.079927 seconds

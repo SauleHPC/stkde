@@ -1,0 +1,13 @@
+hostname : sth-c18.uncc.edu
+bounding: [-39;77]x[-159;148]x[0;5950]
+read 31478 observations
+res: 0.2 0.2 1 bw: 2 2 21
+voxsize: 581x1536x5951 size:20258.9707MB
+voxBW: 10 21
+decomposition time: 0.001081 seconds
+max load: 31478 avgloadperbox: 31478 avgloadpercore: 15739 total load: 31478
+Initialization time: 2.719950
+mem: 27
+compute: 2.287939 seconds
+evaluations: 0
+time: 5.009192 seconds
