@@ -11,10 +11,10 @@ gettime() {
 RESULTDIR=../results
 
 (
-    echo '\\begin{tabular}{|l|rrrrrr|r|}'
+    echo '\\begin{tabular}{|l|rr|rrrr|r|}'
     echo \\hline
     echo          \& \\multicolumn{6}{c\|}{Time \(in seconds\)}        \& speedup'\\\\'
-    echo Instance \& VB \& VB-D \& PB \&  PB-DISK \& PB-BAR \& PB-SYM \& PB-SYM '\\\\'
+    echo Instance \& VB \& VB-DEC \& PB \&  PB-DISK \& PB-BAR \& PB-SYM \& PB-SYM '\\\\'
     echo \\hline
 	    
 
