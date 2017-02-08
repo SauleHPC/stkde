@@ -11,10 +11,10 @@ gettime() {
 RESULTDIR=../results
 
 (
-    echo '\\begin{tabular}{|l|rrrr|r|}'
+    echo '\\begin{tabular}{|l|rrrrrr|r|}'
     echo \\hline
-    echo          \& \\multicolumn{4}{c\|}{Time \(in seconds\)}        \& speedup'\\\\'
-    echo Instance \& PB \&  PB-DISK \& PB-BAR \& PB-SYM \& PB-SYM '\\\\'
+    echo          \& \\multicolumn{6}{c\|}{Time \(in seconds\)}        \& speedup'\\\\'
+    echo Instance \& VB \& VB-D \& PB \&  PB-DISK \& PB-BAR \& PB-SYM \& PB-SYM '\\\\'
     echo \\hline
 	    
 
@@ -23,6 +23,7 @@ RESULTDIR=../results
 				    Flu-Animal_lowres-lowbw Flu-Animal_lowres-highbw Flu-Animal_medres-lowbw Flu-Animal_medres-highbw Flu-Animal_highres-lowbw Flu-Animal_highres-highbw
     do
 	echo $inst \\t\& \
+	     $(gettime ${inst} VOXELBASED-OMP_t1) \\t\& $(gettime ${inst} VOXELBASED-OMP-OBSDECOMP_64_64_64_t1) \\t\& \
 	     $(gettime ${inst} POINTBASED) \\t\& $(gettime ${inst} POINTBASED-SYMDISK) \\t\& \
 	     $(gettime ${inst} POINTBASED-SYMBAR) \\t\& $(gettime ${inst} POINTBASED-SYM) \\t\& \
 	     $(echo $(gettime ${inst} POINTBASED) / $(gettime ${inst} POINTBASED-SYM) | bc -l | awk '{printf "%.3f", $1}' ) '\\\\' 
