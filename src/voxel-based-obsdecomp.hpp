@@ -123,7 +123,6 @@ std::shared_ptr<util::Compact3D<values>> stkde_voxelbased_obsdecomp(const boundi
   
   
   util::timestamp compbeg;
-  long evals = 0;
 
   for (index vox=0; vox<c.voxX; ++vox) {
     for (index voy=0; voy<c.voxY; ++voy) {
@@ -157,7 +156,7 @@ std::shared_ptr<util::Compact3D<values>> stkde_voxelbased_obsdecomp(const boundi
 		    v += densityF(vox_x, vox_y, vox_t,
 				  ox, oy, ot,
 				  inst.obsx.size(), pa.xbw, pa.tbw);
-		    evals++;
+		    eval++;
 		  }
 		}
 	      }
