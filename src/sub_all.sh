@@ -26,3 +26,13 @@ qsub -q steelhead -d $(pwd) -l mem=110GB -l nodes=1:ppn=16 -v INSTANCE=Pollen,BO
 qsub -q steelhead -d $(pwd) -l mem=110GB -l nodes=1:ppn=16 -v INSTANCE=Pollen,BOUNDARY=../dataset/Pollen/boundary,OBSERVATIONS=../dataset/Pollen/Pollen-xyt.txt,BANDWIDTH=../dataset/Pollen/highres-medbw ./run_one.sh
 qsub -q steelhead -d $(pwd) -l mem=110GB -l nodes=1:ppn=16 -v INSTANCE=Pollen,BOUNDARY=../dataset/Pollen/boundary,OBSERVATIONS=../dataset/Pollen/Pollen-xyt.txt,BANDWIDTH=../dataset/Pollen/highres-highbw ./run_one.sh
 
+
+#PollenUS
+qsub -q steelhead -d $(pwd) -l mem=110GB -l nodes=1:ppn=16 -v INSTANCE=PollenUS,BOUNDARY=../dataset/Pollen/boundary-UScropped,OBSERVATIONS=../dataset/Pollen/Pollen-xyt.txt,BANDWIDTH=../dataset/Pollen/lowres-lowbw ./run_one.sh
+
+qsub -q steelhead -d $(pwd) -l mem=110GB -l nodes=1:ppn=16 -v INSTANCE=PollenUS,BOUNDARY=../dataset/Pollen/boundary-UScropped,OBSERVATIONS=../dataset/Pollen/Pollen-xyt.txt,BANDWIDTH=../dataset/Pollen/highres-lowbw ./run_one.sh
+qsub -q steelhead -d $(pwd) -l mem=110GB -l nodes=1:ppn=16 -v INSTANCE=PollenUS,BOUNDARY=../dataset/Pollen/boundary-UScropped,OBSERVATIONS=../dataset/Pollen/Pollen-xyt.txt,BANDWIDTH=../dataset/Pollen/highres-medbw ./run_one.sh
+qsub -q steelhead -d $(pwd) -l mem=110GB -l nodes=1:ppn=16 -v INSTANCE=PollenUS,BOUNDARY=../dataset/Pollen/boundary-UScropped,OBSERVATIONS=../dataset/Pollen/Pollen-xyt.txt,BANDWIDTH=../dataset/Pollen/highres-highbw ./run_one.sh
+
+qsub -q steelhead -d $(pwd) -l mem=110GB -l nodes=1:ppn=16 -v INSTANCE=PollenUS,BOUNDARY=../dataset/Pollen/boundary-UScropped,OBSERVATIONS=../dataset/Pollen/Pollen-xyt.txt,BANDWIDTH=../dataset/Pollen/veryhighres-lowbw ./run_one.sh
+qsub -q steelhead -d $(pwd) -l mem=110GB -l nodes=1:ppn=16 -v INSTANCE=PollenUS,BOUNDARY=../dataset/Pollen/boundary-UScropped,OBSERVATIONS=../dataset/Pollen/Pollen-xyt.txt,BANDWIDTH=../dataset/Pollen/veryhighres-verylowbw ./run_one.sh
