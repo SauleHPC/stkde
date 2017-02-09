@@ -1,11 +1,11 @@
-hostname : sth-c9.uncc.edu
+hostname : sth-c15.uncc.edu
 bounding: [-39;77]x[-159;148]x[0;5950]
 read 31478 observations
 res: 0.5 0.5 3 bw: 1 1 7
 voxsize: 233x615x1985 size:1085.05468MB
 voxBW: 2 3
-Initialization time: 0.295663
-decomposition time: 0.001232 seconds
+Initialization time: 0.241489
+decomposition time: 0.001103 seconds
 0,0,0 : 31478
 max load: 31478 avgloadperbox: 31478 avgloadpercore: 31478 total load: 31478
 maxin round:31478
@@ -16,6 +16,6 @@ maxin round:0
 maxin round:0
 maxin round:0
 maxin round:0
-compute: 0.010860 seconds
-evaluations: 3021792
-time: 0.307902 seconds
+compute: 0.015046 seconds
+evaluations: 5507840
+time: 0.257762 seconds

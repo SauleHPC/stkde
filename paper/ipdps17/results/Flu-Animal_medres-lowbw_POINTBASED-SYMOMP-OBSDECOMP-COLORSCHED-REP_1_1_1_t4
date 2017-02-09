@@ -1,19 +1,19 @@
-hostname : sth-c2.uncc.edu
+hostname : sth-c15.uncc.edu
 bounding: [-39;77]x[-159;148]x[0;5950]
 read 31478 observations
 res: 0.5 0.5 3 bw: 1 1 7
 voxsize: 233x615x1985 size:1085.05468MB
 voxBW: 2 3
-decomposition time: 0.001027 seconds
+decomposition time: 0.001036 seconds
 max load: 31478 avgloadperbox: 31478 avgloadpercore: 7869.5 total load: 31478
 most loaded: 0 0 0
 load based longest path:31478
 nb replication: 8
 total active blocks: 8
-schedule time: 0.000430 seconds
-Initialization time: 7.188069
+schedule time: 0.000371 seconds
+Initialization time: 7.267402
 mem: 27
-compute: 0.028772 seconds
-reduction: 25.046850 seconds
+compute: 0.019476 seconds
+reduction: 26.342092 seconds
 evaluations: 0
-time: 32.265493 seconds
+time: 33.630767 seconds

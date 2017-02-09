@@ -1,0 +1,6 @@
+hostname : sth-c16.uncc.edu
+bounding: [-39;77]x[-159;148]x[0;5950]
+read 31478 observations
+res: 0.5 0.5 3 bw: 2 2 21
+evals: 22658014
+time: 1184.711928 seconds

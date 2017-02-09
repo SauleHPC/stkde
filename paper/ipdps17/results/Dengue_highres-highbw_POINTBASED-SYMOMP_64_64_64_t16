@@ -1,13 +1,13 @@
-hostname : sth-c8.uncc.edu
+hostname : sth-c5.uncc.edu
 bounding: [1053872.965;1068485.726]x[860186.8419;879395.9741]x[3;730]
 read 11056 observations
 res: 50 50 1 bw: 2500 2500 1
 voxsize: 294x386x728 size:315.156372MB
 voxBW: 50 1
-Initialization time: 0.040313
+Initialization time: 0.039176
 intersect: 5146079
-decomposition time: 1.430397 seconds
+decomposition time: 1.439435 seconds
 max load: 309 avgloadperbox: 0.042175293 avgloadpercore: 691
-compute: 0.203617 seconds
-evaluations: 214955902
-time: 1.764730 seconds
+compute: 0.216257 seconds
+evaluations: 327761178
+time: 1.784469 seconds

@@ -1,12 +1,12 @@
-hostname : sth-c3.uncc.edu
+hostname : sth-c2.uncc.edu
 bounding: [-180;180]x[7;72]x[5875;5958]
 read 588189 observations
 res: 0.1 0.1 1 bw: 5 5 14
 decomposition should allow blocks larger than bandwidth. Adjusting decomposition to 32x6x2
 voxsize: 3601x651x84 size:751.179062MB
 voxBW: 50 14
-Initialization time: 0.071998
-decomposition time: 0.020502 seconds
+Initialization time: 0.072693
+decomposition time: 0.022986 seconds
 8,1,0 : 12101
 5,2,0 : 23016
 6,2,0 : 11747
@@ -37,6 +37,6 @@ maxin round:39088
 maxin round:53404
 maxin round:32911
 maxin round:54797
-compute: 223.689658 seconds
-evaluations: 157284155464
-time: 223.783046 seconds
+compute: 233.238285 seconds
+evaluations: 165700270408
+time: 233.334901 seconds

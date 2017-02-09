@@ -66,10 +66,10 @@ long process_observation_boxed_sym (computation& c,
 				    std::vector<values>& bufferbar,
 				    index obsmin=-1, index obsmax=-1 //what range of observation to do, -1 for all
 				    ) {
-  // std::cerr<<"processing voxel box: "
-  // 	   <<"["<< voxXmin<<";"<<voxXmax<<"["
-  //   	   <<" ["<< voxYmin<<";"<<voxYmax<<"["
-  //   	   <<" ["<< voxTmin<<";"<<voxTmax<<"["<<std::endl;
+   // std::cerr<<"processing voxel box: "
+   // 	   <<"["<< voxXmin<<";"<<voxXmax<<"["
+   //   	   <<" ["<< voxYmin<<";"<<voxYmax<<"["
+   //   	   <<" ["<< voxTmin<<";"<<voxTmax<<"["<<std::endl;
 
   if (obsmin < 0 )
     obsmin = 0;
@@ -95,8 +95,8 @@ long process_observation_boxed_sym (computation& c,
     //std::cerr<<"obsv: "<<obsvx<<" "<<obsvy<<" "<<obsvt<<std::endl;
 
 
-    for (index i = std::max(obsvx - c.voxsbw, (index)voxXmin); i< std::min(obsvx + c.voxsbw, voxXmax); ++i) {
-      for (index j = std::max(obsvy - c.voxsbw, (index)voxYmin); j< std::min(obsvy + c.voxsbw, voxYmax); ++j) {
+    for (index i = std::max(obsvx - c.voxsbw, (index)voxXmin); i< std::min(obsvx + c.voxsbw+1, voxXmax); ++i) {
+      for (index j = std::max(obsvy - c.voxsbw, (index)voxYmin); j< std::min(obsvy + c.voxsbw+1, voxYmax); ++j) {
 	coordinate vox_x = c.bb.xl + i*c.pa.xres;
 	coordinate vox_y = c.bb.yl + j*c.pa.yres;
 
@@ -110,7 +110,7 @@ long process_observation_boxed_sym (computation& c,
       }
     }
 
-    for (index k = std::max(obsvt - c.voxtbw, (index)voxTmin); k< std::min(obsvt + c.voxtbw, voxTmax); ++k) {
+    for (index k = std::max(obsvt - c.voxtbw, (index)voxTmin); k< std::min(obsvt + c.voxtbw+1, voxTmax); ++k) {
       coordinate vox_t = c.bb.tl + k*c.pa.tres;
       
       if (std::abs(vox_t - ot) <= c.pa.tbw) { //is this test even necessary?
@@ -123,14 +123,14 @@ long process_observation_boxed_sym (computation& c,
     
     
     //BW around observation
-    for (index i = std::max(obsvx - c.voxsbw, (index)voxXmin); i< std::min(obsvx + c.voxsbw, voxXmax); ++i) {
-      for (index j = std::max(obsvy - c.voxsbw, (index)voxYmin); j< std::min(obsvy + c.voxsbw, voxYmax); ++j) {
+    for (index i = std::max(obsvx - c.voxsbw, (index)voxXmin); i< std::min(obsvx + c.voxsbw+1, voxXmax); ++i) {
+      for (index j = std::max(obsvy - c.voxsbw, (index)voxYmin); j< std::min(obsvy + c.voxsbw+1, voxYmax); ++j) {
 	
-	for (index k = std::max(obsvt - c.voxtbw, (index)voxTmin); k< std::min(obsvt + c.voxtbw, voxTmax); ++k) {
+	for (index k = std::max(obsvt - c.voxtbw, (index)voxTmin); k< std::min(obsvt + c.voxtbw+1, voxTmax); ++k) {
 	  values val = bufferdisk[i][j]*bufferbar[k];
 	  
 	  //std::cerr<<vox_x<<" "<<vox_y<<" "<<vox_t<<" "<<val<<std::endl;
-	  
+
 	  co(i,j,k) += val;
 	  eval++;
 	}
@@ -142,10 +142,11 @@ long process_observation_boxed_sym (computation& c,
   return eval;  
 }
 
+///Is [min1;max1] inter [min2;max2] non empty?
 bool intersect1d (coordinate min1, coordinate max1,
 		  coordinate min2, coordinate max2) {
   if (max2 < min1) return false;
-  if (min2 > max1) return false;
+  if (max1 < min2) return false;
 
   return true;
 }
@@ -218,7 +219,13 @@ std::shared_ptr<util::Compact3D<values>> stkde_pointbased_symomp(const bounding_
       coordinate bwxmin = ox-pa.xbw;
       coordinate bwxmax = ox+pa.xbw;
       //does it intersect?
-      if (! intersect1d(bwxmin, bwxmax, decxmin, decxmax)) {continue;}
+      if (! intersect1d(bwxmin, bwxmax, decxmin, decxmax)) {
+	if (0)
+	    std::cerr<<"not adding "<<ox<<","<<oy<<","<<ot<<" to "
+		     <<decxmin<<";"<<decxmax
+		     <<std::endl;
+	continue;
+      }
       //this kind of intersection can cause to touch (evaluate) less
       //voxels than the sequential code would. Though it is because of
       //a rounding error in sequential. So it is begnin.
@@ -231,7 +238,14 @@ std::shared_ptr<util::Compact3D<values>> stkde_pointbased_symomp(const bounding_
 	coordinate bwymin = oy-pa.ybw;
 	coordinate bwymax = oy+pa.ybw;
 	//does it intersect?
-	if (! intersect1d(bwymin, bwymax, decymin, decymax)) {continue;}
+	if (! intersect1d(bwymin, bwymax, decymin, decymax)) {
+	  if (0)
+	    std::cerr<<"not adding "<<ox<<","<<oy<<","<<ot<<" to "
+		     <<decxmin<<";"<<decxmax<<" "
+		     <<decymin<<";"<<decymax
+		     <<std::endl;
+	  continue;
+	}
 
 	
 	for (int dt = 0; dt<decompsizeT; ++dt) {
@@ -241,9 +255,16 @@ std::shared_ptr<util::Compact3D<values>> stkde_pointbased_symomp(const bounding_
 	  coordinate bwtmin = ot-pa.tbw;
 	  coordinate bwtmax = ot+pa.tbw;
 	  //does it intersect?
-	  if (! intersect1d(bwtmin, bwtmax, dectmin, dectmax)) {continue;}
+	  if (! intersect1d(bwtmin, bwtmax, dectmin, dectmax)) {
+	    if (0)
+	      std::cerr<<"not adding "<<ox<<","<<oy<<","<<ot<<" to "
+		       <<decxmin<<";"<<decxmax<<" "
+		       <<decymin<<";"<<decymax<<" "
+		       <<dectmin<<";"<<dectmax<<std::endl;
+	    continue;
+	  }
 
-	  if (0 && i == 0){
+	  if (0){
 	    std::cerr<<"adding "<<ox<<","<<oy<<","<<ot<<" to "
 		     <<decxmin<<";"<<decxmax<<" "
 		     <<decymin<<";"<<decymax<<" "
@@ -298,30 +319,30 @@ std::shared_ptr<util::Compact3D<values>> stkde_pointbased_symomp(const bounding_
 	for (int dt = 0; dt<decompsizeT; ++dt) {
 	  
 	  coordinate decxmin = bb.xl + ( dx   *(bb.xh-bb.xl)/decompsizeX );
-	  index voxXmin = std::lround((decxmin-bb.xl)/pa.xres);
+	  index voxXmin = std::lround(std::ceil((decxmin-bb.xl)/pa.xres));
 	  coordinate decxmax = bb.xl + ((dx+1)*(bb.xh-bb.xl)/decompsizeX );
 	  index voxXmax;
 	  if (dx != decompsizeX-1)
-	    voxXmax = std::lround((decxmax-bb.xl)/pa.xres);
+	    voxXmax = std::lround(std::floor((decxmax-bb.xl)/pa.xres))+1;
 	  else
 	    voxXmax = c.voxX;
 	  
 	  coordinate decymin = bb.yl + ( dy   *(bb.yh-bb.yl)/decompsizeY );
-	  index voxYmin = std::lround((decymin-bb.yl)/pa.yres);
+	  index voxYmin = std::lround(std::ceil((decymin-bb.yl)/pa.yres));
 	  coordinate decymax = bb.yl + ((dy+1)*(bb.yh-bb.yl)/decompsizeY );
 	  index voxYmax;
 	  if (dy != decompsizeY-1)
-	    voxYmax = std::lround((decymax-bb.yl)/pa.yres);
+	    voxYmax = std::lround(std::floor((decymax-bb.yl)/pa.yres))+1;
 	  else
 	    voxYmax = c.voxY;
 
 	  
 	  coordinate dectmin = bb.tl + ( dt   *(bb.th-bb.tl)/decompsizeT );
-	  index voxTmin = std::lround((dectmin-bb.tl)/pa.tres);
+	  index voxTmin = std::lround(std::ceil((dectmin-bb.tl)/pa.tres));
 	  coordinate dectmax = bb.tl + ((dt+1)*(bb.th-bb.tl)/decompsizeT );
 	  index voxTmax;
 	  if (dt != decompsizeT-1)
-	    voxTmax = std::lround((dectmax-bb.tl)/pa.tres);
+	    voxTmax = std::lround(std::floor((dectmax-bb.tl)/pa.tres))+1;
 	  else
 	    voxTmax = c.voxT;
 	  

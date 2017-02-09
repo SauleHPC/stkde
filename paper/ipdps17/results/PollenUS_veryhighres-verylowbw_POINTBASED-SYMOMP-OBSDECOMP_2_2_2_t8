@@ -1,0 +1,28 @@
+hostname : sth-c16.uncc.edu
+bounding: [-130;-65]x[20;50]x[5875;5958]
+read 588189 observations
+res: 0.01 0.01 1 bw: 0.5 0.5 3
+voxsize: 6501x3001x84 size:6251.51857MB
+voxBW: 50 3
+Initialization time: 0.586127
+decomposition time: 0.020830 seconds
+0,0,0 : 31396
+1,0,0 : 55327
+0,1,0 : 25516
+1,1,0 : 107339
+0,0,1 : 52477
+1,0,1 : 87736
+0,1,1 : 53680
+1,1,1 : 174718
+max load: 174718 avgloadperbox: 73523.625 avgloadpercore: 73523.625 total load: 588189
+maxin round:31396
+maxin round:52477
+maxin round:25516
+maxin round:53680
+maxin round:55327
+maxin round:87736
+maxin round:107339
+maxin round:174718
+compute: 157.977356 seconds
+evaluations: 41392685368
+time: 158.584872 seconds

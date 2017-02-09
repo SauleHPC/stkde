@@ -1,0 +1,19 @@
+hostname : sth-c13.uncc.edu
+bounding: [-130;-65]x[20;50]x[5875;5958]
+read 588189 observations
+res: 0.1 0.1 1 bw: 2.5 2.5 7
+voxsize: 651x301x84 size:62.7894745MB
+voxBW: 25 7
+decomposition time: 0.023246 seconds
+max load: 588189 avgloadperbox: 588189 avgloadpercore: 588189 total load: 588189
+most loaded: 0 0 0
+load based longest path:588189
+nb replication: 2
+total active blocks: 2
+schedule time: 0.000550 seconds
+Initialization time: 0.119710
+mem: 27
+compute: 57.542527 seconds
+reduction: 0.115658 seconds
+evaluations: 0
+time: 57.802086 seconds

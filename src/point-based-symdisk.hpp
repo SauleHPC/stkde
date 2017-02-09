@@ -65,8 +65,8 @@ std::shared_ptr<util::Compact3D<values>> stkde_pointbased_symdisk(const bounding
 
     
     //BW around observation
-    for (index i = std::max(obsvx - voxsbw, (index)0); i< std::min(obsvx + voxsbw, voxX); ++i) {
-      for (index j = std::max(obsvy - voxsbw, (index)0); j< std::min(obsvy + voxsbw, voxY); ++j) {
+    for (index i = std::max(obsvx - voxsbw, (index)0); i< std::min(obsvx + voxsbw+1, voxX); ++i) {
+      for (index j = std::max(obsvy - voxsbw, (index)0); j< std::min(obsvy + voxsbw+1, voxY); ++j) {
 	coordinate vox_x = bb.xl + i*pa.xres;
 	coordinate vox_y = bb.yl + j*pa.yres;
 
@@ -75,7 +75,7 @@ std::shared_ptr<util::Compact3D<values>> stkde_pointbased_symdisk(const bounding
 				      vox_x, vox_y, -1,
 				      inst.obsx.size(), pa.xbw, pa.tbw);
 	
-	  for (index k = std::max(obsvt - voxtbw, (index)0); k< std::min(obsvt + voxtbw, voxT); ++k) {
+	  for (index k = std::max(obsvt - voxtbw, (index)0); k< std::min(obsvt + voxtbw+1, voxT); ++k) {
 	    coordinate vox_t = bb.tl + k*pa.tres;
 
 	    if (std::abs(vox_t - ot) <= pa.tbw) {

@@ -1,4 +1,4 @@
-hostname : sth-c12.uncc.edu
+hostname : sth-c5.uncc.edu
 bounding: [1053872.965;1068485.726]x[860186.8419;879395.9741]x[3;730]
 read 11056 observations
 res: 50 50 1 bw: 2500 2500 1
@@ -11,10 +11,10 @@ most loaded: 1 1 0
 load based longest path:6367
 nb replication: 6
 total active blocks: 166
-schedule time: 0.000514 seconds
-Initialization time: 0.293195
+schedule time: 0.000470 seconds
+Initialization time: 0.295431
 mem: 200
-compute: 0.512299 seconds
-reduction: 0.238178 seconds
+compute: 0.547276 seconds
+reduction: 0.225350 seconds
 evaluations: 0
-time: 1.044971 seconds
+time: 1.069501 seconds

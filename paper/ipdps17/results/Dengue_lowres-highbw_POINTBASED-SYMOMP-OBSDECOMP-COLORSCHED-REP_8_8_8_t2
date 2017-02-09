@@ -1,20 +1,20 @@
-hostname : sth-c12.uncc.edu
+hostname : sth-c3.uncc.edu
 bounding: [1053872.965;1068485.726]x[860186.8419;879395.9741]x[3;730]
 read 11056 observations
 res: 100 100 1 bw: 2500 2500 1
 decomposition should allow blocks larger than bandwidth. Adjusting decomposition to 2x3x8
 voxsize: 148x194x728 size:79.736084MB
 voxBW: 25 1
-decomposition time: 0.000426 seconds
+decomposition time: 0.000433 seconds
 max load: 1445 avgloadperbox: 230.333333 avgloadpercore: 5528 total load: 11056
 most loaded: 1 1 0
 load based longest path:6367
 nb replication: 3
 total active blocks: 92
-schedule time: 0.000435 seconds
-Initialization time: 0.047970
+schedule time: 0.000461 seconds
+Initialization time: 0.048412
 mem: 200
-compute: 0.236245 seconds
-reduction: 0.042874 seconds
+compute: 0.254880 seconds
+reduction: 0.042547 seconds
 evaluations: 0
-time: 0.328117 seconds
+time: 0.346911 seconds

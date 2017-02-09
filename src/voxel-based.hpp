@@ -11,49 +11,49 @@ std::shared_ptr<util::Compact3D<values>> stkde_voxelbased(const bounding_box& bb
 				 const parameters& pa) {
   
   // std::cout << "Running the voxel based implementation." << std::endl;
-  int voxx = ceil((bb.xh - bb.xl) / pa.xres) + 1;
-  int voxy = ceil((bb.yh - bb.yl) / pa.yres) + 1;
-  int voxt = ceil((bb.th - bb.tl) / pa.tres) + 1;
+  index voxx = std::lround(std::ceil((bb.xh - bb.xl) / pa.xres)) + 1;
+  index voxy = std::lround(std::ceil((bb.yh - bb.yl) / pa.yres)) + 1;
+  index voxt = std::lround(std::ceil((bb.th - bb.tl) / pa.tres)) + 1;
 
-  int n = inst.obsx.size();
- 
-  coordinate px, py, pt;
-  coordinate ox, oy, ot;
+  long n = inst.obsx.size();
  
   long int evals = 0;
-  
-  util::timestamp t1;
 
   std::shared_ptr<util::Compact3D<values>> p = std::make_shared<util::Compact3D<values>>(voxx, voxy, voxt);
   util::Compact3D<values>& co = *p;
-  co.zero();
+  //co.zero(); //This is unnecessary since the correct value is directly written
 
-  for(int i = 0; i < voxx; i++) {
-    for(int j = 0; j < voxy; j++) {
-      for(int k = 0; k < voxt; k++) {
+  for(index i = 0; i < voxx; i++) {
+    for(index j = 0; j < voxy; j++) {
+      for(index k = 0; k < voxt; k++) {
+	
 	// contruct the point
-	px = bb.xl + i * pa.xres;
-	py = bb.yl + j * pa.yres;
-	pt = bb.tl + k * pa.tres;
+	coordinate px = bb.xl + i * pa.xres;
+	coordinate py = bb.yl + j * pa.yres;
+	coordinate pt = bb.tl + k * pa.tres;
 
+	values v = 0;
+	
 	// for every voxel do every observation point
 	for(int o = 0; o < n; o++) {
-	  ox = inst.obsx[o];
-	  oy = inst.obsy[o];
-	  ot = inst.obst[o];	  
-	  if(abs(pt - ot) <= pa.tbw) {
-	    if(sqrt((px - ox) * (px - ox) + (py - oy) * (py - oy)) <= pa.xbw) {
-	      co(i, j, k) += densityF(px, py, pt, ox, oy, ot, n, pa.xbw, pa.tbw);
+	  coordinate ox = inst.obsx[o];
+	  coordinate oy = inst.obsy[o];
+	  coordinate ot = inst.obst[o];	  
+	  if(std::abs(pt - ot) <= pa.tbw) {
+	    if(std::sqrt((px - ox) * (px - ox) + (py - oy) * (py - oy)) <= pa.xbw) {
+	      v += densityF(px, py, pt,
+				      ox, oy, ot,
+				      n, pa.xbw, pa.tbw);
 	      evals++;
 	    }
 	  }
 	}
+	
+	co(i, j, k) = v;
       }
     }
   }
   
-  util::timestamp t2;
-  std::cout<<"compute: " << t2 - t1 << " seconds" <<std::endl;
   std::cout<<"evals: "<< evals << std::endl;
   return p;
 }
