@@ -1,0 +1,22 @@
+hostname : sth-c13.uncc.edu
+bounding: [-130;-65]x[20;50]x[5875;5958]
+read 588189 observations
+res: 0.1 0.1 1 bw: 2.5 2.5 7
+decomposition should allow blocks larger than bandwidth. Adjusting decomposition to 8x5x5
+voxsize: 651x301x84 size:62.7894745MB
+voxBW: 25 7
+Initialization time: 0.008911
+decomposition time: 0.023889 seconds
+6,3,3 : 29710
+max load: 29710 avgloadperbox: 2940.945 avgloadpercore: 294094.5 total load: 588189
+maxin round:13892
+maxin round:10505
+maxin round:28153
+maxin round:29710
+maxin round:15513
+maxin round:22699
+maxin round:19907
+maxin round:21876
+compute: 30.958016 seconds
+evaluations: 22258534021
+time: 30.991271 seconds
