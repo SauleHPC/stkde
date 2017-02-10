@@ -1,0 +1,13 @@
+hostname : sth-c3.uncc.edu
+bounding: [-89;89]x[-180;180]x[71836;79136]
+read 291990435 observations
+res: 0.5 0.5 3 bw: 1 1 7
+voxsize: 357x721x2435 size:2390.90612MB
+voxBW: 2 3
+Initialization time: 0.232355
+intersect: 284734247
+decomposition time: 10.357483 seconds
+max load: 284734247 avgloadperbox: 291990435 avgloadpercore: 72997608.8
+compute: 128.708530 seconds
+evaluations: 49801858690
+time: 139.310825 seconds
