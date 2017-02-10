@@ -9,7 +9,9 @@ gettime() {
 
 INSTANCES="Dengue_lowres-lowbw Dengue_lowres-highbw Dengue_highres-lowbw Dengue_highres-highbw Dengue_highres-veryhighbandwidth \
             Pollen_lowres-lowbw Pollen_highres-lowbw Pollen_highres-medbw Pollen_highres-highbw \
-	    Flu-Animal_lowres-lowbw Flu-Animal_lowres-highbw Flu-Animal_medres-lowbw Flu-Animal_medres-highbw Flu-Animal_highres-lowbw Flu-Animal_highres-highbw"
+	    PollenUS_lowres-lowbw PollenUS_highres-lowbw PollenUS_highres-medbw PollenUS_highres-highbw PollenUS_veryhighres-lowbw PollenUS_veryhighres-verylowbw \
+	    Flu-Animal_lowres-lowbw Flu-Animal_lowres-highbw Flu-Animal_medres-lowbw Flu-Animal_medres-highbw Flu-Animal_highres-lowbw Flu-Animal_highres-highbw \
+            eBird_lowres-lowbw"
 
 RESULTDIR=../results
 
@@ -138,8 +140,8 @@ set style histogram cluster gap 2
 
 set xtics rotate by -45
 set style fill solid border rgb "black"
-set xrange [-.5:14.5]
-set yrange [0:*]
+set xrange [-.5:21.5]
+set yrange [0:15]
 set ylabel 'Time relative to PB-SYM'
 
 plot 'SYM-DD-overhead.data' using 2:xtic(1) title col, \
@@ -203,7 +205,7 @@ set style histogram cluster gap 2
 
 set xtics rotate by -45
 set style fill solid border rgb "black"
-set xrange [-.5:14.5]
+set xrange [-.5:21.5]
 set yrange [0:*]
 set ylabel 'Speedup'
 
