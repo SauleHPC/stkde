@@ -87,7 +87,11 @@ void decomposition_ghost(//problem
     }
   }
   
-    
+
+  index decompBWx = std::lround(std::ceil(pa.xbw/((bb.xh-bb.xl)/decompsizeX)));
+  index decompBWy = std::lround(std::ceil(pa.ybw/((bb.yh-bb.yl)/decompsizeY)));
+  index decompBWt = std::lround(std::ceil(pa.tbw/((bb.th-bb.tl)/decompsizeT)));
+  
   //
   long inter = 0;
   for (int i=0; i< inst.obsx.size(); ++i) {
@@ -95,8 +99,22 @@ void decomposition_ghost(//problem
     auto oy = inst.obsy[i];
     auto ot = inst.obst[i];
 
+
+    index odx = (ox-bb.xl)/(bb.xh-bb.xl)*decompsizeX;
+    index ody = (oy-bb.yl)/(bb.yh-bb.yl)*decompsizeY;
+    index odt = (ot-bb.tl)/(bb.th-bb.tl)*decompsizeT;
+
+    //handling points out of range. Processing them with near by boundary
+    odx = std::max(odx, (index)0);
+    ody = std::max(ody, (index)0);
+    odt = std::max(odt, (index)0);
+    odx = std::min(odx, decompsizeX-1);
+    ody = std::min(ody, decompsizeY-1);
+    odt = std::min(odt, decompsizeT-1);
+
+    
     //place in appropriate decomposition
-    for (int dx = 0; dx<decompsizeX; ++dx) {
+    for (index dx = std::max(odx-decompBWx, (index)0); dx<std::min(odx+decompBWx+1, decompsizeX); ++dx) {
       coordinate decxmin = bb.xl + ( dx   *(bb.xh-bb.xl)/decompsizeX );
       coordinate decxmax = bb.xl + ((dx+1)*(bb.xh-bb.xl)/decompsizeX );
 
@@ -115,7 +133,7 @@ void decomposition_ghost(//problem
       //a rounding error in sequential. So it is begnin.
       
       
-      for (int dy = 0; dy<decompsizeY; ++dy) {
+      for (index dy = std::max(ody-decompBWy, (index)0); dy < std::max(ody+decompBWy+1, decompsizeY); ++dy) {
 	coordinate decymin = bb.yl + ( dy   *(bb.yh-bb.yl)/decompsizeY );
 	coordinate decymax = bb.yl + ((dy+1)*(bb.yh-bb.yl)/decompsizeY );
 
@@ -132,7 +150,7 @@ void decomposition_ghost(//problem
 	}
 
 	
-	for (int dt = 0; dt<decompsizeT; ++dt) {
+	for (index dt = std::max(odt-decompBWt, (index)0); dt < std::min(odt+decompBWt+1, decompsizeT); ++dt) {
 	  coordinate dectmin = bb.tl + ( dt   *(bb.th-bb.tl)/decompsizeT );
 	  coordinate dectmax = bb.tl + ((dt+1)*(bb.th-bb.tl)/decompsizeT );
 

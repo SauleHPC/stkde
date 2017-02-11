@@ -1,6 +1,6 @@
 LD=g++
 #CXXFLAGS = -std=c++14 -O0 -g -fopenmp
-CXXFLAGS = -g -std=c++14 -O3 -march=native -fopenmp -DNDEBUG
+CXXFLAGS = -fdiagnostics-color=auto -g -std=c++14 -O3 -march=native -fopenmp -DNDEBUG
 #CXXFLAGS = -std=c++14 -O3 -march=native  -DNDEBUG
 #LDFLAGS= -O3 -march=native -fopenmp
 LDFLAGS= -O3 -march=native -fopenmp
