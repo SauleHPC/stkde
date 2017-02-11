@@ -133,7 +133,7 @@ void decomposition_ghost(//problem
       //a rounding error in sequential. So it is begnin.
       
       
-      for (index dy = std::max(ody-decompBWy, (index)0); dy < std::max(ody+decompBWy+1, decompsizeY); ++dy) {
+      for (index dy = std::max(ody-decompBWy, (index)0); dy < std::min(ody+decompBWy+1, decompsizeY); ++dy) {
 	coordinate decymin = bb.yl + ( dy   *(bb.yh-bb.yl)/decompsizeY );
 	coordinate decymax = bb.yl + ((dy+1)*(bb.yh-bb.yl)/decompsizeY );
 

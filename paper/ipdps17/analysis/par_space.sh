@@ -104,7 +104,7 @@ set style histogram cluster gap 2
 set xtics rotate by -45
 set style fill solid border rgb "black"
 set xrange [-.5:${NB_INSTANCES}.5]
-set yrange [0:15]
+set yrange [0:]
 set ylabel 'Time relative to PB-SYM'
 
 plot 'SYM-DD-overhead.data' using 2:xtic(1) title col, \
@@ -161,7 +161,7 @@ set style histogram cluster gap 2
 set xtics rotate by -45
 set style fill solid border rgb "black"
 set xrange [-.5:${NB_INSTANCES}.5]
-set yrange [0:*]
+set yrange [0:18]
 set ylabel 'Speedup'
 
 plot 'SYM-DD-speedup16.data' using 2:xtic(1) title col, \
@@ -201,7 +201,7 @@ set terminal pdf
 set output 'parspacetime_${inst}.pdf'
 set key autotitle columnhead
 set style data linespoints
-set yrange [0:]
+set yrange [0:18]
 set ylabel 'time (in seconds)'
 set xlabel 'threads'
 set title 'parallel space decomposition ${inst}'
