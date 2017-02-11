@@ -1,19 +1,7 @@
 #!/bin/sh
 
-gettime() {
-    inst=$1
-    meth=$2
+. ./common.sh
 
-    grep \^time: ${RESULTDIR}/${inst}_${meth} | cut -d \  -f 2 | awk '{printf "%.3f", $1}'
-}
-
-INSTANCES="Dengue_lowres-lowbw Dengue_lowres-highbw Dengue_highres-lowbw Dengue_highres-highbw Dengue_highres-veryhighbandwidth \
-            Pollen_lowres-lowbw Pollen_highres-lowbw Pollen_highres-medbw Pollen_highres-highbw \
-	    PollenUS_lowres-lowbw PollenUS_highres-lowbw PollenUS_highres-medbw PollenUS_highres-highbw PollenUS_veryhighres-lowbw PollenUS_veryhighres-verylowbw \
-	    Flu-Animal_lowres-lowbw Flu-Animal_lowres-highbw Flu-Animal_medres-lowbw Flu-Animal_medres-highbw Flu-Animal_highres-lowbw Flu-Animal_highres-highbw \
-            eBird_lowres-lowbw"
-
-RESULTDIR=../results
 
 DECOMP="1_1_1 2_2_2 4_4_4 8_8_8 16_16_16 32_32_32 64_64_64"
 
@@ -30,7 +18,7 @@ DECOMP="1_1_1 2_2_2 4_4_4 8_8_8 16_16_16 32_32_32 64_64_64"
 	seq=$(gettime ${inst} POINTBASED-SYM)
 	t=16
 	
-	echo -n ${inst} \& ${seq}  \ 
+	echo -n $(prettyname ${inst}) \& ${seq}  \ 
 	
 	
 	for decomp in $DECOMP
@@ -41,15 +29,7 @@ DECOMP="1_1_1 2_2_2 4_4_4 8_8_8 16_16_16 32_32_32 64_64_64"
 	    echo -n \& $tim \ 
 	done
 	echo '\\\\'
-    done | sed 's/-Animal//' \
-	| sed 's/lowres/Lr/g' \
-	| sed 's/medres/Mr/g' \
-	| sed 's/highres/Hr/g' \
-	| sed 's/lowbw/Lb/g' \
-	| sed 's/medbw/Mb/g' \
-	| sed 's/highbw/Hb/g' \
-	| sed 's/veryhighbandwidth/VHb/g' \
-	| sed 's/_/\\_/g'
+    done 
 ) >  parspace-t16.tex
 
 
@@ -65,7 +45,7 @@ DECOMP="1_1_1 2_2_2 4_4_4 8_8_8 16_16_16 32_32_32 64_64_64"
 	seq=$(gettime ${inst} POINTBASED-SYM)
 	t=1
 	
-	echo -n ${inst} \& ${seq}  \ 
+	echo -n $(prettyname ${inst}) \& ${seq}  \ 
 	
 	
 	for decomp in $DECOMP
@@ -78,16 +58,7 @@ DECOMP="1_1_1 2_2_2 4_4_4 8_8_8 16_16_16 32_32_32 64_64_64"
 	
 	echo '\\\\'
 	
-    done | sed 's/-Animal//' \
-	| sed 's/lowres/Lr/g' \
-	| sed 's/medres/Mr/g' \
-	| sed 's/highres/Hr/g' \
-	| sed 's/lowbw/Lb/g' \
-	| sed 's/medbw/Mb/g' \
-	| sed 's/highbw/Hb/g' \
-	| sed 's/veryhighbandwidth/VHb/g' \
-	| sed 's/_/\\_/g'
-    
+    done 
 )  >  parspace-t1.tex
 
 #clustered bar chart for 1 thread.
@@ -105,7 +76,7 @@ DECOMP="1_1_1 2_2_2 4_4_4 8_8_8 16_16_16 32_32_32 64_64_64"
 	seq=$(gettime ${inst} POINTBASED-SYM)
 	t=1
 	
-	echo -n ${inst} \  
+	echo -n $(prettyname ${inst}) \  
 
 	for decomp in $DECOMP
 	do
@@ -116,15 +87,7 @@ DECOMP="1_1_1 2_2_2 4_4_4 8_8_8 16_16_16 32_32_32 64_64_64"
 	done
 	echo
     done
-) | sed 's/-Animal//' \
-    | sed 's/lowres/Lr/g' \
-    | sed 's/medres/Mr/g' \
-    | sed 's/highres/Hr/g' \
-    | sed 's/lowbw/Lb/g' \
-    | sed 's/medbw/Mb/g' \
-    | sed 's/highbw/Hb/g' \
-    | sed 's/veryhighbandwidth/VHb/g' \
-    | sed 's/_/\\_/g' > SYM-DD-overhead.data
+) > SYM-DD-overhead.data
 
 
 gnuplot<<EOF
@@ -140,7 +103,7 @@ set style histogram cluster gap 2
 
 set xtics rotate by -45
 set style fill solid border rgb "black"
-set xrange [-.5:21.5]
+set xrange [-.5:${NB_INSTANCES}.5]
 set yrange [0:15]
 set ylabel 'Time relative to PB-SYM'
 
@@ -170,7 +133,7 @@ EOF
 	seq=$(gettime ${inst} POINTBASED-SYM)
 	t=16
 	
-	echo -n ${inst} \  
+	echo -n $(prettyname ${inst}) \  
 
 	for decomp in $DECOMP
 	do
@@ -181,15 +144,7 @@ EOF
 	done
 	echo
     done
-) | sed 's/-Animal//' \
-    | sed 's/lowres/Lr/g' \
-    | sed 's/medres/Mr/g' \
-    | sed 's/highres/Hr/g' \
-    | sed 's/lowbw/Lb/g' \
-    | sed 's/medbw/Mb/g' \
-    | sed 's/highbw/Hb/g' \
-    | sed 's/veryhighbandwidth/VHb/g' \
-    | sed 's/_/\\_/g' > SYM-DD-speedup16.data
+) > SYM-DD-speedup16.data
 
 
 gnuplot<<EOF
@@ -205,7 +160,7 @@ set style histogram cluster gap 2
 
 set xtics rotate by -45
 set style fill solid border rgb "black"
-set xrange [-.5:21.5]
+set xrange [-.5:${NB_INSTANCES}.5]
 set yrange [0:*]
 set ylabel 'Speedup'
 
