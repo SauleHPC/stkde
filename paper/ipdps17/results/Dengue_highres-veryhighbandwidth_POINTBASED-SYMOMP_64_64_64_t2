@@ -4,10 +4,6 @@ read 11056 observations
 res: 50 50 1 bw: 2500 2500 14
 voxsize: 294x386x728 size:315.156372MB
 voxBW: 50 14
-Initialization time: 0.041866
-intersect: 14866722
-decomposition time: 2.205679 seconds
-max load: 816 avgloadperbox: 0.042175293 avgloadpercore: 5528
-compute: 4.846341 seconds
-evaluations: 3151214294
-time: 7.243888 seconds
+Initialization time: 0.041822
+terminate called after throwing an instance of 'std::bad_alloc'
+  what():  std::bad_alloc

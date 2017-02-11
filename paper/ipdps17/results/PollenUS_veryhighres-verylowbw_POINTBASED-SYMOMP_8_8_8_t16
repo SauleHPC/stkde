@@ -1,13 +1,7 @@
-hostname : sth-c16.uncc.edu
+hostname : sth-c5.uncc.edu
 bounding: [-130;-65]x[20;50]x[5875;5958]
 read 588189 observations
 res: 0.01 0.01 1 bw: 0.5 0.5 3
 voxsize: 6501x3001x84 size:6251.51857MB
 voxBW: 50 3
-Initialization time: 0.588958
-intersect: 1264557
-decomposition time: 0.092070 seconds
-max load: 33555 avgloadperbox: 1148.80664 avgloadpercore: 36761.8125
-compute: 15.626180 seconds
-evaluations: 41515841868
-time: 16.310218 seconds
+Initialization time: 0.590956
