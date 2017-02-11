@@ -1,94 +1,13 @@
-hostname : sth-c15.uncc.edu
+hostname : sth-c3.uncc.edu
 bounding: [-130;-65]x[20;50]x[5875;5958]
 read 588189 observations
 res: 0.01 0.01 1 bw: 1 1 3
 voxsize: 6501x3001x84 size:6251.51857MB
 voxBW: 100 3
-Initialization time: 0.584577
-intersect: 50673451
-decomposition time: 4.221670 seconds
+Initialization time: 0.582040
+intersect: 50672436
+decomposition time: 4.195045 seconds
 max load: 9578 avgloadperbox: 2.24376297 avgloadpercore: 73523.625
-compute: 235.171081 seconds
+compute: 235.153924 seconds
 evaluations: 164428313243
-*** Error in `./point-based': munmap_chunk(): invalid pointer: 0x0000000001962f10 ***
-======= Backtrace: =========
-/lib64/libc.so.6(+0x7b184)[0x7f2fbfc9f184]
-./point-based[0x410107]
-./point-based[0x4030c9]
-/lib64/libc.so.6(__libc_start_main+0xf5)[0x7f2fbfc45b15]
-./point-based[0x403d01]
-======= Memory map: ========
-00400000-0041f000 r-xp 00000000 00:29 296357135422                       /users/esaule/stkde/src/point-based
-0061e000-0061f000 r--p 0001e000 00:29 296357135422                       /users/esaule/stkde/src/point-based
-0061f000-00620000 rw-p 0001f000 00:29 296357135422                       /users/esaule/stkde/src/point-based
-0174f000-677de000 rw-p 00000000 00:00 0                                  [heap]
-7f2df8000000-7f2df8021000 rw-p 00000000 00:00 0 
-7f2df8021000-7f2dfc000000 ---p 00000000 00:00 0 
-7f2e10000000-7f2e10021000 rw-p 00000000 00:00 0 
-7f2e10021000-7f2e14000000 ---p 00000000 00:00 0 
-7f2e18000000-7f2e18021000 rw-p 00000000 00:00 0 
-7f2e18021000-7f2e1c000000 ---p 00000000 00:00 0 
-7f2e1c000000-7f2e1c021000 rw-p 00000000 00:00 0 
-7f2e1c021000-7f2e20000000 ---p 00000000 00:00 0 
-7f2e20000000-7f2e20021000 rw-p 00000000 00:00 0 
-7f2e20021000-7f2e24000000 ---p 00000000 00:00 0 
-7f2e24000000-7f2e24021000 rw-p 00000000 00:00 0 
-7f2e24021000-7f2e28000000 ---p 00000000 00:00 0 
-7f2e28000000-7f2e28021000 rw-p 00000000 00:00 0 
-7f2e28021000-7f2e2c000000 ---p 00000000 00:00 0 
-7f2e31c8c000-7f2e31c8d000 ---p 00000000 00:00 0 
-7f2e31c8d000-7f2e3288d000 rw-p 00000000 00:00 0                          [stack:141559]
-7f2e3288d000-7f2e3288e000 ---p 00000000 00:00 0 
-7f2e3288e000-7f2e3348e000 rw-p 00000000 00:00 0                          [stack:141558]
-7f2e3348e000-7f2e3348f000 ---p 00000000 00:00 0 
-7f2e3348f000-7f2e3408f000 rw-p 00000000 00:00 0                          [stack:141557]
-7f2e3408f000-7f2e34090000 ---p 00000000 00:00 0 
-7f2e34090000-7f2e34c90000 rw-p 00000000 00:00 0                          [stack:141556]
-7f2e34c90000-7f2e34c91000 ---p 00000000 00:00 0 
-7f2e34c91000-7f2e35891000 rw-p 00000000 00:00 0                          [stack:141555]
-7f2e35891000-7f2e35892000 ---p 00000000 00:00 0 
-7f2e35892000-7f2e36492000 rw-p 00000000 00:00 0                          [stack:141554]
-7f2e36492000-7f2e36493000 ---p 00000000 00:00 0 
-7f2e36493000-7f2fbec1a000 rw-p 00000000 00:00 0                          [stack:141553]
-7f2fbec1d000-7f2fbf41e000 rw-p 00000000 00:00 0 
-7f2fbf41f000-7f2fbfa20000 rw-p 00000000 00:00 0 
-7f2fbfa20000-7f2fbfa23000 r-xp 00000000 08:03 396754                     /usr/lib64/libdl-2.17.so
-7f2fbfa23000-7f2fbfc22000 ---p 00003000 08:03 396754                     /usr/lib64/libdl-2.17.so
-7f2fbfc22000-7f2fbfc23000 r--p 00002000 08:03 396754                     /usr/lib64/libdl-2.17.so
-7f2fbfc23000-7f2fbfc24000 rw-p 00003000 08:03 396754                     /usr/lib64/libdl-2.17.so
-7f2fbfc24000-7f2fbfdda000 r-xp 00000000 08:03 396748                     /usr/lib64/libc-2.17.so
-7f2fbfdda000-7f2fbffda000 ---p 001b6000 08:03 396748                     /usr/lib64/libc-2.17.so
-7f2fbffda000-7f2fbffde000 r--p 001b6000 08:03 396748                     /usr/lib64/libc-2.17.so
-7f2fbffde000-7f2fbffe0000 rw-p 001ba000 08:03 396748                     /usr/lib64/libc-2.17.so
-7f2fbffe0000-7f2fbffe5000 rw-p 00000000 00:00 0 
-7f2fbffe5000-7f2fbfffb000 r-xp 00000000 08:03 396774                     /usr/lib64/libpthread-2.17.so
-7f2fbfffb000-7f2fc01fb000 ---p 00016000 08:03 396774                     /usr/lib64/libpthread-2.17.so
-7f2fc01fb000-7f2fc01fc000 r--p 00016000 08:03 396774                     /usr/lib64/libpthread-2.17.so
-7f2fc01fc000-7f2fc01fd000 rw-p 00017000 08:03 396774                     /usr/lib64/libpthread-2.17.so
-7f2fc01fd000-7f2fc0201000 rw-p 00000000 00:00 0 
-7f2fc0201000-7f2fc0217000 r-xp 00000000 00:2a 7170105861                 /apps/pkg/gcc-5.3.0/rhel7_u2-x86_64/gnu/lib64/libgcc_s.so.1
-7f2fc0217000-7f2fc0416000 ---p 00016000 00:2a 7170105861                 /apps/pkg/gcc-5.3.0/rhel7_u2-x86_64/gnu/lib64/libgcc_s.so.1
-7f2fc0416000-7f2fc0417000 r--p 00015000 00:2a 7170105861                 /apps/pkg/gcc-5.3.0/rhel7_u2-x86_64/gnu/lib64/libgcc_s.so.1
-7f2fc0417000-7f2fc0418000 rw-p 00016000 00:2a 7170105861                 /apps/pkg/gcc-5.3.0/rhel7_u2-x86_64/gnu/lib64/libgcc_s.so.1
-7f2fc0418000-7f2fc0438000 r-xp 00000000 00:2a 7170105878                 /apps/pkg/gcc-5.3.0/rhel7_u2-x86_64/gnu/lib64/libgomp.so.1.0.0
-7f2fc0438000-7f2fc0638000 ---p 00020000 00:2a 7170105878                 /apps/pkg/gcc-5.3.0/rhel7_u2-x86_64/gnu/lib64/libgomp.so.1.0.0
-7f2fc0638000-7f2fc0639000 r--p 00020000 00:2a 7170105878                 /apps/pkg/gcc-5.3.0/rhel7_u2-x86_64/gnu/lib64/libgomp.so.1.0.0
-7f2fc0639000-7f2fc063a000 rw-p 00021000 00:2a 7170105878                 /apps/pkg/gcc-5.3.0/rhel7_u2-x86_64/gnu/lib64/libgomp.so.1.0.0
-7f2fc063a000-7f2fc073b000 r-xp 00000000 08:03 396756                     /usr/lib64/libm-2.17.so
-7f2fc073b000-7f2fc093a000 ---p 00101000 08:03 396756                     /usr/lib64/libm-2.17.so
-7f2fc093a000-7f2fc093b000 r--p 00100000 08:03 396756                     /usr/lib64/libm-2.17.so
-7f2fc093b000-7f2fc093c000 rw-p 00101000 08:03 396756                     /usr/lib64/libm-2.17.so
-7f2fc093c000-7f2fc0aa7000 r-xp 00000000 00:2a 7181952278                 /apps/pkg/gcc-5.3.0/rhel7_u2-x86_64/gnu/lib64/libstdc++.so.6.0.21
-7f2fc0aa7000-7f2fc0ca7000 ---p 0016b000 00:2a 7181952278                 /apps/pkg/gcc-5.3.0/rhel7_u2-x86_64/gnu/lib64/libstdc++.so.6.0.21
-7f2fc0ca7000-7f2fc0cb2000 r--p 0016b000 00:2a 7181952278                 /apps/pkg/gcc-5.3.0/rhel7_u2-x86_64/gnu/lib64/libstdc++.so.6.0.21
-7f2fc0cb2000-7f2fc0cb4000 rw-p 00176000 00:2a 7181952278                 /apps/pkg/gcc-5.3.0/rhel7_u2-x86_64/gnu/lib64/libstdc++.so.6.0.21
-7f2fc0cb4000-7f2fc0cb8000 rw-p 00000000 00:00 0 
-7f2fc0cb8000-7f2fc0cd9000 r-xp 00000000 08:03 396741                     /usr/lib64/ld-2.17.so
-7f2fc0ea9000-7f2fc0eb0000 rw-p 00000000 00:00 0 
-7f2fc0ed7000-7f2fc0ed9000 rw-p 00000000 00:00 0 
-7f2fc0ed9000-7f2fc0eda000 r--p 00021000 08:03 396741                     /usr/lib64/ld-2.17.so
-7f2fc0eda000-7f2fc0edb000 rw-p 00022000 08:03 396741                     /usr/lib64/ld-2.17.so
-7f2fc0edb000-7f2fc0edc000 rw-p 00000000 00:00 0 
-7ffcf5e5e000-7ffcf5e7f000 rw-p 00000000 00:00 0                          [stack]
-7ffcf5f56000-7ffcf5f58000 r-xp 00000000 00:00 0                          [vdso]
-ffffffffff600000-ffffffffff601000 r-xp 00000000 00:00 0                  [vsyscall]
+time: 240.141983 seconds

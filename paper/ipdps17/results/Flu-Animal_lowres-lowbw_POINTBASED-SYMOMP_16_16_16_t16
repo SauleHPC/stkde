@@ -4,10 +4,10 @@ read 31478 observations
 res: 1 1 7 bw: 1 1 7
 voxsize: 117x308x851 size:116.983932MB
 voxBW: 1 1
-Initialization time: 0.011986
-intersect: 44074
-decomposition time: 0.004332 seconds
+Initialization time: 0.012467
+intersect: 44066
+decomposition time: 0.003092 seconds
 max load: 1911 avgloadperbox: 7.68505859 avgloadpercore: 1967.375
-compute: 0.001445 seconds
+compute: 0.001622 seconds
 evaluations: 870453
-time: 0.017991 seconds
+time: 0.017413 seconds
