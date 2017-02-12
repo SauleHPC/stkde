@@ -28,13 +28,18 @@ echo $BOUNDARY
 echo $OBSERVATIONS
 echo $BANDWIDTH
 
-for method in POINTBASED-SYM POINTBASED POINTBASED-SYMDISK POINTBASED-SYMBAR  POINTBASED-SYMOMP POINTBASED-SYMOMP-POINTDECOMP POINTBASED-SYMOMP-OBSDECOMP POINTBASED-SYMOMP-OBSDECOMP-SCHED POINTBASED-SYMOMP-OBSDECOMP-COLORSCHED-REP POINTBASED-SYMOMP-OBSDECOMP-COLORSCHED VOXELBASED-OMP-OBSDECOMP VOXELBASED-OMP 
+#DECOMP="64 32 16 8 4 2 1"
+#THREAD="16 8 4 2 1"
+DECOMP="16"
+THREAD="16"
+
+for method in POINTBASED-SYM POINTBASED-SYMOMP POINTBASED-SYMOMP-POINTDECOMP POINTBASED-SYMOMP-OBSDECOMP POINTBASED-SYMOMP-OBSDECOMP-SCHED POINTBASED-SYMOMP-OBSDECOMP-COLORSCHED-REP POINTBASED-SYMOMP-OBSDECOMP-COLORSCHED POINTBASED POINTBASED-SYMDISK POINTBASED-SYMBAR VOXELBASED-OMP-OBSDECOMP VOXELBASED-OMP 
 do
     if [ $method = POINTBASED-SYMOMP ]
     then
-	for t in 16 8 4 2 1
+	for t in $THREAD
 	do
-	    for decomp in 64 32 16 8 4 2 1
+	    for decomp in $DECOMP
 	    do
 		FILE=results/${INSTANCE}_$(basename $BANDWIDTH)_${method}_${decomp}_${decomp}_${decomp}_t${t}
 		if [ ! -f $FILE ]
@@ -47,7 +52,7 @@ do
     else
 	if [ $method = POINTBASED-SYMOMP-POINTDECOMP ]
 	then
-	    for t in 16 8 4 2 1
+	    for t in $THREAD
 	    do
 		FILE=results/${INSTANCE}_$(basename $BANDWIDTH)_${method}_t${t}
 		if [ ! -f $FILE ]
@@ -59,9 +64,9 @@ do
 	else
 	    if [ $method = POINTBASED-SYMOMP-OBSDECOMP ]
 	    then
-		for t in 16 8 4 2 1
+		for t in $THREAD
 		do
-		    for decomp in 64 32 16 8 4 2 1
+		    for decomp in $DECOMP
 		    do
 			FILE=results/${INSTANCE}_$(basename $BANDWIDTH)_${method}_${decomp}_${decomp}_${decomp}_t${t}
 			if [ ! -f $FILE ]
@@ -74,9 +79,9 @@ do
 	    else
 		if [ $method = POINTBASED-SYMOMP-OBSDECOMP-SCHED ]
 		then
-		    for t in 16 8 4 2 1
+		    for t in $THREAD
 		    do
-			for decomp in 64 32 16 8 4 2 1
+			for decomp in $DECOMP
 			do
 			    FILE=results/${INSTANCE}_$(basename $BANDWIDTH)_${method}_${decomp}_${decomp}_${decomp}_t${t}
 			    if [ ! -f $FILE ]
@@ -89,9 +94,9 @@ do
 		else
 		    if [ $method = POINTBASED-SYMOMP-OBSDECOMP-COLORSCHED ]
 		    then
-			for t in 16 8 4 2 1
+			for t in $THREAD
 			do
-			    for decomp in 64 32 16 8 4 2 1
+			    for decomp in $DECOMP
 			    do
 				FILE=results/${INSTANCE}_$(basename $BANDWIDTH)_${method}_${decomp}_${decomp}_${decomp}_t${t}
 				if [ ! -f $FILE ]
@@ -104,9 +109,9 @@ do
 		    else
 			if [ $method = POINTBASED-SYMOMP-OBSDECOMP-COLORSCHED-REP ]
 			then
-			    for t in 16 8 4 2 1
+			    for t in $THREAD
 			    do
-				for decomp in 64 32 16 8 4 2 1
+				for decomp in $DECOMP
 				do
 				    FILE=results/${INSTANCE}_$(basename $BANDWIDTH)_${method}_${decomp}_${decomp}_${decomp}_t${t}
 				    if [ ! -f $FILE ]
@@ -119,7 +124,7 @@ do
 			else
 			    if [ $method = VOXELBASED-OMP ]
 			    then
-				for t in 16 8 4 2 1
+				for t in $THREAD
 				do
 				    FILE=results/${INSTANCE}_$(basename $BANDWIDTH)_${method}_t${t}
 				    if [ ! -f $FILE ]
@@ -132,7 +137,7 @@ do
 				if [ $method = VOXELBASED-OMP-OBSDECOMP ]
 				then
 				    
-				    for t in 16 8 4 2 1
+				    for t in $THREAD
 				    do
 					for decomp in 1024 64 
 					do
