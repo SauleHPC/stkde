@@ -104,7 +104,7 @@ set style histogram cluster gap 2
 set xtics rotate by -45
 set style fill solid border rgb "black"
 set xrange [-.5:${NB_INSTANCES}.5]
-set yrange [0:]
+set yrange [0:10]
 set ylabel 'Time relative to PB-SYM'
 
 plot 'SYM-DD-overhead.data' using 2:xtic(1) title col, \
