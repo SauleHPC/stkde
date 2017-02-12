@@ -1,0 +1,13 @@
+hostname : sth-c20.uncc.edu
+bounding: [-89;89]x[-180;180]x[71836;79136]
+read 291990435 observations
+res: 0.1 0.1 3 bw: 1 1 7
+voxsize: 1781x3601x2435 size:59572.5355MB
+voxBW: 10 3
+Initialization time: 5.468665
+intersect: 324072026
+decomposition time: 19.925772 seconds
+max load: 68285897 avgloadperbox: 570293.818 avgloadpercore: 36498804.4
+compute: 565.927511 seconds
+evaluations: 883412444546
+time: 591.354363 seconds

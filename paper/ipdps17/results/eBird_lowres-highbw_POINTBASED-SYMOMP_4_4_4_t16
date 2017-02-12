@@ -8,3 +8,6 @@ Initialization time: 0.226248
 intersect: 409700502
 decomposition time: 21.707180 seconds
 max load: 123073882 avgloadperbox: 4562350.55 avgloadpercore: 18249402.2
+compute: 395.399163 seconds
+evaluations: 544547987026
+time: 417.357643 seconds
