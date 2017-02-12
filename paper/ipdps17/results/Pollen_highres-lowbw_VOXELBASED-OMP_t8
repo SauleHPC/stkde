@@ -1,4 +1,0 @@
-hostname : sth-c20.uncc.edu
-bounding: [-180;180]x[7;72]x[5875;5958]
-read 588189 observations
-res: 0.1 0.1 1 bw: 1 1 3
