@@ -1,0 +1,13 @@
+hostname : sth-c17.uncc.edu
+bounding: [-89;89]x[-180;180]x[71836;79136]
+read 291990435 observations
+res: 0.1 0.1 3 bw: 1 1 7
+voxsize: 1781x3601x2435 size:59572.5355MB
+voxBW: 10 3
+decomposition time: 13.407699 seconds
+max load: 27302857 avgloadperbox: 71286.7273 avgloadpercore: 18249402.2 total load: 291990435
+Initialization time: 6.474748
+mem: 5832
+compute: 672.611664 seconds
+evaluations: 0
+time: 692.517066 seconds
