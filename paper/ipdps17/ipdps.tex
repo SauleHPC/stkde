@@ -689,6 +689,9 @@ and as North as the Northern shore of Russia. The domain is modeled
 with spatial resolution from $.2^\circ$ to $1^\circ$ and a temporal
 resolution of 1 day.
 
+\todo{introduce eBird.}
+\todo{introduce PollenUS}
+
 For all dataset, we created multiple instances of the problem coded
 Lr, Mr, Hr for low, medium, and high resolution and Lb, Hb, VHb for
 low, high and veryhigh bandwidth. See details in Table~\ref{tab:instance}. 
@@ -744,7 +747,7 @@ We do not provide direct comparison with the gold implementation
 because it uses a different programming language, which would make a
 direct comparison unfair. But a reimplementation of the voxel based
 algorithm with a 64x64x64 decomposition in C++ shows that the
-voxel-based algorithm VB is about 20 times slower than PB on Dengue\_Lr-Lb.
+voxel-based algorithm VB is about 20 times slower than PB on Dengue\_Lr-Lb. \todo{We have comparison to VB and VB-PD. explain why no parallel comparison.}
 
 \subsection{Domain-based parallelism}
 
@@ -763,6 +766,8 @@ Figure~\ref{fig:sym-dr-speedup}. Because it replicates the domain
 space, PB-SYM-DR was not able to complete the calculations for
 Flu\_Hr-Lb and Flu\_Hr-Hb when using 8 threads and 16 threads as the
 memory requirement exceeds the 128GB available on the machine.
+\todo{missing instances.}
+\todo{move to bar chart?}
 
 \begin{figure}[tbh]
   \centering
@@ -978,6 +983,8 @@ the execution has similar drawbacks as PB-SYM-DR.
   \label{fig:PB-SYM-PD-REP-speedup}
 \end{figure*}
 
+\todo{add a best of plot to highlight differences}
+
 \section{Related Works}
 
 \label{sec:soa}
@@ -990,6 +997,8 @@ is aggregated back on the CPU. The arbitrarily shaped density considered does
 not expose the invariants leveraged by PB-SYM which makes their work
 inapplicable to STKDE.
 
+\todo{expand with todd's paper. point out massive performance difference.}
+
 The two most common spatial problems solved with parallel computing
 are N-body interactions~\cite{Aaseth03} and Particle in Cell
 simulations~\cite{karimabadi06}. STKDE is different in the sense that there
@@ -998,6 +1007,8 @@ timesteps of N-body or particle in cell, no direct interaction between
 points, and no field updates as in Particle in Cell (unless you
 consider a field discretized at a one voxel size which makes the
 analogy not quite useful).
+
+\todo{expand with RBF functions and why they are different problems.}
 
 Spatial application can use spatial partitioning techniques 
 such as recursive bisection~\cite{berger87}, jagged partition~\cite{ujaldon96,pinar97,DeveciRDC16}, or
