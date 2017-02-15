@@ -1,0 +1,6 @@
+hostname : sth-c12.uncc.edu
+bounding: [-39;77]x[-159;148]x[0;5950]
+read 31478 observations
+res: 0.2 0.2 1 bw: 1 1 7
+evals: 37202052
+time: 21229.933781 seconds
