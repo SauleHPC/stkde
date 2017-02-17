@@ -29,7 +29,7 @@
 
 	    tim=$(grep ^time $RESULTDIR/${inst}_${meth}_* | cut -d \  -f 2 | awk 'BEGIN{min=0;} {if (FNR == 1){min = $1} if ($1 < min){min=$1}} END{print min}')
 	    
-	    if [ "$tim" = "" ]
+	    if [ "$tim" = "" -o "$tim" = "0" ]
 	    then
 		echo -n 0 \ 
 	    else
