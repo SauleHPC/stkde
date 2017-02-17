@@ -47,12 +47,12 @@ gnuplot <<EOF
 set terminal pdf size 10in,3in 
 set output 'bestof.pdf'
 
-set key font ",15"
+set key font ",15" samplen 1 maxrows 3
 set xtics font ",15"
 set ytics font ",15"
 set ylabel font ",15"
 set style data histogram
-set style histogram cluster gap 2
+set style histogram cluster gap 3
 
 set xtics rotate by -45
 set style fill solid border rgb "black"
