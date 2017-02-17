@@ -14,7 +14,7 @@
 #include "timestamp.hpp"
 #include "density.hpp"
 #include "omp.h"
-
+#include "decompositions.hpp"
 
 std::shared_ptr<util::Compact3D<values>> stkde_voxelbased_omp_obsdecomp(const bounding_box& bb,
 									   const instance& inst,
@@ -81,44 +81,15 @@ std::shared_ptr<util::Compact3D<values>> stkde_voxelbased_omp_obsdecomp(const bo
   
   util::Compact3D<index> load (decompsizeX, decompsizeY, decompsizeT);
 
-  for (int dx = 0; dx<decompsizeX; ++dx) {
-    for (int dy = 0; dy<decompsizeY; ++dy) {
-      for (int dt = 0; dt<decompsizeT; ++dt) {
-	      load(dx,dy,dt) = 0;
-      }
-    }
-  }
-  
   util::Compact3D<std::vector<coordinate>> decompX (decompsizeX, decompsizeY, decompsizeT);
   util::Compact3D<std::vector<coordinate>> decompY (decompsizeX, decompsizeY, decompsizeT);
   util::Compact3D<std::vector<coordinate>> decompT (decompsizeX, decompsizeY, decompsizeT);
 
-  for (int i=0; i< inst.obsx.size(); ++i) {
-    auto ox = inst.obsx[i];
-    auto oy = inst.obsy[i];
-    auto ot = inst.obst[i];
+  decomposition(bb, inst, pa, decompsizeX, decompsizeY, decompsizeT,
+		load,
+		decompX, decompY, decompT
+		);
 
-    index dx = (ox-bb.xl)/(bb.xh-bb.xl)*decompsizeX;
-    index dy = (oy-bb.yl)/(bb.yh-bb.yl)*decompsizeY;
-    index dt = (ot-bb.tl)/(bb.th-bb.tl)*decompsizeT;
-
-    //handling points out of rnage. Processing them with near by boundary
-    dx = std::max(dx, (index)0);
-    dy = std::max(dy, (index)0);
-    dt = std::max(dt, (index)0);
-    dx = std::min(dx, decompsizeX-1);
-    dy = std::min(dy, decompsizeY-1);
-    dt = std::min(dt, decompsizeT-1);
-
-    //it does intersect
-    load(dx,dy,dt) ++;
-
-    //inter++;
-    decompX(dx,dy,dt).push_back(ox);
-    decompY(dx,dy,dt).push_back(oy);
-    decompT(dx,dy,dt).push_back(ot);
-  }
-  
   util::timestamp decend;
   std::cerr<<"decomposition time: "<<decend-decbeg<<" seconds"<<std::endl;
   
