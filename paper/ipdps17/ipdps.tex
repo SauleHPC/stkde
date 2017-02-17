@@ -750,11 +750,14 @@ flu recorded in the last 15 years but they span most of the earth.
   \label{fig:breakdown}
 \end{figure}
 
-We do not provide direct comparison with the gold implementation
-because it uses a different programming language, which would make a
-direct comparison unfair. But a reimplementation of the voxel based
-algorithm with a 64x64x64 decomposition in C++ shows that the
-voxel-based algorithm VB is about 20 times slower than PB on Dengue\_Lr-Lb. \todo{We have comparison to VB and VB-PD. explain why no parallel comparison.}
+Comparing to the gold implementation would not be fair because it is
+in a different programming language. Though we implemented the VB
+algorithm, and also a variant, VB-DEC, that partitions the points in
+blocks of size equal to the bandwidth to only compute distances
+between voxels and points that have a chance to have an impact on
+it. The results are given in Table~\ref{tab:seq_table} and show that
+even VB-DEC is usually at least an order of magnitude larger than PB
+and typically two orders of magnitude larger than PB-SYM.
 
 \subsection{Domain-based parallelism}
 
