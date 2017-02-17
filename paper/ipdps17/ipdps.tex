@@ -668,15 +668,16 @@ privacy~\cite{Kwan04}. In 2010, 9606 were successfully geocoded
 successfully geocoded (1822 reported cases, or 85.7\%).
 
 The Pollen dataset is composed of 588K tweets of US users from
-February 2016 to April 2016 related to Pollen (i.e., that mention keywords
-such as ``pollen'' and ``allergy''). Tweets that did not contain a
-precise localization were approximated by picking a random location in
-the approximated region provided by
+February 2016 to April 2016 related to Pollen (i.e., that mention
+keywords such as ``pollen'' and ``allergy''). Tweets that did not
+contain a precise localization were approximated by picking a random
+location in the approximated region provided by
 Gnip\footnote{\url{http://www.gnip.com/}}. Tweets are mostly located
 in the US, but there are tweets all over the northern hemisphere in
 this dataset. Therefore, this is the region we modeled with a spatial
 resolution ranging from $.2^\circ$ to $1^\circ$ and a temporal
-resolution of 1 day.
+resolution of 1 day. We created a secondary problem we call PollenUS
+where we only model the contiguous continental United States.
 
 The Flu dataset was obtained from the Animal Surveillance
 database of the Influenza Research
@@ -689,8 +690,14 @@ and as North as the Northern shore of Russia. The domain is modeled
 with spatial resolution from $.2^\circ$ to $1^\circ$ and a temporal
 resolution of 1 day.
 
-\todo{introduce eBird.}
-\todo{introduce PollenUS}
+The eBird dataset is a collection of worldwide rare bird spotting
+obtained from a crowdsourcing effort managed by Cornell's Lab or
+Ornithology~\cite{ebird}. Despite the service was launched in 2002,
+the database contains many older entries of birds that are known to
+have been observed at the time. For our experiment, we use the last 20
+years of bird spotting and model the entire world with a temporal
+resolution of 3 days, and a spatial resolution of either $.1^\circ$ or
+$.5^\circ$.
 
 For all dataset, we created multiple instances of the problem coded
 Lr, Mr, Hr for low, medium, and high resolution and Lb, Hb, VHb for
@@ -983,21 +990,33 @@ the execution has similar drawbacks as PB-SYM-DR.
   \label{fig:PB-SYM-PD-REP-speedup}
 \end{figure*}
 
-\todo{add a best of plot to highlight differences}
+\todo{add a paragraph relating to the bestof plot}
+
+\begin{figure*}
+  \centering
+  \includegraphics[width=.9\linewidth]{analysis/bestof.pdf}
+  \caption{Best configurations}
+  \label{fig:bestof}
+\end{figure*}
 
 \section{Related Works}
 
 \label{sec:soa}
 
-The PhD Thesis of U. Lopez-Novoa~\cite{LopezNovoa} is on the topic of computing kernel density estimation for arbitrarily shaped kernels. The crop
-and chop method presented revolves around cropping the voxel space
-around a point with similar goal as PB, and compute the density
-estimates in parallel on a multi-core CPU or on a GPU before the data
-is aggregated back on the CPU. The arbitrarily shaped density considered does
-not expose the invariants leveraged by PB-SYM which makes their work
-inapplicable to STKDE.
-
-\todo{expand with todd's paper. point out massive performance difference.}
+The PhD Thesis of U. Lopez-Novoa~\cite{LopezNovoa} is on the topic of
+computing kernel density estimation for arbitrarily shaped
+kernels. The crop and chop method presented revolves around cropping
+the voxel space around a point with similar goal as PB, and compute
+the density estimates in parallel on a multi-core CPU or on a GPU
+before the data is aggregated back on the CPU. The arbitrarily shaped
+density considered does not expose the invariants leveraged by PB-SYM
+which makes their work inapplicable to STKDE. \cite{Eaglin17} considers
+the same variant of kernel density that we consider and expand the
+techniques of~\cite{LopezNovoa} by considering coalescing. However,
+they still use a voxel based algorithm which is very slow (on a
+resolution lower than our lowest resolution, the parallel computation
+takes .6 seconds on a GPU which is slower than our reported sequential
+time on a larger instance.)
 
 The two most common spatial problems solved with parallel computing
 are N-body interactions~\cite{Aaseth03} and Particle in Cell
