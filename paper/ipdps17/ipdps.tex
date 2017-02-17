@@ -993,7 +993,23 @@ the execution has similar drawbacks as PB-SYM-DR.
   \label{fig:PB-SYM-PD-REP-speedup}
 \end{figure*}
 
-\todo{add a paragraph relating to the bestof plot}
+Figure~\ref{fig:bestof} summarizes the performance of all our
+methods. It shows the performance achieved by the best configuration
+of each particular algorithm. On Dengue instances, PB-SYM-DD usually
+leads to the best performance because of its low overhead on that
+instance while maintaining a good load balance. On the Pollen (and
+PollenUS) instances, the smart scheduling of PB-SYM-PD-SCHED-REP is
+necessary to reach the highest parallelism. The flu instances are
+mostly dominated to initialization overhead because it is very sparse,
+as such, PB-SYM-DR performs much worse than the other methods, and
+past that issue, the method leads to little performance
+difference. The eBird instances have a very small memory
+initialization overhead because they are dense in computation. This
+makes approaches that replicate the voxel space perform well at low
+resolution, but at high resolution there is not enough memory to
+leverage that opportunity well.
+
+\todo{maybe don't need pollen and pollenUS}
 
 \begin{figure*}
   \centering
