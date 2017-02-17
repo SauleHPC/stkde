@@ -153,3 +153,37 @@ INSTANCES="Dengue_lowres-lowbw Dengue_lowres-highbw Dengue_highres-lowbw Dengue_
 
 
 NB_INSTANCES=`echo $INSTANCES | wc -w`
+
+
+decomphistogram(){
+    output=$1
+    datafile=$2
+
+    gnuplot<<EOF
+set terminal pdf size 10in,3in 
+set output '${output}'
+
+set key font ",15" samplen 1 maxrows 4
+set xtics font ",15"
+set ytics font ",15"
+set ylabel font ",15"
+set style data histogram
+set style histogram cluster gap 3
+
+set xtics rotate by -45
+set style fill solid border rgb "black"
+set xrange [-.5:${NB_INSTANCES}.5]
+set yrange [0:18]
+set ylabel 'Speedup'
+
+plot '${datafile}' using 2:xtic(1) title col, \
+        '' using 3:xtic(1) title col, \
+        '' using 4:xtic(1) title col, \
+        '' using 5:xtic(1) title col, \
+        '' using 6:xtic(1) title col, \
+        '' using 7:xtic(1) title col, \
+        '' using 8:xtic(1) title col
+
+EOF
+
+}
