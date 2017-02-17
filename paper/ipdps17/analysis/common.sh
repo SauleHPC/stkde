@@ -154,6 +154,43 @@ INSTANCES="Dengue_lowres-lowbw Dengue_lowres-highbw Dengue_highres-lowbw Dengue_
 
 NB_INSTANCES=`echo $INSTANCES | wc -w`
 
+DECOMP="1_1_1 2_2_2 4_4_4 8_8_8 16_16_16 32_32_32 64_64_64"
+
+decompspeedupdata() {
+    output=$1
+    method=$2
+    
+(
+    echo -n Instance \ 
+    for dec in $DECOMP
+    do
+	echo -n ${dec} \  
+    done |tr _ x
+    echo
+    
+    for inst in $INSTANCES
+    do
+	seq=$(gettime ${inst} POINTBASED-SYM)
+	t=16
+	
+	echo -n $(prettyname ${inst}) \  
+
+	for decomp in $DECOMP
+	do
+	    meth=${method}_${decomp}_t${t}
+	    
+	    tim=$(gettime ${inst} ${meth})
+	    if [ "$tim" = "0" -o "$tim" = "" ]
+	    then
+		echo -n 0 \ 
+	    else
+		echo -n $(echo ${seq}/${tim}  | bc -l) \ 
+	    fi
+	done
+	echo
+    done
+)  > ${output}
+}
 
 decomphistogram(){
     output=$1

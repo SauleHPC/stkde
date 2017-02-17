@@ -119,33 +119,7 @@ EOF
 
 
 #clustered bar chart for 16 threads.
-
-(
-    echo -n Instance \ 
-    for dec in $DECOMP
-    do
-	echo -n ${dec} \  
-    done |tr _ x
-    echo
-    
-    for inst in $INSTANCES
-    do
-	seq=$(gettime ${inst} POINTBASED-SYM)
-	t=16
-	
-	echo -n $(prettyname ${inst}) \  
-
-	for decomp in $DECOMP
-	do
-	    meth=POINTBASED-SYMOMP_${decomp}_t${t}
-	    
-	    tim=$(gettime ${inst} ${meth})
-	    echo -n $(echo ${seq}/${tim}  | bc -l) \ 
-	done
-	echo
-    done
-) > SYM-DD-speedup16.data
-
+decompspeedupdata SYM-DD-speedup16.data POINTBASED-SYMOMP
 
 decomphistogram SYM-DD-speedup16.pdf SYM-DD-speedup16.data
 
