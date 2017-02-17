@@ -1,0 +1,4 @@
+hostname : sth-c4.uncc.edu
+bounding: [-89;89]x[-180;180]x[71836;79136]
+read 291990435 observations
+res: 0.1 0.1 3 bw: 1 1 7

@@ -6,3 +6,6 @@ voxsize: 1781x3601x2435 size:59572.5355MB
 voxBW: 10 3
 Initialization time: 5.479653
 decomposition time: 14.096668 seconds
+compute: 161585.893997 seconds
+evaluations: 447184041448
+time: 161605.517218 seconds
