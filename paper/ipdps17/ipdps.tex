@@ -1046,7 +1046,16 @@ points, and no field updates as in Particle in Cell (unless you
 consider a field discretized at a one voxel size which makes the
 analogy not quite useful).
 
-\todo{expand with RBF functions and why they are different problems.}
+The summation of kernel function, in particular of radial basis
+function attracted some
+attention~\cite{MarchXiaoYuBiros2015,FornbergLarssonFlyer2011,YangDuraiswamiGumerovDavis2003}. While
+some method presented in these papers are similar to some of the
+decomposition we discuss here, the mathematical property of the kernel
+function are different. In particular the kernel functions that these
+paper consider do not have the grid-aligned symmetries that the
+space-time kernel density estimate have. That symmetry is what we
+leverage in PB-SYM to gain an order of magnitude of acceleration and
+that leads to a more complex management of parallelism we investigated.
 
 Spatial application can use spatial partitioning techniques 
 such as recursive bisection~\cite{berger87}, jagged partition~\cite{ujaldon96,pinar97,DeveciRDC16}, or
