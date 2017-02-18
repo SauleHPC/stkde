@@ -710,6 +710,7 @@ low, high and veryhigh bandwidth. See details in Table~\ref{tab:instance}.
   \label{tab:instance}
 \end{table}
 
+\todo{maybe don't need pollen and pollenUS}
 
 \subsection{Algorithm design}
 
@@ -750,11 +751,14 @@ flu recorded in the last 15 years but they span most of the earth.
   \label{fig:breakdown}
 \end{figure}
 
-We do not provide direct comparison with the gold implementation
-because it uses a different programming language, which would make a
-direct comparison unfair. But a reimplementation of the voxel based
-algorithm with a 64x64x64 decomposition in C++ shows that the
-voxel-based algorithm VB is about 20 times slower than PB on Dengue\_Lr-Lb. \todo{We have comparison to VB and VB-PD. explain why no parallel comparison.}
+Comparing to the gold implementation would not be fair because it is
+in a different programming language. Though we implemented the VB
+algorithm, and also a variant, VB-DEC, that partitions the points in
+blocks of size equal to the bandwidth to only compute distances
+between voxels and points that have a chance to have an impact on
+it. The results are given in Table~\ref{tab:seq_table} and show that
+even VB-DEC is usually at least an order of magnitude larger than PB
+and typically two orders of magnitude larger than PB-SYM.
 
 \subsection{Domain-based parallelism}
 
@@ -990,7 +994,21 @@ the execution has similar drawbacks as PB-SYM-DR.
   \label{fig:PB-SYM-PD-REP-speedup}
 \end{figure*}
 
-\todo{add a paragraph relating to the bestof plot}
+Figure~\ref{fig:bestof} summarizes the performance of all our
+methods. It shows the performance achieved by the best configuration
+of each particular algorithm. On Dengue instances, PB-SYM-DD usually
+leads to the best performance because of its low overhead on that
+instance while maintaining a good load balance. On the Pollen (and
+PollenUS) instances, the smart scheduling of PB-SYM-PD-SCHED-REP is
+necessary to reach the highest parallelism. The flu instances are
+mostly dominated to initialization overhead because it is very sparse,
+as such, PB-SYM-DR performs much worse than the other methods, and
+past that issue, the method leads to little performance
+difference. The eBird instances have a very small memory
+initialization overhead because they are dense in computation. This
+makes approaches that replicate the voxel space perform well at low
+resolution, but at high resolution there is not enough memory to
+leverage that opportunity well.
 
 \begin{figure*}
   \centering
@@ -1027,7 +1045,16 @@ points, and no field updates as in Particle in Cell (unless you
 consider a field discretized at a one voxel size which makes the
 analogy not quite useful).
 
-\todo{expand with RBF functions and why they are different problems.}
+The summation of kernel function, in particular of radial basis
+function attracted some
+attention~\cite{MarchXiaoYuBiros2015,FornbergLarssonFlyer2011,YangDuraiswamiGumerovDavis2003}. While
+some method presented in these papers are similar to some of the
+decomposition we discuss here, the mathematical property of the kernel
+function are different. In particular the kernel functions that these
+paper consider do not have the grid-aligned symmetries that the
+space-time kernel density estimate have. That symmetry is what we
+leverage in PB-SYM to gain an order of magnitude of acceleration and
+that leads to a more complex management of parallelism we investigated.
 
 Spatial application can use spatial partitioning techniques 
 such as recursive bisection~\cite{berger87}, jagged partition~\cite{ujaldon96,pinar97,DeveciRDC16}, or
