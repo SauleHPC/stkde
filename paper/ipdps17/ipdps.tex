@@ -153,14 +153,14 @@ of~\cite{Hohl16}):
 $$ \hat{f} (x, y, t) = \frac{1}{n h_s^2 h_t} \sum_{i | d_i < h_s, t_i<h_t}
 k_s (\frac{x-x_i}{h_s},\frac{y-y_i}{h_s}) k_t(\frac{t-t_i}{h_t})$$
 
-The density of each voxel $s$ with coordinates $(x, y, t)$ is computed
-based on neighboring data points $(x_i, y_i, t_i)$. A data point is in
-the neighborhood of the voxel if the spatial distance $d_i$ and
-temporal distance $t_i$ are smaller than the spatial ($h_s$) and
-temporal bandwidths ($h_t$) respectively. Each point that falls into
-the neighborhood of a voxel is weighted using spatial and temporal
-kernel functions, $k_s$ and $k_t$, respectively (weight increases with
-decreasing distance):
+Density $\hat{f} (x, y, t)$ of each voxel is determined by number and distance of events (points)
+$(x_i, y_i, t_i)$ within its vicinity, which is conceptualized by a
+cylinder. The spatial bandwidth hs forms a circle which, due to the
+orthogonal relationship between space and time, is extended to a
+cylinder by temporal bandwidth $h_t$. For every event inside the
+cylinder, the spatial ($d_i$) and temporal ($t_i$) distances are smaller
+than $h_s$ and $h_t$. Therefore, the event receives a weight based on the
+kernel functions $k_s$ and $k_t$ (distance decay):
 
 $$k_s (u,v) = \frac{\pi}{2} (1-u)^2 (1-v)^2$$
 $$k_t (w) = \frac{3}{4} (1-w)^2$$
