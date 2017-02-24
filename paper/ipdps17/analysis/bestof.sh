@@ -47,7 +47,7 @@ gnuplot <<EOF
 set terminal pdf size 10in,3in 
 set output 'bestof.pdf'
 
-set key font ",15" samplen 1 maxrows 3
+set key font ",15" samplen 1 maxrows 3 width 3
 set xtics font ",15"
 set ytics font ",15"
 set ylabel font ",15"

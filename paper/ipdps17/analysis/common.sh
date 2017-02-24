@@ -206,10 +206,10 @@ decomphistogram(){
 set terminal pdf size 10in,3.5in 
 set output '${output}'
 
-set key font ",15" samplen 1 maxrows 4
-set xtics font ",15"
-set ytics font ",15"
-set ylabel font ",15"
+set key font ",17" samplen 1 maxrows 4  opaque width 3
+set xtics font ",17"
+set ytics font ",17"
+set ylabel font ",17"
 set style data histogram
 set style histogram cluster gap 3
 
@@ -230,3 +230,4 @@ plot '${datafile}' using 2:xtic(1) title col, \
 EOF
 
 }
+
