@@ -93,7 +93,7 @@ analysis, or the study of animal migration patterns also require
 understanding spatial and temporal locality of events. The massive
 amount of data we see nowadays is often analyzed using complex
 models. But before these can be constructed, data scientists  need to
-visualize and explore interactively the data to understand its
+interactively visualize and explore the data to understand its
 structure. \looseness=-1
 
 %
@@ -126,7 +126,7 @@ reduce the critical path further, we propose the PB-SYM-PD-REP algorithm which
 introduces some work
 overhead only where is needed to achieve a short critical path.
 Section~\ref{sec:experiments} presents experimental
-results on three different datasets and 15 instances extracted from
+results on 4 different datasets and 21 instances extracted from
 these datasets. The experiments highlights that the sequential
 strategies are efficient. The parallel strategies have their pros and
 cons and different strategies appear to be best in different
@@ -144,8 +144,8 @@ extension of the traditional 2D kernel density
 estimation~\cite{Silverman86} which generates density surface
 (``heatmap'') from a set of $n$ points located in a geographic space. The resulting density
 estimates is visualized within the space-time cube framework using two spatial $(x,
-y)$ and a temporal dimension $(t)$~\cite{Nakaya10}. STKDE creates a 3D
-raster volume where each voxel (3D equivalent of a pixel) is assigned a
+y)$ and a temporal dimension $(t)$~\cite{Nakaya10}. STKDE creates a discretized 3D
+ volume where each voxel (3D equivalent of a pixel) is assigned a
 density estimate based on the surrounding points. The space-time
 density is estimated using (following the notations
 of~\cite{Hohl16}):
@@ -153,21 +153,21 @@ of~\cite{Hohl16}):
 $$ \hat{f} (x, y, t) = \frac{1}{n h_s^2 h_t} \sum_{i | d_i < h_s, t_i<h_t}
 k_s (\frac{x-x_i}{h_s},\frac{y-y_i}{h_s}) k_t(\frac{t-t_i}{h_t})$$
 
-The density of each voxel $s$ with coordinates $(x, y, t)$ is computed
-based on neighboring data points $(x_i, y_i, t_i)$. A data point is in
-the neighborhood of the voxel if the spatial distance $d_i$ and
-temporal distance $t_i$ are smaller than the spatial ($h_s$) and
-temporal bandwidths ($h_t$) respectively. Each point that falls into
-the neighborhood of a voxel is weighted using spatial and temporal
-kernel functions, $k_s$ and $k_t$, respectively (weight increases with
-decreasing distance):
+Density $\hat{f} (x, y, t)$ of each voxel is determined by number and distance of events (points)
+$(x_i, y_i, t_i)$ within its vicinity, which is conceptualized by a
+cylinder. The spatial bandwidth hs forms a circle which, due to the
+orthogonal relationship between space and time, is extended to a
+cylinder by temporal bandwidth $h_t$. For every event inside the
+cylinder, the spatial ($d_i$) and temporal ($t_i$) distances are smaller
+than $h_s$ and $h_t$. Therefore, the event receives a weight based on the
+kernel functions $k_s$ and $k_t$ (distance decay):
 
 $$k_s (u,v) = \frac{\pi}{2} (1-u)^2 (1-v)^2$$
 $$k_t (w) = \frac{3}{4} (1-w)^2$$
 
 Figure~\ref{fig:stkde-ex} illustrates how varying the bandwidths used
 in STKDE helps focusing the graphical visualization of Dengue fever
-cases in Cali, Colombia. Figure~\ref{fig:stkde} shows the impact
+cases in Cali, Colombia~\cite{Delmelle14}. Figure~\ref{fig:stkde} shows the impact
 of a single point on the neighboring space.
 
 \begin{figure}
@@ -232,7 +232,7 @@ lowercase notation denote quantities in domain space.
 
 The gold standard implementation follows the exact definition of STKDE
 as it is given above. It is a voxel-based algorithm we call VB. For
-each voxel, VB finds the close points and calculates the contribution
+each voxel, VB finds the points within the temporal and spatial bandwidths and calculates the contribution
 to the density of this voxel. The pseudo code is given in Algorithm~\ref{alg:vb}.
 
 \begin{algorithm}
@@ -253,10 +253,10 @@ to the density of this voxel. The pseudo code is given in Algorithm~\ref{alg:vb}
 \end{algorithm}
 
 
-The algorithm performs $\theta(G_x G_y G_t n)$ distance tests and computes
-$\theta(n H_s^2 H_t )$ densities. Noticing that the bandwidth has to be
-smaller than the grid size, the complexity of the algorithm is
-$\theta(G_x G_y G_t n )$ requires $\theta(G_x G_y G_t)$
+The algorithm performs $\theta(G_x G_y G_t n)$ distance tests and
+computes $\theta(n H_s^2 H_t )$ densities. Since $H_s$ is smaller than
+$G_x$ and $G_y$ and since $H_t$ is smaller than $G_t$, the complexity of the
+algorithm is $\theta(G_x G_y G_t n )$ and it requires $\theta(G_x G_y G_t)$
 memory.
 
 \section{Algorithm Design and Engineering}
@@ -315,7 +315,7 @@ particular point, its contribution to the neighboring voxels can be
 decomposed in two components. $K_s(x,y)$  only depends on the
 spatial coordinate of the voxel with respect to the point and does not
 depend on its temporal coordinate. And $K_t(t)$  only depends on
-the temporal coordinate and not on the spatial coordinate. See
+the temporal coordinate and not on the spatial coordinates. See
 Figure~\ref{fig:pb-sym-decomposition} for a graphical depiction.
 
 \begin{figure}
@@ -611,7 +611,7 @@ where $T_1$ is the total amount of work to perform and $T_\infty$ is
 the length of the longest chain in the dependency graph.
 
 We propose to reduce the critical path by using a load-aware coloring
-of the subdomain. We use a greedy coloring algorithm which 
+of the subdomains. We use a greedy coloring algorithm which 
 considers the subdomains in a particular order and for each subdomain
 will color it with the smallest color that does not conflict with the
 already colored neighbors. Such greedy coloring algorithm are commonly
@@ -652,9 +652,9 @@ and Linux 3.10. All codes are written in C++ and are compiled using GCC 5.3, whi
 OpenMP 4.0, with optimization flags \texttt{-O3 -march=native -fopenmp
   -DNDEBUG}. All reported execution times exclude all IOs.
 
-\paragraph{Dataset} Three datasets are used in our experiments. Their
+\paragraph{Dataset} Four datasets are used in our experiments. Their
 key attributes are summarized in Table~\ref{tab:instance}. 
-Out first dataset is Dengue which uses the space-time
+Out first dataset, Dengue, is of epidemiological nature and consists of the space-time
 locations of dengue fever cases reported to the “Sistema de Vigilancia
 en Salud P\'{u}blica” for the city of Cali, Colombia during 2010 and 2011. The
 system is updated on a daily basis with records of individuals that
@@ -667,17 +667,15 @@ privacy~\cite{Kwan04}. In 2010, 9606 were successfully geocoded
 (11,760 reported cases, or 81.7\%), whereas in 2011, 1562 cases were
 successfully geocoded (1822 reported cases, or 85.7\%).
 
-The Pollen dataset is composed of 588K tweets of US users from
+The PollenUS dataset is composed of 588K tweets of US users from
 February 2016 to April 2016 related to Pollen (i.e., that mention
 keywords such as ``pollen'' and ``allergy''). Tweets that did not
 contain a precise localization were approximated by picking a random
 location in the approximated region provided by
 Gnip\footnote{\url{http://www.gnip.com/}}. Tweets are mostly located
-in the US, but there are tweets all over the northern hemisphere in
-this dataset. Therefore, this is the region we modeled with a spatial
-resolution ranging from $.2^\circ$ to $1^\circ$ and a temporal
-resolution of 1 day. We created a secondary problem we call PollenUS
-where we only model the contiguous continental United States.
+in the contiguous continental US. Therefore, this is the region we
+modeled with a spatial resolution ranging from $.2^\circ$ to $1^\circ$
+and a temporal resolution of 1 day.
 
 The Flu dataset was obtained from the Animal Surveillance
 database of the Influenza Research
@@ -690,7 +688,7 @@ and as North as the Northern shore of Russia. The domain is modeled
 with spatial resolution from $.2^\circ$ to $1^\circ$ and a temporal
 resolution of 1 day.
 
-The eBird dataset is a collection of worldwide rare bird spotting
+The eBird\footnote{\url{http://ebird.org}} dataset is a collection of worldwide rare bird spotting
 obtained from a crowdsourcing effort managed by Cornell's Lab or
 Ornithology~\cite{ebird}. Despite the service was launched in 2002,
 the database contains many older entries of birds that are known to
@@ -710,9 +708,11 @@ low, high and veryhigh bandwidth. See details in Table~\ref{tab:instance}.
   \label{tab:instance}
 \end{table}
 
-\todo{maybe don't need pollen and pollenUS}
-
 \subsection{Algorithm design}
+
+\todo{Check all numbers in the text as they could have slightly changed since complete rerun.}
+
+\todo{Pollen to PollenUS}
 
 \begin{table}
   \resizebox{\linewidth}{!}{\input{analysis/seq_table.tex}}
@@ -776,40 +776,39 @@ The performance of the PB-SYM-DR algorithm is given in
 Figure~\ref{fig:sym-dr-speedup}. Because it replicates the domain
 space, PB-SYM-DR was not able to complete the calculations for
 Flu\_Hr-Lb and Flu\_Hr-Hb when using 8 threads and 16 threads as the
-memory requirement exceeds the 128GB available on the machine.
-\todo{missing instances.}
-\todo{move to bar chart?}
+memory requirement exceeds the 128GB available on the machine. None of
+the high resolution eBird instances could have their domain
+replicated.
 
 \begin{figure}[tbh]
   \centering
-  \includegraphics[width=.9\linewidth]{analysis/SYM-DR-speedup.pdf}
+  \includegraphics[width=\linewidth]{analysis/SYM-DR-speedup.pdf}
   
-  \caption{Speedup of PB-SYM-DR. Flu\_Hr-Lb and Flu\_Hr-Hb run out of
-    memory for 8 and 16 threads.}
+  \caption{Speedup of PB-SYM-DR for different number of threads
+    used. Some instances run out of memory.}
   \label{fig:sym-dr-speedup}
 \end{figure}
 
-All the instances that have
-a high initialization cost get a speedup lesser than 1 since the
-threads spends their time allocating extra memory and reducing the
-content of that extra memory. Only 2 instances achieves a speedup
-higher than 6 when using 16 threads: Pollen\_Hr-Hb and
-Pollen\_Hr-Mb. Not surprisingly, they are the two instances with the
-largest fraction of computation. (See Figure~\ref{fig:breakdown} for
-reference.)
+All the instances that have a high initialization cost get a speedup
+lesser than 1 since the threads spends their time allocating extra
+memory and reducing the content of that extra memory. The only
+instances to achieve a speedup higher than 6 when using 16 threads are
+the PollenUS instances and the low resolution eBird instances. Not
+surprisingly, they are the instances with the largest fraction of
+computation. (See Figure~\ref{fig:breakdown} for reference.)
 
 \paragraph{PB-SYM-DD}
 
-\begin{figure*}[tbh]
+\begin{figure}[tbh]
   \centering
-  \includegraphics[width=.9\linewidth]{analysis/SYM-DD-overhead.pdf}
+  \includegraphics[width=\linewidth]{analysis/SYM-DD-overhead.pdf}
   
   \caption{Overhead of PB-SYM-DD: runtime of PB-SYM-DD with a single
     thread normalized to PB-SYM. Some decomposition improve
     performance dues to better cache fitting. Overdecomposition can
     cause significant overhead.}
   \label{fig:pb-sym-dd-speedup}
-\end{figure*}
+\end{figure}
 
 The PB-SYM-DD algorithm (described in Section~\ref{sec:pb-sym-dd}) also has some
 overhead induced by cut cylinder surrounding a point. To measure the
@@ -850,15 +849,15 @@ super linear speedup is possible on that instance, since the
 decomposition provides a work reduction of 23\% on that instance. A
 similar effect happens on Dengue\_Hr-Hb.
 
-\begin{figure*}[tbh]
+\begin{figure}[tbh]
   \centering
-  \includegraphics[width=.9\linewidth]{analysis/SYM-DD-speedup16.pdf}
+  \includegraphics[width=\linewidth]{analysis/SYM-DD-speedup16.pdf}
   
   \caption{Speedup of PB-SYM-DD with 16 threads. While PB-SYM-DD achieves good
     speedup in some cases, the overdecomposition overhead usually
     hinders the performance.}
   \label{fig:pb-sym-dd-16-speedup}
-\end{figure*}
+\end{figure}
 
 Despite a significant overhead on the Pollen\_Hr instances, a speedup
 of 7.4 and 8.5 can be observed on the Mb and Hb cases using 8x8x8
@@ -928,13 +927,13 @@ Section~\ref{sec:pb-sym-pd}). Therefore if the number of subdomain
 leads to too small subdomains, the decomposition is adjusted to fit
 the required size.
 
-\begin{figure*}
+\begin{figure}
   \centering
-  \includegraphics[width=.9\linewidth]{analysis/SYM-PD-speedup16.pdf}
+  \includegraphics[width=\linewidth]{analysis/SYM-PD-speedup16.pdf}
   \caption{Speedup of PB-SYM-PD using 16 threads. Note that decompositions of
     subdomain smaller that twice the bandwidths are adjusted.}
   \label{fig:pb-sym-pd}
-\end{figure*}
+\end{figure}
 
 PB-SYM-PD does not scale very well. The highest speedup is achieved on
 Pollen\_Lr-Lb where the speedup is $4$. It is interesting to notice
@@ -952,7 +951,7 @@ the limited scalability in the initialization phase.
 
 \begin{figure}
   \centering
-  \includegraphics[width=.9\linewidth]{analysis/PB-SYM-PD-imbalance.pdf}
+  \includegraphics[width=.8\linewidth]{analysis/PB-SYM-PD-imbalance.pdf}
   \caption{Length of the critical path of the parallel algorithms
     PB-SYM-PD and PB-SYM-PD-SCHED for a 64x64x64 decomposition}
   \label{fig:PB-SYM-PD-loadbalance}
@@ -968,12 +967,12 @@ construct a better execution in practice. And one can see from
 Figure~\ref{fig:PB-SYM-PD-SCHED-speedup} that this scheduling improves
 parallelism significantly for the Pollen instance. 
 
-\begin{figure*}
+\begin{figure}
   \centering
-  \includegraphics[width=.9\linewidth]{analysis/SYM-PD-COLOR-SCHED-speedup16.pdf}
+  \includegraphics[width=\linewidth]{analysis/SYM-PD-COLOR-SCHED-speedup16.pdf}
   \caption{Speedup of PB-SYM-PD-SCHED with 16 threads.}
   \label{fig:PB-SYM-PD-SCHED-speedup}
-\end{figure*}
+\end{figure}
 
 However, the parallelism is still constrained by load
 imbalance. PB-SYM-PD-REP performs domain decomposition on the
@@ -985,14 +984,16 @@ for small decompositions and on certain instances. Indeed, when there
 is no (or little) decomposition, most of the domain is replicated and
 the execution has similar drawbacks as PB-SYM-DR.
 
-\begin{figure*}
+\begin{figure}
   \centering
-  \includegraphics[width=.9\linewidth]{analysis/SYM-PD-COLOR-REP-speedup16.pdf}
+  \includegraphics[width=\linewidth]{analysis/SYM-PD-COLOR-REP-speedup16.pdf}
   \caption{Speedup of PB-SYM-PD-REP using 16 threads for different
     decompositions. Flu\_Hr-Lb and Flu\_Hr-Hb run out of memory for
     small decomposition.}
   \label{fig:PB-SYM-PD-REP-speedup}
-\end{figure*}
+\end{figure}
+
+\subsection{Summary and Discussion}
 
 Figure~\ref{fig:bestof} summarizes the performance of all our
 methods. It shows the performance achieved by the best configuration
@@ -1016,6 +1017,8 @@ leverage that opportunity well.
   \caption{Best configurations}
   \label{fig:bestof}
 \end{figure*}
+
+\todo{need for parametric models}
 
 \section{Related Works}
 
@@ -1085,7 +1088,10 @@ to model the instance and the platform to control the various overhead
 and be able to pick the parallel strategy that will derive the highest
 performance. It would also be interesting to look at distributed
 memory machines and accelerators to reduce the runtime further since
-real-time is desirable for interactive applications.
+real-time is desirable for interactive applications. In term of the
+application, we would like to investigate how these methods apply to a
+bandwidth that adapts to the density of population of the area is also
+of interest.
 
 \section*{Acknowledgment}
 

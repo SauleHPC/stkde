@@ -91,7 +91,7 @@ DECOMP="1_1_1 2_2_2 4_4_4 8_8_8 16_16_16 32_32_32 64_64_64"
 
 
 gnuplot<<EOF
-set terminal pdf size 10in,3in 
+set terminal pdf size 10in,3.5in 
 set output 'SYM-DD-overhead.pdf'
 
 set key font ",15" samplen 1 maxrows 4
