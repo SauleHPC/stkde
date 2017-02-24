@@ -1,0 +1,19 @@
+hostname : sth-c11.uncc.edu
+bounding: [-89;89]x[-180;180]x[71836;79136]
+read 291990435 observations
+res: 0.1 0.1 3 bw: 1 1 7
+voxsize: 1781x3601x2435 size:59572.5355MB
+voxBW: 10 3
+decomposition time: 14.251344 seconds
+max load: 7765261 avgloadperbox: 8910.84091 avgloadpercore: 291990435 total load: 291990435
+most loaded: 23 9 31
+load based longest path:32034262
+nb replication: 1
+total active blocks: 32768
+schedule time: 0.072556 seconds
+Initialization time: 13.500003
+mem: 39304
+compute: 2209.720758 seconds
+reduction: 0.001290 seconds
+evaluations: 0
+time: 2237.563264 seconds
