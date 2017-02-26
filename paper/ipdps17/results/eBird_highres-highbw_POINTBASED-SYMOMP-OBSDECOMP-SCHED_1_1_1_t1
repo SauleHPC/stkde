@@ -8,3 +8,6 @@ decomposition time: 12.887679 seconds
 max load: 291990435 avgloadperbox: 291990435 avgloadpercore: 291990435 total load: 291990435
 Initialization time: 13.081019
 mem: 27
+compute: 35340.625422 seconds
+evaluations: 0
+time: 35366.617542 seconds
