@@ -1,0 +1,25 @@
+hostname : sth-c12.uncc.edu
+bounding: [-89;89]x[-180;180]x[71836;79136]
+read 291990435 observations
+res: 0.1 0.1 3 bw: 3 3 14
+voxsize: 1781x3601x2435 size:59572.5355MB
+voxBW: 30 5
+Initialization time: 5.524932
+decomposition time: 9.969085 seconds
+1,0,0 : 19577213
+0,0,1 : 4773862
+1,0,1 : 248974249
+0,1,1 : 7366482
+1,1,1 : 9346455
+max load: 248974249 avgloadperbox: 36498804.4 avgloadpercore: 18249402.2 total load: 291990435
+maxin round:494194
+maxin round:4773862
+maxin round:579414
+maxin round:7366482
+maxin round:19577213
+maxin round:248974249
+maxin round:878566
+maxin round:9346455
+compute: 33705.460967 seconds
+evaluations: 11640229591242
+time: 33720.979364 seconds
