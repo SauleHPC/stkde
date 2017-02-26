@@ -745,7 +745,8 @@ flu recorded in the last 15 years but they span most of the earth.
 
 \begin{figure}
   \centering
-  \includegraphics[width=.9\linewidth]{analysis/seq_breakup.pdf}
+  \includegraphics[width=.8\linewidth]{analysis/seq_breakup.pdf}
+  \vspace*{-2em}
   \caption{Breakdown of the runtime of PB-SYM. Some instances are
     mostly Initialization.}
   \label{fig:breakdown}
@@ -783,7 +784,7 @@ replicated.
 \begin{figure}[tbh]
   \centering
   \includegraphics[width=\linewidth]{analysis/SYM-DR-speedup.pdf}
-  
+  \vspace*{-2em}
   \caption{Speedup of PB-SYM-DR for different number of threads
     used. Some instances run out of memory.}
   \label{fig:sym-dr-speedup}
@@ -802,7 +803,7 @@ computation. (See Figure~\ref{fig:breakdown} for reference.)
 \begin{figure}[tbh]
   \centering
   \includegraphics[width=\linewidth]{analysis/SYM-DD-overhead.pdf}
-  
+  \vspace*{-2em}
   \caption{Overhead of PB-SYM-DD: runtime of PB-SYM-DD with a single
     thread normalized to PB-SYM. Some decomposition improve
     performance dues to better cache fitting. Overdecomposition can
@@ -852,7 +853,7 @@ similar effect happens on Dengue\_Hr-Hb.
 \begin{figure}[tbh]
   \centering
   \includegraphics[width=\linewidth]{analysis/SYM-DD-speedup16.pdf}
-  
+  \vspace*{-2em}
   \caption{Speedup of PB-SYM-DD with 16 threads. While PB-SYM-DD achieves good
     speedup in some cases, the overdecomposition overhead usually
     hinders the performance.}
@@ -930,6 +931,7 @@ the required size.
 \begin{figure}
   \centering
   \includegraphics[width=\linewidth]{analysis/SYM-PD-speedup16.pdf}
+  \vspace*{-2em}
   \caption{Speedup of PB-SYM-PD using 16 threads. Note that decompositions of
     subdomain smaller that twice the bandwidths are adjusted.}
   \label{fig:pb-sym-pd}
@@ -951,7 +953,8 @@ the limited scalability in the initialization phase.
 
 \begin{figure}
   \centering
-  \includegraphics[width=.8\linewidth]{analysis/PB-SYM-PD-imbalance.pdf}
+  \includegraphics[width=.7\linewidth]{analysis/PB-SYM-PD-imbalance.pdf}
+  \vspace*{-1.5em}
   \caption{Length of the critical path of the parallel algorithms
     PB-SYM-PD and PB-SYM-PD-SCHED for a 64x64x64 decomposition}
   \label{fig:PB-SYM-PD-loadbalance}
@@ -970,6 +973,7 @@ parallelism significantly for the Pollen instance.
 \begin{figure}
   \centering
   \includegraphics[width=\linewidth]{analysis/SYM-PD-COLOR-SCHED-speedup16.pdf}
+  \vspace*{-2em}
   \caption{Speedup of PB-SYM-PD-SCHED with 16 threads.}
   \label{fig:PB-SYM-PD-SCHED-speedup}
 \end{figure}
@@ -987,6 +991,7 @@ the execution has similar drawbacks as PB-SYM-DR.
 \begin{figure}
   \centering
   \includegraphics[width=\linewidth]{analysis/SYM-PD-COLOR-REP-speedup16.pdf}
+  \vspace*{-2em}
   \caption{Speedup of PB-SYM-PD-REP using 16 threads for different
     decompositions. Flu\_Hr-Lb and Flu\_Hr-Hb run out of memory for
     small decomposition.}
@@ -1014,11 +1019,16 @@ leverage that opportunity well.
 \begin{figure*}
   \centering
   \includegraphics[width=.9\linewidth]{analysis/bestof.pdf}
+  \vspace*{-1em}
   \caption{Best configurations}
   \label{fig:bestof}
 \end{figure*}
 
-\todo{need for parametric models}
+What we need to do is to develop a parametric model for the problem
+that will take into account memory availability, cost of memory
+initialization, expected cost of computing the kernel density. Using
+that model finding the best execution strategy becomes a combinatorial
+problem.
 
 \section{Related Works}
 
