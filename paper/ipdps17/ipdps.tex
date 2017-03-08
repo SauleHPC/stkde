@@ -580,7 +580,7 @@ classical graphs and scheduling problem. Modeling the subdomains as a
 parallel is coloring the vertices of the graph so that no two
 neighboring vertices share the same color. It differs from classical
 graph coloring problems (surveyed in~\cite{GMP05}) in that the objective
-is not to minimize the number of color or to balance the number of
+is not to minimize the number of colors or to balance the number of
 vertices of each color but to minimize the execution time of the
 implied schedule.
 
@@ -617,7 +617,7 @@ will color it with the smallest color that does not conflict with the
 already colored neighbors. Such greedy coloring algorithm are commonly
 used in parallel computing applications~\cite{GMP05,Boman05-EuroPar,Deveci2016}. However, we will use
 an ordering that color the vertices in non-increasing order of the
-number of point contained in the subdomain. While this algorithm is a
+number of points contained in the subdomain. While this algorithm is a
 heuristic, it is likely to obtain a coloring that minimizes the
 critical path\footnote{The complexity of this problem is currently
   unknown to the authors. The general case of an arbitrary graph is
@@ -704,19 +704,16 @@ low, high and veryhigh bandwidth. See details in Table~\ref{tab:instance}.
 \begin{table}
     \resizebox{\linewidth}{!}{\input{analysis/instance_table.tex}}
   \caption{Properties of the datasets. The domain is expressed in voxels
-    and in MB. Spatial and temporal bandwidth are given in voxels.}
+    and in MB. Spatial and temporal bandwidth are given in voxels.\vspace*{-2em}}
   \label{tab:instance}
 \end{table}
 
 \subsection{Algorithm design}
 
-\todo{Check all numbers in the text as they could have slightly changed since complete rerun.}
-
-\todo{Pollen to PollenUS}
 
 \begin{table}
   \resizebox{\linewidth}{!}{\input{analysis/seq_table.tex}}
-  \caption{Runtime of different algorithm. The speedup of PB-SYM over PB is given.}
+  \caption{Runtime of different algorithm. The speedup of PB-SYM over PB is given.  \vspace*{-3em}}
   \label{tab:seq_table}
 \end{table}
 
@@ -730,7 +727,7 @@ reduction.
 
 PB-SYM combines the reductions of both PB-BAR and PB-DISK and achieves
 the best performance in most cases. PB-SYM provides improvements up to
-a factor of $6.898$ on the Polen\_Hr-Hb case. The case where PB-SYM
+a factor of $6.969$ on the PollenUS\_Hr-Hb case. The case where PB-SYM
 provides little improvement are explained either by cases that have a
 low bandwidth, and therefore there is little redundant computation to
 take advantange of, or by the fact that the runtime is dominated by
@@ -772,7 +769,6 @@ and typically two orders of magnitude larger than PB-SYM.
 %%   \caption{domain replication. Times are in seconds. Missing data points run out of memory.}
 %% \end{table*}
 
-
 The performance of the PB-SYM-DR algorithm is given in
 Figure~\ref{fig:sym-dr-speedup}. Because it replicates the domain
 space, PB-SYM-DR was not able to complete the calculations for
@@ -793,10 +789,12 @@ replicated.
 All the instances that have a high initialization cost get a speedup
 lesser than 1 since the threads spends their time allocating extra
 memory and reducing the content of that extra memory. The only
-instances to achieve a speedup higher than 6 when using 16 threads are
-the PollenUS instances and the low resolution eBird instances. Not
+instances to achieve a speedup higher than 8 when using 16 threads are 3 of 
+the PollenUS instances and one low resolution eBird instances. Not
 surprisingly, they are the instances with the largest fraction of
 computation. (See Figure~\ref{fig:breakdown} for reference.)
+
+
 
 \paragraph{PB-SYM-DD}
 
@@ -815,22 +813,26 @@ The PB-SYM-DD algorithm (described in Section~\ref{sec:pb-sym-dd}) also has some
 overhead induced by cut cylinder surrounding a point. To measure the
 overhead beforehand, we run the decomposition algorithm using
 different number of subdomains ranging from a single subdomain (1x1x1)
-to a very fine grain decomposition in 64x64x64 subdomains. The results
+to a very fine grain decomposition in 64x64x64 subdomains (except on the eBird\_Hr\_Hb where such a test is computationally expensive). The results
 of that experiment is presented in
 Figure~\ref{fig:pb-sym-dd-speedup}. The figure presents the overhead
 of the decomposition relatively to PB-SYM. Two things are
 apparent. Some decomposition can actually reduce the runtime by
-providing better cache locality. 
+providing better cache locality; for instance Flu\_Hr-Lb is 9.8\% faster
+using a 16x16x16 decomposition than PB-SYM.
+
 
 However, in most cases, the decomposition actually increases the
 runtime. For instance, a 16x16x16 decomposition increases the amount
-of work by 80\% in the Flu-Hr cases, and a 64x64x64 decomposition
-induces an overhead of 300\%. Even on the Dengue\_Lr-Hb, a simple
+of work by 9\% in the Flu-Lr-Hb cases, and a 64x64x64 decomposition
+induces an overhead of 254\%. Even on the Dengue\_Lr-Hb, a simple
 4x4x4 decomposition already induces a 5\% overhead which grows to 69\%
-for a 16x16x16 decomposition. Such large decomposition are likely to
+for a 16x16x16 decomposition.  Such large decomposition are likely to
 be necessary since the points in the datasets are often organized in
 clusters: a decomposition in 16 subdomains is unlikely to provide a
-load balanced execution.
+load balanced execution. The PollenUS suffer from the highest overheads,
+with a 16x16x16 decomposition leading to a 74\% overhead on PollenUS-Hr-Mb,
+and a 495\% overhead for a 64x64x64 decomposition
 
 %% \begin{table*}
 %%   \begin{tabular}{|l|r|rrrrrrrrr|}
@@ -841,14 +843,13 @@ load balanced execution.
 %%     cache fitting. Overdecomposition can cause significant overhead.}
 %% \end{table*}
 
+
 The speedup achieved by a parallel execution of PB-SYM-DD using 16
 threads is presented in Figure~\ref{fig:pb-sym-dd-16-speedup}. This
-algorithm achieves better speedup than PB-SYM-DR. It achieves a
-speedup greater than 6 on 4 instances. Let us note that a speedup of
-$16.3$ achieved on Dengue\_Hr-VHb using a 16x16x16 decomposition. A
-super linear speedup is possible on that instance, since the
-decomposition provides a work reduction of 23\% on that instance. A
-similar effect happens on Dengue\_Hr-Hb.
+algorithm achieves overall better speedup than PB-SYM-DR. It achieves a
+speedup greater than 8 on 9 instances. Let us note that a speedup of
+$14.9$ is achieved on Dengue\_Hr-VHb using a 16x16x16 decomposition
+and of $14.8$ on eBird\_Hr-Hb with a 32x32x32 decomposition.
 
 \begin{figure}[tbh]
   \centering
@@ -860,10 +861,12 @@ similar effect happens on Dengue\_Hr-Hb.
   \label{fig:pb-sym-dd-16-speedup}
 \end{figure}
 
-Despite a significant overhead on the Pollen\_Hr instances, a speedup
-of 7.4 and 8.5 can be observed on the Mb and Hb cases using 8x8x8
+
+
+Despite a significant overhead on the PollenUS\_Hr instances, a speedup
+of $10$ and $11.5$ can be observed on the Mb and Hb cases using 8x8x8
 decomposition. This speedup is relatively impressive provided the
-decomposition induces an overhead of 28\% and 33\% in these two
+decomposition induces an overhead of 25\% and 23\% in these two
 cases. The 8x8x8 decomposition in that case is still imbalanced and a
 finer decomposition can reach perfect load balance; however the
 overhead induced by the decomposition prevents taking advantages of
@@ -871,7 +874,8 @@ that better load balance. For PB-SYM-DD to be useful,
 it is important to pick the decomposition to ensure load
 balance without suffering from an unbearable computational overhead.
 
-A more modest speedup between $2$ and $6$ can be observed on the
+
+A more modest speedup between $2$ and $4$ can be observed on the
 instances with higher initialization cost, such as on the Flu
 dataset. Indeed, most of the time is spent on initializing the memory
 to hold the density estimates. Even if the algorithm performs memory
@@ -880,10 +884,11 @@ memory operations. Even more so since the initialization touches the memory
 for the first time, which makes the operating system
 allocate the pages in physical memory. The speedup of the
 initialization phase using 16 threads is about the same for all
-instances and is at about $2.5$. The small speedup of PB-SYM-DD on
+instances and is at about $3$. The small speedup of PB-SYM-DD on
 instances with high initialization cost is completely explained by
 this phenomenon. Even if the compute phase was reduced to $0$, the
-speedup on the entire calculation would only be $3.54$.
+speedup on the entire calculation would only be $3.7$. 
+
 
 %% \begin{table*}
 %%   \begin{tabular}{|l|r|rrrrrrrrr|}
@@ -920,6 +925,8 @@ speedup on the entire calculation would only be $3.54$.
 %%   \caption{obs decomposition - color sched mold. The missing item run out of memory becasue of a too high replication factor.}
 %% \end{table*}
 
+
+
 The
 performance of PB-SYM-PD is shown in Figure~\ref{fig:pb-sym-pd} for
 different decomposition. Note that there is a requirement in PB-SYM-PD
@@ -937,17 +944,18 @@ the required size.
   \label{fig:pb-sym-pd}
 \end{figure}
 
-PB-SYM-PD does not scale very well. The highest speedup is achieved on
-Pollen\_Lr-Lb where the speedup is $4$. It is interesting to notice
+
+
+PB-SYM-PD does not scale well on all instances. The highest speedup achieved on
+PollenUS\_Lr-Lb is $2.6$. It is interesting to notice
 that the speedup usually increases with decomposition size. However,
 the speedup is limited because of load
 imbalance. Figure~\ref{fig:PB-SYM-PD-loadbalance} shows the implicit
 critical path within the PB-SYM-PD algorithm for the highest
 decomposition used in the experiment (64x64x64). Most instances have a
 critical path of about 10\% of the total work. If Graham's bound is
-reached, that implies a speedup lesser than $6.15$. Dengue\_Hr-VHb has
-a critical path of 28\% which implies a speedup lesser than $2.9$; and
-Pollen\_Hr-Hb has a critical path of 55\% which implies a speedup
+reached, that implies a speedup lesser than $6.15$. 
+PollenUS\_Hr-Hb has a critical path of 55\% which implies a speedup
 lesser than $1.6$. However, the speedup is typically lower because of
 the limited scalability in the initialization phase.
 
@@ -957,33 +965,39 @@ the limited scalability in the initialization phase.
   \vspace*{-1.5em}
   \caption{Length of the critical path of the parallel algorithms
     PB-SYM-PD and PB-SYM-PD-SCHED for a 64x64x64 decomposition}
+  \vspace*{-0.5em}
   \label{fig:PB-SYM-PD-loadbalance}
 \end{figure}
 
 PB-SYM-PD-SCHED aims at improving the load balance by arranging the
-execution to execute the most loaded subdomain
+execution to process the most loaded subdomain
 first. Figure~\ref{fig:PB-SYM-PD-loadbalance} shows that
 PB-SYM-PD-SCHED marginally decreases the critical path in all but one
 case. Even if that decrease is marginal, PB-SYM-PD-SCHED ensures that
 the highest loaded subdomain are executed first which tends to
 construct a better execution in practice. And one can see from
 Figure~\ref{fig:PB-SYM-PD-SCHED-speedup} that this scheduling improves
-parallelism significantly for the Pollen instance. 
+parallelism significantly for the PollenUS instance. A superlinear
+speedup occurs on PollenUS\_VHr-VLb: it is due to the decomposition of
+the points which improves the locality of the computation compared to
+the sequential execution.
 
 \begin{figure}
   \centering
   \includegraphics[width=\linewidth]{analysis/SYM-PD-COLOR-SCHED-speedup16.pdf}
   \vspace*{-2em}
   \caption{Speedup of PB-SYM-PD-SCHED with 16 threads.}
+  \vspace*{-1em}
   \label{fig:PB-SYM-PD-SCHED-speedup}
 \end{figure}
+
 
 However, the parallelism is still constrained by load
 imbalance. PB-SYM-PD-REP performs domain decomposition on the
 subdomain of the most loaded chains in the dependency graph until the
 critical is small. Figure~\ref{fig:PB-SYM-PD-REP-speedup} shows the
 speedup achieved by PB-SYM-PD-REP. Using PB-SYM-PD-REP achieves a
-speedup larger than 8 on 7 instances. Though the speedup is close to 0
+speedup larger than 8 on 8 instances. Though the speedup is close to 0
 for small decompositions and on certain instances. Indeed, when there
 is no (or little) decomposition, most of the domain is replicated and
 the execution has similar drawbacks as PB-SYM-DR.
@@ -1004,8 +1018,8 @@ Figure~\ref{fig:bestof} summarizes the performance of all our
 methods. It shows the performance achieved by the best configuration
 of each particular algorithm. On Dengue instances, PB-SYM-DD usually
 leads to the best performance because of its low overhead on that
-instance while maintaining a good load balance. On the Pollen (and
-PollenUS) instances, the smart scheduling of PB-SYM-PD-SCHED-REP is
+instance while maintaining a good load balance. On the PollenUS
+instances, the smart scheduling of PB-SYM-PD-SCHED-REP is
 necessary to reach the highest parallelism. The flu instances are
 mostly dominated to initialization overhead because it is very sparse,
 as such, PB-SYM-DR performs much worse than the other methods, and
@@ -1013,14 +1027,14 @@ past that issue, the method leads to little performance
 difference. The eBird instances have a very small memory
 initialization overhead because they are dense in computation. This
 makes approaches that replicate the voxel space perform well at low
-resolution, but at high resolution there is not enough memory to
-leverage that opportunity well.
+resolution, but runs out of memory at high resolution there.
 
 \begin{figure*}
   \centering
   \includegraphics[width=.9\linewidth]{analysis/bestof.pdf}
   \vspace*{-1em}
   \caption{Best configurations}
+  \vspace*{-1.5em}
   \label{fig:bestof}
 \end{figure*}
 
@@ -1071,12 +1085,11 @@ that leads to a more complex management of parallelism we investigated.
 
 Spatial application can use spatial partitioning techniques 
 such as recursive bisection~\cite{berger87}, jagged partition~\cite{ujaldon96,pinar97,DeveciRDC16}, or
-rectilinear partitioning~\cite{nicol94,manne96}. Depending on the algorithms used for
+rectilinear partition~\cite{nicol94,manne96}. Depending on the algorithms used for
 STKDE, the objective function is different. A partitioning for
 PB-SYM-DD needs a good load balance, to minimize the number of cut
-cylinders, and could take arbitrarily shaped partitioning. But PB-SYM-PD
-needs a decomposition where the subdomains have a size larger than a
-threshold and the load balance critirion is harder to express since
+cylinders. But PB-SYM-PD
+needs a decomposition where the subdomains have a minimum size and the load balance critirion is harder to express since
 neighboring subdomains can not be processed simultaneously.
 
 \section{Conclusion}
