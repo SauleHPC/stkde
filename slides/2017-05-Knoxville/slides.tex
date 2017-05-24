@@ -33,7 +33,7 @@
 
 %\graphicspath{{fig/}}
 
-\title{Parallel Space-Time Kernel Density Estimation}
+\title{Shared-Memory Parallel Space-Time Kernel Density Estimation}
 
 
 \date[Knoxville 2017]{Scheduling in Knoxville\\May 26th, 2017}
@@ -170,13 +170,129 @@
   But pleasingly parallel.    
 \end{frame}
 
-\section{Domain Parallelism}
+\begin{frame}
+  \frametitle{Point Based Algorithm \textsc{PB}}
+  
+  \begin{block}{Algorithm}
+    \begin{algorithmic}
+      \For{all voxels $s=(x,y,t)$}
+        \State $stkde[X][Y][T] = 0$
+      \EndFor
+      %
+      \For{each points $i$ at $x_i, y_i, t_i$}
+        \For{$X_i - H_s\leq X \leq X_i+H_s$}
+          \For{$Y_i - H_s\leq Y \leq Y_i+H_s$}
+            \For{$T_i - T_s\leq T \leq T_i+H_s$}
+              \If{$\sqrt{(x_i-x)^2+(y_i-y)^2}< h_s$ and $|t_i-t| \leq h_t$}
+                \State $stkde[X][Y][T] += \frac{k_s(\frac{x-x_i}{h_s},\frac{y-y_i}{h_s}) k_t(\frac{t-t_i}{h_t})}{n h_s^2h_t}$
+              \EndIf
+            \EndFor
+          \EndFor
+        \EndFor
+      \EndFor
+    \end{algorithmic}
+  \end{block}
+    
+  \begin{itemize}
+  \item $\Theta(G_x G_y G_t)$ for memory initialization
+  \item $\Theta(n H_s^2 H_t)$ density computations
+  \item Complexity:  $\Theta(G_x G_y G_t + n H_s^2 H_t)$
+  \item (Gain the $\theta(G_x G_y G_t n)$ distance tests)
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Exploiting Symmetries \textsc{PB-SYM}}
+
+  \begin{columns}
+    \column{.49\linewidth}
+  
+    \includegraphics[width=\linewidth]{../../paper/icpp17/figures/PB-SYM.pdf}
+
+    \column{.49\linewidth}
+
+    For each point:
+    \begin{itemize}
+    \item Compute the $K_t$
+    \item Compute the $K_s$
+    \item Cross product
+    \end{itemize}
+
+    Complexity is the same, but saves computation in practice
+  \end{columns}
+
+\end{frame}
+
+\begin{frame}
+  \frametitle{In practice}
+
+  \only<1>{\resizebox{.7\linewidth}{!}{\input{../../paper/icpp17/analysis/instance_table.tex}}}%
+  \only<2>{\resizebox{.9\linewidth}{!}{\input{../../paper/icpp17/analysis/seq_table.tex}}\\~\\
+
+    Clearly, \textsc{PB-SYM} is the algorithm to make parallel.
+  }
+  
+\end{frame}
+
+\section{Domain-Based Parallelism}
+
+\begin{frame}
+  \frametitle{Domain Replication \textsc{PB-SYM-DR}}
+
+  Each worker:
+  \begin{itemize}
+  \item Initialize its own memory buffer
+  \item Process some points in its own buffer (with load balancing)
+  \item Participate in reducing the result
+  \end{itemize}
+  
+  \includegraphics[width=1.05\linewidth]{../../paper/icpp17/analysis/SYM-DR-speedup.pdf}  
+\end{frame}
+
+\begin{frame}
+  \frametitle{Why is DR bad? Some instances have low computation!}
+
+    \includegraphics[width=.8\linewidth]{../../paper/icpp17/analysis/seq_breakup.pdf}
+
+    (and some run out of memory)
+\end{frame}
+
+\begin{frame}
+  \frametitle{Domain Decomposition \textsc{PB-SYM-DD}}
+  
+  \begin{itemize}
+  \item Decompose the domain in $K \times K$ subdomains
+  \item Each worker process different subdomains (load balanced on the subdomains)
+  \end{itemize}
+
+  \includegraphics[width=1.05\linewidth]{../../paper/icpp17/analysis/SYM-DD-speedup16.pdf}  
+\end{frame}
+
+\begin{frame}
+  \frametitle{Why is DD bad? Work overhead. Some cylinders are cut!}
+  \centering
+  
+  \includegraphics[width=.4\linewidth]{../../paper/icpp17/figures/PB-SYM-DD-overhead.pdf}
+
+  \includegraphics[width=\linewidth]{../../paper/icpp17/analysis/SYM-DD-overhead.pdf}
+
+  Does anyone know a cheap way to cut?
+\end{frame}
 
 \section{Point-Based Parallelism}
 
+
+
 \section{Conclusion}
 
+\begin{frame}
+  \frametitle{Future Works}
 
+  \begin{itemize}
+  \item GPU
+  \item Distributed Memory
+  \end{itemize}
+\end{frame}
 
 \bibliographystyle{alpha}
 \bibliography{slides}
