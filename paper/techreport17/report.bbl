@@ -1,0 +1,176 @@
+\newcommand{\etalchar}[1]{$^{#1}$}
+\begin{thebibliography}{KVKVO06}
+
+\bibitem[Aar03]{Aaseth03}
+Sverre~J. Aarseth.
+\newblock {\em Gravitational N-Body Simulations: Tools and Algorithms}.
+\newblock Cambridge University Press, 2003.
+
+\bibitem[BB87]{berger87}
+Marsha Berger and Shahid Bokhari.
+\newblock A partitioning strategy for nonuniform problems on multiprocessors.
+\newblock {\em IEEE TC}, C36(5):570--580, 1987.
+
+\bibitem[BB{\c{C}}{\etalchar{+}}05]{Boman05-EuroPar}
+E.G. Boman, D.~Bozda{\u{g}}, {\"{U}}.V. {\c{C}}ataly{\"{u}}rek, A.H.
+  Gebremedhin, and F.~Manne.
+\newblock A scalable parallel graph coloring algorithm for distributed memory
+  computers.
+\newblock In {\em Proc. of Euro-Par}, pages 241--251, Aug 2005.
+
+\bibitem[Boa13]{OpenMP4}
+OpenMP Architecture~Review Board.
+\newblock Openmp application program interface.
+\newblock Technical report, OpenMP Architecture Review Board, July 2013.
+\newblock Verion 4.0.0.
+
+\bibitem[CLoO16]{ebird}
+New~York Cornell Lab~of Ornithology, Ithaca.
+\newblock ebird basic dataset.
+\newblock http://ebird.org/content/ebird/, May 2016.
+\newblock Version: EBD\_relMay-2016.
+
+\bibitem[DBDR16]{Deveci2016}
+M.~Deveci, E.~G. Boman, K.~D. Devine, and S.~Rajamanickam.
+\newblock Parallel graph coloring for manycore architectures.
+\newblock In {\em 2016 IEEE International Parallel and Distributed Processing
+  Symposium (IPDPS)}, pages 892--901, May 2016.
+
+\bibitem[DCRV13]{delmelle2013spatio}
+Eric Delmelle, Irene Casas, Jorge~H Rojas, and Alejandro Varela.
+\newblock Spatio-temporal patterns of dengue fever in cali, colombia.
+\newblock {\em International Journal of Applied Geospatial Research (IJAGR)},
+  4(4):58--75, 2013.
+
+\bibitem[DDC{\etalchar{+}}14]{Delmelle14}
+E.~Delmelle, C.~Dony, I.~Casas, M.~Jia, and W~Tang.
+\newblock Visualizing the impact of space-time uncertainties on dengue fever
+  patterns.
+\newblock {\em International Journal of Geographical Information Science},
+  28(5):1107--1127, 2014.
+
+\bibitem[DRD{\c{C}}16]{DeveciRDC16}
+Mehmet Deveci, Sivasankaran Rajamanickam, Karen~D. Devine, and {\"{U}}mit~V.
+  {\c{C}}ataly{\"{u}}rek.
+\newblock Multi-jagged: {A} scalable parallel spatial partitioning algorithm.
+\newblock {\em {IEEE} Trans. Parallel Distrib. Syst.}, 27(3):803--817, 2016.
+
+\bibitem[ECR17]{Eaglin17}
+Todd Eaglin, Isaac Cho, and William Ribarsky.
+\newblock Space-time kernel density estimation for real-time interactive visual
+  analytics.
+\newblock In {\em Proceedings of the 50th Hawaii International Conference on
+  System Sciences}, January 2017.
+
+\bibitem[EE11]{eisen2011using}
+Lars Eisen and Rebecca~J Eisen.
+\newblock Using geographic information systems and decision support systems for
+  the prediction, prevention, and control of vector-borne diseases.
+\newblock {\em Annual review of entomology}, 56:41--61, 2011.
+
+\bibitem[FLF11]{FornbergLarssonFlyer2011}
+Bengt Fornberg, Elisabeth Larsson, and Natasha Flyer.
+\newblock Stable computations with gaussian radial basis functions.
+\newblock {\em SIAM Journal on Scientific Computing}, 33(2):869--892, 2011.
+
+\bibitem[GMP05]{GMP05}
+Assefaw~H. Gebremedhin, Fredrik Manne, and Alex Pothen.
+\newblock What color is your jacobian? {G}raph coloring for computing
+  derivatives.
+\newblock {\em SIAM Review}, 47(4):629--705, 2005.
+
+\bibitem[Gra69]{Graham69}
+Ronald~L. Graham.
+\newblock Bounds on multiprocessing timing anomalies.
+\newblock {\em SIAM Journal on Applied Mathematics}, 17(2):416--429, March
+  1969.
+
+\bibitem[GWM14]{grubesic2014spatial}
+Tony~H Grubesic, Ran Wei, and Alan~T Murray.
+\newblock Spatial clustering overview and comparison: Accuracy, sensitivity,
+  and computational expense.
+\newblock {\em Annals of the Association of American Geographers},
+  104(6):1134--1156, 2014.
+
+\bibitem[HDTC16]{Hohl16}
+A.~Hohl, E.~Delmelle, W.~Tang, and I.~Casas.
+\newblock Accelerating the discovery of space-time patterns of infectious
+  diseases using parallel computing.
+\newblock {\em Spatial and Spatio-temporal Epidemiology}, 2016.
+
+\bibitem[Hun13]{Hunold13}
+Sascha Hunold.
+\newblock Scheduling moldable tasks with precedence constraints and arbitrary
+  speedup functions on multiprocessors.
+\newblock In {\em Prof of {PPAM}}, pages 13--25, 2013.
+
+\bibitem[KCS04]{Kwan04}
+M.~P. Kwan, I.~Casas, and B.~Schmitz.
+\newblock Protection of geoprivacy and accuracy of spatial information: how
+  effective are geographical masks?
+\newblock {\em Cartographica: The International Journal for Geographic
+  Information and Geovisualization}, 39(2):15--28, 2004.
+
+\bibitem[KVKVO06]{karimabadi06}
+H.~Karimabadi, H.~X. Vu, D.~Krauss-Varban, and Y.~Omelchenko.
+\newblock Global hybrid simulations of the earth's magnetosphere.
+\newblock {\em Numerical Modeling of Space Plasma Flows}, December 2006.
+
+\bibitem[{Lop}15]{LopezNovoa}
+Unai {Lopez-Novoa}.
+\newblock {\em Contributions to the Efficient Use of General Purpose
+  Coprocessors: Kernel Density Estimation as Case Study}.
+\newblock PhD thesis, Universidad del Pa\'{i}s Vasco, 2015.
+
+\bibitem[LTW02]{Lepere02}
+Renaud Lep{\`{e}}re, Denis Trystram, and Gerhard~J. Woeginger.
+\newblock Approximation algorithms for scheduling malleable tasks under
+  precedence constraints.
+\newblock {\em Int. J. Found. Comput. Sci.}, 13(4):613--627, 2002.
+
+\bibitem[MS96]{manne96}
+Fredrik Manne and Tor S{\o}revik.
+\newblock Partitioning an array onto a mesh of processors.
+\newblock In {\em Proc of PARA '96}, pages 467--477, 1996.
+
+\bibitem[MXYB15]{MarchXiaoYuBiros2015}
+William~B March, Bo~Xiao, Chenhan~D Yu, and George Biros.
+\newblock {ASKIT:} an efficient, parallel library for high-dimensional kernel
+  summations.
+\newblock {\em SIAM Journal on Scientific Computing (to appear)}, 2015.
+
+\bibitem[Nic94]{nicol94}
+David Nicol.
+\newblock Rectilinear partitioning of irregular data parallel computations.
+\newblock {\em JPDC}, 23:119--134, 1994.
+
+\bibitem[NY10]{Nakaya10}
+T.~Nakaya and K.~Yano.
+\newblock Visualising crime clusters in a space-time cube: an exploratory
+  data-analysis approach using space-time kernel density estimation and scan
+  statistics.
+\newblock {\em Transactions in GIS}, 14(3):223--239, 2010.
+
+\bibitem[PA97]{pinar97}
+Ali P{\i}nar and Cevdet Aykanat.
+\newblock Sparse matrix decomposition with optimal load balancing.
+\newblock In {\em Proc. of HiPC 1997}, 1997.
+
+\bibitem[Sil86]{Silverman86}
+B.~W. Silverman.
+\newblock {\em Density estimation for statistics and data analysis}, volume~26.
+\newblock CRC press, 1986.
+
+\bibitem[USZS96]{ujaldon96}
+Manuel Ujaldon, Shamik Sharma, Emilio Zapata, and Joel Saltz.
+\newblock Experimental evaluation of efficient sparse matrix distributions.
+\newblock In {\em Proc. of SuperComputing'96}, 1996.
+
+\bibitem[YDGD03]{YangDuraiswamiGumerovDavis2003}
+Changjiang Yang, Ramani Duraiswami, Nail~A Gumerov, and Larry Davis.
+\newblock Improved fast gauss transform and efficient kernel density
+  estimation.
+\newblock In {\em Proceedings of the Ninth IEEE International Conference on
+  Computer Vision}, pages 664--671. IEEE, 2003.
+
+\end{thebibliography}
