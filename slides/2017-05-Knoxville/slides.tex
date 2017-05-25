@@ -78,7 +78,7 @@
       information
     \item Basically voxelize the space
     \item Give a value to each voxel that depends on the number of
-      {\it neighbooring} event to the voxel (with some kind of decay).
+      {\it neighboring} event to the voxel (with some kind of decay).
     \item Essentially a generalization of density maps (e.g.,
       population density)
     \end{itemize}
@@ -247,8 +247,6 @@
   \end{center}
 
     Clearly, \textsc{PB-SYM} is the algorithm to make parallel.
-  
-  
 \end{frame}
 
 \section{Domain-Based Parallelism}
@@ -294,7 +292,7 @@
   \includegraphics[width=\linewidth]{../../paper/icpp17/analysis/SYM-DD-overhead.pdf}
 
   Does anyone know a cheap way to partition better?
-  Looks like a variant of geometric partitioning.
+  Some structures admit dynamic programming.
 \end{frame}
 
 \section{Point-Based Parallelism}
@@ -332,7 +330,7 @@
 \begin{frame}
   \frametitle{A better coloring with \textsc{PD-SYM-PD-SCHED}}
 
-  We don't need to color subdomains to minimze the number of colors.
+  We don't need to color subdomains to minimize the number of colors.
 
   We need a coloring that minimizes the longest chain in the implied graph.
 
@@ -397,7 +395,7 @@
   \begin{itemize}
   \item Better way to decompose for \textsc{PB-SYM-DD}
   \item Formally study the edge orientation problem for \textsc{PB-SYM-DD-SCHED}
-  \item Look deeper into the moldable scheduling connexion for \textsc{PB-SYM-PD-SCHED-REP}
+  \item Look deeper into the moldable scheduling connection for \textsc{PB-SYM-PD-SCHED-REP}
   \item Model everything and derive analytical bounds on performance
   \end{itemize}
 \end{frame}
@@ -406,8 +404,8 @@
   \frametitle{Food for thoughts!}
 
   \begin{itemize}
-  \item Scheduling makes me thing about parallel problems differently.
-  \item Scheduling helps me understanding performance.
+  \item Scheduling makes me think about parallel problems differently.
+  \item Scheduling helps me understand performance.
   \item Maybe the real problem is to figure which instance of the
     problem to give to the scheduler.
   \item Maybe the scheduling algorithm is not always what is most
