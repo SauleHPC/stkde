@@ -539,9 +539,9 @@ $8$ OpenMP parallel-for constructs.\looseness=-1
   \State $localpoints[\floor{\frac{A X}{G_x}}][\floor{\frac{B Y}{G_y}}][\floor{\frac{C T}{G_t}}].add(x_i,y_i,t_i)$
 \EndFor
 %
-\For{$abase \in \{-1;0;+1\}$}
-  \For{$bbase \in \{-1;0;+1\}$}
-    \For{$cbase \in \{-1;0;+1\}$}
+\For{$abase \in \{0;1\}$}
+  \For{$bbase \in \{0;1\}$}
+    \For{$cbase \in \{0;1\}$}
       \State Do the work of the next three loops in parallel
       \For{$a = abase; a \leq A; a+=2$}
         \For{$b = bbase; b \leq B; b+=2$}
