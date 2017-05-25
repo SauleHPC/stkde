@@ -33,7 +33,7 @@
 
 %\graphicspath{{fig/}}
 
-\title{Shared-Memory Parallel Space-Time Kernel Density Estimation}
+\title[Shared-memory STKDE]{Parallel Space-Time Kernel Density Estimation}
 
 
 \date[Knoxville 2017]{Scheduling in Knoxville\\May 26th, 2017}
@@ -95,7 +95,7 @@
 \end{frame}
 
 \begin{frame}
-  \frametitle{Space Time Kernel Density Estimate Formally}
+  \frametitle{Space-Time Kernel Density Estimate Formally}
 
   \begin{columns}
     \column{.59\linewidth}
@@ -122,6 +122,8 @@
       \includegraphics[width=\linewidth]{../../paper/icpp17/figures/stkde.pdf}
     \end{block}
   \end{columns}
+
+  Similar to computing sums of radial basis functions from physics.
 \end{frame}
 
 
@@ -140,7 +142,6 @@
     $h_s=500m$, $h_t = 7 days$
   \end{columns}
 \end{frame}
-
 
 \section{Sequential Algorithms}
 
@@ -224,13 +225,29 @@
 \end{frame}
 
 \begin{frame}
+  \frametitle{Experimental settings}
+
+  \begin{center}
+    \resizebox{.55\linewidth}{!}{\input{../../paper/icpp17/analysis/instance_table.tex}}
+  \end{center}
+
+  Shared memory machine:
+  \begin{itemize}
+  \item 2 Intel Xeon E5-2667 v3 (2 times 8 core)
+  \item 128GB of DRAM
+  \item G++ 5.3 (with OpenMP 4.0)
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
   \frametitle{In practice}
 
-  \only<1>{\resizebox{.7\linewidth}{!}{\input{../../paper/icpp17/analysis/instance_table.tex}}}%
-  \only<2>{\resizebox{.9\linewidth}{!}{\input{../../paper/icpp17/analysis/seq_table.tex}}\\~\\
+  \begin{center}
+    \resizebox{.9\linewidth}{!}{\input{../../paper/icpp17/analysis/seq_table.tex}}
+  \end{center}
 
     Clearly, \textsc{PB-SYM} is the algorithm to make parallel.
-  }
+  
   
 \end{frame}
 
@@ -276,21 +293,140 @@
 
   \includegraphics[width=\linewidth]{../../paper/icpp17/analysis/SYM-DD-overhead.pdf}
 
-  Does anyone know a cheap way to cut?
+  Does anyone know a cheap way to partition better?
+  Looks like a variant of geometric partitioning.
 \end{frame}
 
 \section{Point-Based Parallelism}
 
+\begin{frame}
+  \frametitle{Point decomposition \textsc{PB-SYM-PD}}
 
+  \begin{itemize}
+  \item Partition the points in a regular AxBxC grid such that each
+    dimension is bigger than the bandwidth.
+  \item For $(a,b,c) \in \{0,1\}^3$
+    \begin{itemize}
+    \item Do in parallel grids $2i+a,2j+b,2k+c, \forall i,j,k$
+    \end{itemize}
+  \end{itemize}
+  
+  \includegraphics[width=1.05\linewidth]{../../paper/icpp17/analysis/SYM-PD-speedup16.pdf}  
+\end{frame}
+
+\begin{frame}
+  \frametitle{Why is this bad? Too many dependencies?}
+
+  Since all $2i, 2j, 2k$ are done before any $2i+1, 2j, 2k$, there is
+  a forced precedence of $0, 0, 0$ over $3, 0, 0$. But they are not
+  dependent.
+
+  This does coloring, instead of doing scheduling.
+  \begin{center}
+    \includegraphics[width=.5\linewidth]{../../paper/icpp17/figures/PB-SYM-PD-graph.pdf}
+  \end{center}
+  
+  Building the graph from a coloring is simple (and easily expressed in OpenMP 4.0).
+\end{frame}
+
+\begin{frame}
+  \frametitle{A better coloring with \textsc{PD-SYM-PD-SCHED}}
+
+  We don't need to color subdomains to minimze the number of colors.
+
+  We need a coloring that minimizes the longest chain in the implied graph.
+
+  Heuristic: greedily color subdomains in highest number of points first.
+   
+  \includegraphics[width=\linewidth]{../../paper/icpp17/analysis/SYM-PD-COLOR-SCHED-speedup16.pdf}
+
+  (If you don't have a good eye, it is a bit better than before)
+\end{frame}
+
+\begin{frame}
+  \frametitle{Why is it bad? Still too long critical path!}
+  \begin{center}
+    \includegraphics[width=.6\linewidth]{../../paper/icpp17/analysis/PB-SYM-PD-imbalance.pdf}
+  \end{center}
+    
+  How hard is the coloring/edge-orientation problem to minimize critical path?
+  \begin{itemize}
+  \item NP-hard in general graph (harder than coloring)
+  \item Trivial on chains
+  \item Other?
+  \end{itemize}
+
+  How good is the heuristic?
+
+  I need to think more about this...
+\end{frame}
+
+\begin{frame}
+  \frametitle{Parallelize long path \textsc{PB-SYM-PD-SCHED-REP}}
+
+  One can replicate a subdomain and get perfect work parallelism. (at
+  the expense of some memory initialization and reduction.)
+
+  Does that sound like moldable DAG scheduling? (Actually a bit more
+  complicated than that, but close enough.)
+  
+  Heuristic: for all path longer than $\frac{n}{2P}$, add one copy to all tasks on the path
+
+  \includegraphics[width=\linewidth]{../../paper/icpp17/analysis/SYM-PD-COLOR-REP-speedup16.pdf}  
+\end{frame}
 
 \section{Conclusion}
 
 \begin{frame}
+  \frametitle{All methods}
+  \includegraphics[width=\linewidth]{../../paper/icpp17/analysis/bestof.pdf}
+  
+\end{frame}
+
+\begin{frame}
   \frametitle{Future Works}
 
+  Other platforms:
   \begin{itemize}
-  \item GPU
+  \item GPU (not quite sure how to approach it)
+  \item KNL
   \item Distributed Memory
+  \end{itemize}
+
+  Some algorithmic problems:
+  \begin{itemize}
+  \item Better way to decompose for \textsc{PB-SYM-DD}
+  \item Formally study the edge orientation problem for \textsc{PB-SYM-DD-SCHED}
+  \item Look deeper into the moldable scheduling connexion for \textsc{PB-SYM-PD-SCHED-REP}
+  \item Model everything and derive analytical bounds on performance
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Food for thoughts!}
+
+  \begin{itemize}
+  \item Scheduling makes me thing about parallel problems differently.
+  \item Scheduling helps me understanding performance.
+  \item Maybe the real problem is to figure which instance of the
+    problem to give to the scheduler.
+  \item Maybe the scheduling algorithm is not always what is most
+    important.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{ Thank you!}
+
+  And thanks:
+  \begin{itemize}
+  \item Dan Janies for pointing out the Flu dataset
+  \item Bora U\c{c}ar for pointing out the Gallai-Hasse-Roy-Vitaver theorem
+  \item The US tax payer
+    \begin{itemize}
+    \item Support from US NSF XSEDE Supercomputing Resource Allocation (SES170007) is acknowledged.
+    \item This material is based upon work supported by the National Science Foundation under Grant No. 1652442.
+    \end{itemize}
   \end{itemize}
 \end{frame}
 
