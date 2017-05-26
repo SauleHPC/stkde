@@ -108,7 +108,7 @@
       $$k_s (u,v) = \frac{\pi}{2} (1-u)^2 (1-v)^2$$
       $$k_t (w) = \frac{3}{4} (1-w)^2$$
 
-      $h_S$ is the spatial bandwidth
+      $h_s$ is the spatial bandwidth
 
       $h_t$ is the temporal bandwidth
 
@@ -256,9 +256,9 @@
 
   Each worker:
   \begin{itemize}
-  \item Initialize its own memory buffer
-  \item Process some points in its own buffer (with load balancing)
-  \item Participate in reducing the result
+  \item Initializes its own memory buffer
+  \item Processes some points in its own buffer (with load balancing)
+  \item Participates in reducing the result
   \end{itemize}
   
   \includegraphics[width=1.05\linewidth]{../../paper/icpp17/analysis/SYM-DR-speedup.pdf}  
@@ -277,7 +277,7 @@
   
   \begin{itemize}
   \item Decompose the domain in $K \times K$ subdomains
-  \item Each worker process different subdomains (load balanced on the subdomains)
+  \item Each worker processes different subdomains (load balanced on the subdomains)
   \end{itemize}
 
   \includegraphics[width=1.05\linewidth]{../../paper/icpp17/analysis/SYM-DD-speedup16.pdf}  
