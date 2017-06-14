@@ -183,7 +183,7 @@ of a single point on the neighboring space.
 
 \begin{figure}
   \centering
-  \includegraphics[width=.5\linewidth]{figures/stkde.pdf}
+  \includegraphics[width=.4\linewidth]{figures/stkde.pdf}
   \caption{The computation of STKDE happens in a domain space of size
     $g_x,g_y,g_t$. Each point impacts the neighboring space at a
     distance $h_s$ in space and $h_t$ in time; forming a cylinder of
@@ -230,7 +230,7 @@ lowercase notations denote quantities in domain space.
 
 \subsection{Gold Standard Implementation}
 
-The gold standard implementation follows the exact definition of STKDE
+The gold standard implementation (for instance from~\cite{Hohl16}) follows the exact definition of STKDE
 as it is given above. It is a voxel-based algorithm we call VB. For
 each voxel, VB finds the points within the temporal and spatial bandwidths and calculates the contribution
 to the density of this voxel. The pseudo code is given in Algorithm~\ref{alg:vb}.
@@ -320,7 +320,7 @@ Figure~\ref{fig:pb-sym-decomposition} for a graphical depiction.
 
 \begin{figure}
   \centering
-  \includegraphics[width=.6\linewidth]{figures/PB-SYM.pdf}
+  \includegraphics[width=.4\linewidth]{figures/PB-SYM.pdf}
   \caption{The contribution to the density estimate of each voxel of a
     cylinder can be decomposed in two terms, one temporally invariant
     $K_s(x,y)$ and one spatially invariant $K_t(t)$.}
@@ -471,7 +471,7 @@ graphical depiction of this phenomenon.
 
 \begin{figure}
   \centering
-  \includegraphics[width=.6\linewidth]{figures/PB-SYM-DD-overhead.pdf}
+  \includegraphics[width=.5\linewidth]{figures/PB-SYM-DD-overhead.pdf}
   \caption{When a cylinder is split among two subdomains, PB-SYM-DD
     causes an overhead because one of the invariant needs to be
     recomputed. Here each subdomains compute part of the temporal
@@ -519,7 +519,7 @@ $(x + 2, y, z)$. See Figure~\ref{fig:PB-SYM-PD-str} for a graphical depiction.
 
 \begin{figure}
   \centering
-  \includegraphics[width=.5\linewidth]{figures/PB-SYM-PD-str.pdf}
+  \includegraphics[width=.4\linewidth]{figures/PB-SYM-PD-str.pdf}
   \caption{Provided the subdomains are larger than twice the
     bandwidth, the points contained in each blue boxes can be
     performed simultaneously.}
@@ -543,9 +543,9 @@ $8$ OpenMP parallel-for constructs.\looseness=-1
   \State $localpoints[\floor{\frac{A X}{G_x}}][\floor{\frac{B Y}{G_y}}][\floor{\frac{C T}{G_t}}].add(x_i,y_i,t_i)$
 \EndFor
 %
-\For{$abase \in \{-1;0;+1\}$}
-  \For{$bbase \in \{-1;0;+1\}$}
-    \For{$cbase \in \{-1;0;+1\}$}
+\For{$abase \in \{0;+1\}$}
+  \For{$bbase \in \{0;+1\}$}
+    \For{$cbase \in \{0;+1\}$}
       \State Do the work of the next three loops in parallel
       \For{$a = abase; a \leq A; a+=2$}
         \For{$b = bbase; b \leq B; b+=2$}
@@ -708,6 +708,9 @@ low, high and very high bandwidth. See details in Table~\ref{tab:instance}.
   \label{tab:instance}
 \end{table}
 
+An abridged version of the results are included in the following
+sections. A complete description of the results are presented in the companion technical report~\cite{Saule17-arxiv}.
+
 \subsection{Algorithm design}
 
 
@@ -777,14 +780,13 @@ memory requirement exceeds the 128GB available on the machine. None of
 the high resolution eBird instances could have their domain
 replicated.
 
-\begin{figure}[tbh]
+\begin{figure*}[tbh]
   \centering
-  \includegraphics[width=1\linewidth]{analysis/SYM-DR-speedup.pdf}
-  \vspace*{-2em}
+  \includegraphics[width=.8\linewidth]{analysis/SYM-DR-speedup.pdf}
   \caption{Speedup of PB-SYM-DR for different number of threads
     used. Some instances run out of memory.}
   \label{fig:sym-dr-speedup}
-\end{figure}
+\end{figure*}
 
 All the instances that have a high initialization cost get a speedup
 lesser than 1 since the threads spend their time allocating extra
@@ -798,40 +800,34 @@ computation. (See Figure~\ref{fig:breakdown} for reference.)
 
 \paragraph{PB-SYM-DD}
 
-\begin{figure}[tbh]
-  \centering
-  \includegraphics[width=\linewidth]{analysis/SYM-DD-overhead.pdf}
-  \vspace*{-2em}
-  \caption{Overhead of PB-SYM-DD: runtime of PB-SYM-DD with a single
-    thread normalized to PB-SYM. Some decomposition improve
-    performance dues to better cache fitting. Overdecomposition can
-    cause significant overhead.}
-  \label{fig:pb-sym-dd-speedup}
-\end{figure}
+% \begin{figure*}[tbh]
+%   \centering
+%   \includegraphics[width=.8\linewidth]{analysis/SYM-DD-overhead.pdf}
+%   \caption{Overhead of PB-SYM-DD: runtime of PB-SYM-DD with a single
+%     thread normalized to PB-SYM. Some decomposition improve
+%     performance dues to better cache fitting. Overdecomposition can
+%     cause significant overhead.}
+%   \label{fig:pb-sym-dd-speedup}
+% \end{figure*}
 
 The PB-SYM-DD algorithm (described in Section~\ref{sec:pb-sym-dd}) also has some
-overhead induced by cut cylinder surrounding a point. To measure the
-overhead beforehand, we run the decomposition algorithm using
+overhead induced by cut cylinder surrounding a point. We measure the
+overhead beforehand using
 different number of subdomains ranging from a single subdomain (1x1x1)
-to a very fine grain decomposition in 64x64x64 subdomains (except on the eBird\_Hr\_Hb where such a test is computationally expensive). The results
-of that experiment is presented in
-Figure~\ref{fig:pb-sym-dd-speedup}. The figure presents the overhead
-of the decomposition relatively to PB-SYM. Two things are
-apparent. Some decomposition can actually reduce the runtime by
+to a very fine grain decomposition in 64x64x64 subdomains. The results
+of that experiment is omitted from this document but can be found in~\cite{Saule17-arxiv} and we only present here our conclusions. 
+
+Some decomposition can actually reduce the runtime by
 providing better cache locality; for instance Flu\_Hr-Lb is 9.8\% faster
 using a 16x16x16 decomposition than PB-SYM.
-
-
+%
 However, in most cases, the decomposition actually increases the
 runtime. For instance, a 16x16x16 decomposition increases the amount
 of work by 9\% in the Flu-Lr-Hb cases, and a 64x64x64 decomposition
-induces an overhead of 254\%. Even on the Dengue\_Lr-Hb, a simple
+induces an overhead of 254\%. On the Dengue\_Lr-Hb, a 
 4x4x4 decomposition already induces a 5\% overhead which grows to 69\%
-for a 16x16x16 decomposition.  Such large decomposition are likely to
-be necessary since the points in the datasets are often organized in
-clusters: a decomposition in 16 subdomains is unlikely to provide a
-load balanced execution. The PollenUS suffers from the highest overheads,
-with a 16x16x16 decomposition leading to a 74\% overhead on PollenUS-Hr-Mb,
+for a 16x16x16 decomposition. The PollenUS suffers from 
+a 74\% overhead on PollenUS-Hr-Mb for a 16x16x16 decomposition,
 and a 495\% overhead for a 64x64x64 decomposition
 
 %% \begin{table*}
@@ -851,15 +847,14 @@ speedup greater than 8 on 9 instances. Let us note that a speedup of
 $14.9$ is achieved on Dengue\_Hr-VHb using a 16x16x16 decomposition
 and of $14.8$ on eBird\_Hr-Hb with a 32x32x32 decomposition.
 
-\begin{figure}[tbh]
+\begin{figure*}[tbh]
   \centering
-  \includegraphics[width=\linewidth]{analysis/SYM-DD-speedup16.pdf}
-  \vspace*{-2em}
+  \includegraphics[width=.8\linewidth]{analysis/SYM-DD-speedup16.pdf}
   \caption{Speedup of PB-SYM-DD with 16 threads. While PB-SYM-DD achieves good
     speedup in some cases, the overdecomposition overhead usually
     hinders the performance.}
   \label{fig:pb-sym-dd-16-speedup}
-\end{figure}
+\end{figure*}
 
 
 
@@ -935,14 +930,13 @@ Section~\ref{sec:pb-sym-pd}). Therefore if the number of subdomain
 leads to too small subdomains, the decomposition is adjusted to fit
 the required size.
 
-\begin{figure}
+\begin{figure*}
   \centering
-  \includegraphics[width=\linewidth]{analysis/SYM-PD-speedup16.pdf}
-  \vspace*{-2em}
+  \includegraphics[width=.8\linewidth]{analysis/SYM-PD-speedup16.pdf}
   \caption{Speedup of PB-SYM-PD using 16 threads. Note that decompositions of
     subdomain smaller that twice the bandwidths are adjusted.}
   \label{fig:pb-sym-pd}
-\end{figure}
+\end{figure*}
 
 
 
@@ -982,14 +976,12 @@ speedup occurs on PollenUS\_VHr-VLb: it is due to the decomposition of
 the points which improves the locality of the computation compared to
 the sequential execution.
 
-\begin{figure}
+\begin{figure*}
   \centering
-  \includegraphics[width=\linewidth]{analysis/SYM-PD-COLOR-SCHED-speedup16.pdf}
-  \vspace*{-2em}
+  \includegraphics[width=.8\linewidth]{analysis/SYM-PD-COLOR-SCHED-speedup16.pdf}
   \caption{Speedup of PB-SYM-PD-SCHED with 16 threads.}
-  \vspace*{-1em}
   \label{fig:PB-SYM-PD-SCHED-speedup}
-\end{figure}
+\end{figure*}
 
 
 However, the parallelism is still constrained by load
@@ -1002,15 +994,14 @@ for small decompositions and on certain instances. Indeed, when there
 is no (or little) decomposition, most of the domain is replicated and
 the execution has similar drawbacks as PB-SYM-DR.
 
-\begin{figure}
+\begin{figure*}
   \centering
-  \includegraphics[width=\linewidth]{analysis/SYM-PD-COLOR-REP-speedup16.pdf}
-  \vspace*{-2em}
+  \includegraphics[width=.8\linewidth]{analysis/SYM-PD-COLOR-REP-speedup16.pdf}
   \caption{Speedup of PB-SYM-PD-REP using 16 threads for different
     decompositions. Flu\_Hr-Lb and Flu\_Hr-Hb run out of memory for
     small decomposition.}
   \label{fig:PB-SYM-PD-REP-speedup}
-\end{figure}
+\end{figure*}
 
 \subsection{Summary and Discussion}
 
@@ -1032,9 +1023,7 @@ resolution, but runs out of memory at high resolution there.
 \begin{figure*}
   \centering
   \includegraphics[width=.8\linewidth]{analysis/bestof.pdf}
-  \vspace*{-1em}
   \caption{Best configurations}
-  \vspace*{-1.5em}
   \label{fig:bestof}
 \end{figure*}
 
@@ -1120,6 +1109,12 @@ of interest.
 
 The authors would like to thank Dr. Daniel Janies for pointing us to
 the Flu dataset.
+%
+Support from US NSF XSEDE Supercomputing Resource Allocation
+(SES170007) "Accelerating and enhancing multi-scale spatiotemporally
+explicit analysis and modeling of geospatial systems" is acknowledged.
+%
+This material is based upon work supported by the National Science Foundation under Grant No. 1652442.
 
 
 \bibliographystyle{IEEEtran}
