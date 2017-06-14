@@ -224,6 +224,7 @@ lowercase notations denote quantities in domain space.
   \end{tabular}
   \caption{Notations}
   \label{tab:notation}
+  \vspace*{-3em}
 \end{table}
 
 
@@ -416,7 +417,7 @@ initializing the memory, processing the points, and reducing the partial results
 \EndFor
 %
 \For{each points $i$ at $x_i, y_i, t_i$ distributed among the $P$ processors}
-  \State Processor $p$ processes $i$ using PB-SYM and aggregate it in $stkdel[p]$
+  \State Processor $p$ processes $i$ using PB-SYM and aggregates it in $stkdel[p]$
 \EndFor
 %
 \For{all voxels $s=(x,y,t)$ in parallel}
@@ -654,18 +655,18 @@ OpenMP 4.0, with optimization flags \texttt{-O3 -march=native -fopenmp
 
 \paragraph{Dataset} Four datasets are used in our experiments. Their
 key attributes are summarized in Table~\ref{tab:instance}. 
-Out first dataset, Dengue, is of epidemiological nature and consists of the space-time
+The Dengue dataset is of epidemiological nature and consists of the space-time
 locations of dengue fever cases reported to the “Sistema de Vigilancia
 en Salud P\'{u}blica” for the city of Cali, Colombia during 2010 and 2011. The
 system is updated on a daily basis with records of individuals that
 have been diagnosed with dengue fever, including patient address and
-the date of diagnosis. Addresses are standardized to a common address
+the date of diagnosis. Addresses are standardized to a common 
 format, and spelling and other syntactical errors are manually
 corrected~\cite{delmelle2013spatio}; they are then geocoded and masked
 to the nearest street intersection level to maintain
 privacy~\cite{Kwan04}. In 2010, 9606 were successfully geocoded
 (11,760 reported cases, or 81.7\%), whereas in 2011, 1562 cases were
-successfully geocoded (1822 reported cases, or 85.7\%).
+successfully geocoded (1822 reported cases, or 85.7\%).\looseness=-1
 
 The PollenUS dataset is composed of 588K tweets of US users from
 February 2016 to April 2016 related to Pollen (i.e., that mention
@@ -702,7 +703,8 @@ Lr, Mr, Hr for low, medium, and high resolution and Lb, Hb, VHb for
 low, high and very high bandwidth. See details in Table~\ref{tab:instance}. 
 
 \begin{table}
-    \resizebox{\linewidth}{!}{\input{analysis/instance_table.tex}}
+  \centering
+    \resizebox{.8\linewidth}{!}{\input{analysis/instance_table.tex}}
   \caption{Properties of the datasets. The domain is expressed in voxels
     and in MB. Bandwidth are expressed in voxels.\vspace*{-2em}}
   \label{tab:instance}
@@ -749,8 +751,20 @@ flu recorded in the last 15 years but they span most of the earth.
   \vspace*{-2em}
   \caption{Breakdown of the runtime of PB-SYM. Some instances are
     mostly Initialization.}
+  \vspace*{-2em}
   \label{fig:breakdown}
 \end{figure}
+
+
+\begin{figure*}
+  \centering
+  \includegraphics[width=.7\linewidth]{analysis/SYM-DR-speedup.pdf}
+  \vspace{-.3em}
+  \caption{Speedup of PB-SYM-DR for different number of threads
+    used. Some instances run out of memory.}
+  \vspace{-1.3em}
+  \label{fig:sym-dr-speedup}
+\end{figure*}
 
 Comparing to the gold implementation would not be fair because it is
 in a different programming language. Though we implemented the VB
@@ -764,6 +778,8 @@ and typically two orders of magnitude larger than PB-SYM.
 \subsection{Domain-based parallelism}
 
 \paragraph{PB-SYM-DR}
+
+
 
 %% \begin{table*}
 %%   \begin{tabular}{|l|r|rrrrr|}
@@ -780,13 +796,6 @@ memory requirement exceeds the 128GB available on the machine. None of
 the high resolution eBird instances could have their domain
 replicated.
 
-\begin{figure*}
-  \centering
-  \includegraphics[width=.8\linewidth]{analysis/SYM-DR-speedup.pdf}
-  \caption{Speedup of PB-SYM-DR for different number of threads
-    used. Some instances run out of memory.}
-  \label{fig:sym-dr-speedup}
-\end{figure*}
 
 All the instances that have a high initialization cost get a speedup
 lesser than 1 since the threads spend their time allocating extra
@@ -847,8 +856,10 @@ and of $14.8$ on eBird\_Hr-Hb with a 32x32x32 decomposition.
 
 \begin{figure*}[tbh]
   \centering
-  \includegraphics[width=.8\linewidth]{analysis/SYM-DD-speedup16.pdf}
+  \includegraphics[width=.7\linewidth]{analysis/SYM-DD-speedup16.pdf}
+  \vspace{-.5em}
   \caption{Speedup of PB-SYM-DD with 16 threads.}
+  \vspace{-1.5em}
   \label{fig:pb-sym-dd-16-speedup}
 \end{figure*}
 
@@ -867,18 +878,14 @@ balance without suffering from an unbearable computational overhead.
 
 
 A more modest speedup between $2$ and $4$ can be observed on the
-instances with higher initialization cost, such as on the Flu
+instances with higher initialization cost, e.g., the Flu
 dataset. Indeed, most of the time is spent on initializing the memory
-to hold the density estimates. Even if the algorithm performs memory
-initialization in parallel, there is not much room for parallelism in
-memory operations. Even more so since the initialization touches the memory
+to hold the density estimates. Even performing the initialization in parallel leads to little gain in performance. Even more so since the initialization touches the memory
 for the first time, which makes the operating system
 allocates the pages in physical memory. The speedup of the
 initialization phase using 16 threads is about the same for all
-instances and is at about $3$. The small speedup of PB-SYM-DD on
-instances with high initialization cost is completely explained by
-this phenomenon. Even if the compute phase was reduced to $0$, the
-speedup on the entire calculation would only be $3.7$. 
+instances and is at about $3$. This phenomenon explains the small speedup of PB-SYM-DD on
+instances with high initialization cost. 
 
 
 %% \begin{table*}
@@ -920,25 +927,25 @@ speedup on the entire calculation would only be $3.7$.
 
 The details of performance of PB-SYM-PD is omitted from this
 manuscript but can be found in~\cite{Saule17-arxiv}.
-But the take away point is that
+The take away message is that
 PB-SYM-PD does not scale well on all instances. The highest speedup achieved on
 PollenUS\_Lr-Lb is $2.6$. 
-The speedup is actually limited because of load
+The speedup is limited because of load
 imbalance. Figure~\ref{fig:PB-SYM-PD-loadbalance} shows the implicit
-critical path within the PB-SYM-PD algorithm for the highest
-decomposition used in the experiment (64x64x64). Most instances have a
+critical path within the PB-SYM-PD algorithm for a 64x64x64
+decomposition. Most instances have a
 critical path of about 10\% of the total work. If Graham's bound is
 reached, that implies a speedup lesser than $6.15$. 
 PollenUS\_Hr-Hb has a critical path of 55\% which implies a speedup
-lesser than $1.6$. 
+lesser than $1.6$.
 
 \begin{figure}
   \centering
   \includegraphics[width=.7\linewidth]{analysis/PB-SYM-PD-imbalance.pdf}
-  \vspace*{-1.5em}
+  \vspace*{-1em}
   \caption{Length of the critical path of the parallel algorithms
     PB-SYM-PD and PB-SYM-PD-SCHED for a 64x64x64 decomposition relative to the total amount of work.}
-  \vspace*{-0.5em}
+  \vspace*{-1.5em}
   \label{fig:PB-SYM-PD-loadbalance}
 \end{figure}
 
@@ -953,9 +960,11 @@ the sequential execution.
 
 \begin{figure*}
   \centering
-  \includegraphics[width=.8\linewidth]{analysis/SYM-PD-COLOR-SCHED-speedup16.pdf}
+  \includegraphics[width=.7\linewidth]{analysis/SYM-PD-COLOR-SCHED-speedup16.pdf}
+  \vspace{-.5em}
   \caption{Speedup of PB-SYM-PD-SCHED with 16 threads. Note that decompositions of
      subdomain smaller that twice the bandwidths are adjusted.}
+  \vspace{-1em}
   \label{fig:PB-SYM-PD-SCHED-speedup}
 \end{figure*}
 
@@ -972,10 +981,12 @@ the execution has similar drawbacks as PB-SYM-DR.
 
 \begin{figure*}
   \centering
-  \includegraphics[width=.8\linewidth]{analysis/SYM-PD-COLOR-REP-speedup16.pdf}
+  \includegraphics[width=.7\linewidth]{analysis/SYM-PD-COLOR-REP-speedup16.pdf}
+  \vspace{-.5em}
   \caption{Speedup of PB-SYM-PD-REP using 16 threads for different
-    decompositions. Flu\_Hr-Lb and Flu\_Hr-Hb run out of memory for
-    small decomposition.}
+    decompositions. Flu\_Hr-\{Lb,Hb\} run out of memory for
+    small decompositions.}
+  \vspace{-1em}
   \label{fig:PB-SYM-PD-REP-speedup}
 \end{figure*}
 
@@ -984,13 +995,12 @@ the execution has similar drawbacks as PB-SYM-DR.
 Figure~\ref{fig:bestof} summarizes the performance of all our
 methods. It shows the performance achieved by the best configuration
 of each particular algorithm. On Dengue instances, PB-SYM-DD usually
-leads to the best performance because of its low overhead on that
-instance while maintaining a good load balance. On the PollenUS
+leads to the best performance because of its low overhead while maintaining a good load balance. On the PollenUS
 instances, the smart scheduling of PB-SYM-PD-SCHED-REP is
 necessary to reach the highest parallelism. The flu instances are
-mostly dominated to initialization overhead because it is very sparse,
-as such, PB-SYM-DR performs much worse than the other methods, and
-past that issue, the method leads to little performance
+mostly dominated by initialization overhead because it is very sparse,
+as such, PB-SYM-DR performs much worse, and
+past that issue, the other method show to little performance
 difference. The eBird instances have a very small memory
 initialization overhead because they are dense in computation. This
 makes approaches that replicate the voxel space perform well at low
@@ -998,8 +1008,10 @@ resolution, but runs out of memory at high resolution there.
 
 \begin{figure*}
   \centering
-  \includegraphics[width=.8\linewidth]{analysis/bestof.pdf}
+  \includegraphics[width=.7\linewidth]{analysis/bestof.pdf}
+  \vspace{-1em}
   \caption{Best configurations}
+  \vspace{-1em}
   \label{fig:bestof}
 \end{figure*}
 
@@ -1054,7 +1066,7 @@ rectilinear partition~\cite{nicol94,manne96}. Depending on the algorithms used f
 STKDE, the objective function is different. A partitioning for
 PB-SYM-DD needs a good load balance, to minimize the number of cut
 cylinders. But PB-SYM-PD
-needs a decomposition where the subdomains have a minimum size and the load balance critirion is harder to express since
+needs a decomposition where the subdomains have a minimum size and the balance is more complex since
 neighboring subdomains can not be processed simultaneously.
 
 \section{Conclusion}
