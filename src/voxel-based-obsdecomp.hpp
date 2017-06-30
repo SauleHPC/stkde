@@ -13,8 +13,8 @@
 #include <memory>
 #include "timestamp.hpp"
 #include "density.hpp"
-#include "omp.h"
 #include "decompositions.hpp"
+#include "computation.hpp"
 
 std::shared_ptr<util::Compact3D<values>> stkde_voxelbased_obsdecomp(const bounding_box& bb,
 									   const instance& inst,

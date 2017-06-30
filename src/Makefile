@@ -1,9 +1,21 @@
-LD=g++
+
+
 #CXXFLAGS = -std=c++14 -O0 -g -fopenmp
-CXXFLAGS = -fdiagnostics-color=auto -g -std=c++14 -O3 -march=native -fopenmp -DNDEBUG
+
+#Use this one for g++
+#LD=g++
+#CXXFLAGS = -fdiagnostics-color=auto -g -std=c++14 -O3 -march=native -fopenmp -DNDEBUG
+#LDFLAGS= -O3 -march=native -fopenmp
+
+#une this one for clang
+CXX=clang++-3.8
+LD=clang++-3.8
+CXXFLAGS = -fdiagnostics-color=auto -g -std=c++14 -O3 -march=native -DNO_OMP -DNDEBUG
+LDFLAGS= -O3 -march=native
+
 #CXXFLAGS = -std=c++14 -O3 -march=native  -DNDEBUG
 #LDFLAGS= -O3 -march=native -fopenmp
-LDFLAGS= -O3 -march=native -fopenmp
+#LDFLAGS= -O3 -march=native -fopenmp
 #LDFLAGS= -O0 -fopenmp
 
 OBJS = point-based.o

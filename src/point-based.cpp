@@ -14,16 +14,24 @@
 #include "point-based-symdisk.hpp"
 #include "point-based-symbar.hpp"
 #include "point-based-sym.hpp"
+
+#ifndef NO_OMP
 #include "point-based-symomp.hpp"
 #include "point-based-symomp-pointdecomp.hpp"
 #include "point-based-symomp-obsdecomp.hpp"
 #include "point-based-symomp-obsdecomp-sched.hpp"
 #include "point-based-symomp-obsdecomp-colorsched.hpp"
 #include "point-based-symomp-obsdecomp-colorsched-rep.hpp"
+#endif
+
 #include "voxel-based.hpp"
+#ifndef NO_OMP
 #include "voxel-based-omp.hpp"
+#endif
 #include "voxel-based-obsdecomp.hpp"
+#ifndef NO_OMP
 #include "voxel-based-omp-obsdecomp.hpp"
+#endif
 
 void density_compare(std::shared_ptr<util::Compact3D<values>> dens1, 
 		     std::shared_ptr<util::Compact3D<values>> dens2,
@@ -167,6 +175,8 @@ int main (int argc, char* argv[]) {
     dens = stkde_pointbased_symbar (bb, inst, param);
   if (method.compare("POINTBASED-SYM") == 0)
     dens = stkde_pointbased_sym (bb, inst, param);
+
+#ifndef NO_OMP
   if (method.compare("POINTBASED-SYMOMP") == 0)
     dens = stkde_pointbased_symomp (bb, inst, param, decompX, decompY, decompT);
   if (method.compare("POINTBASED-SYMOMP-OBSDECOMP") == 0)
@@ -177,18 +187,25 @@ int main (int argc, char* argv[]) {
     dens = stkde_pointbased_symomp_obsdecomp_colorsched (bb, inst, param, decompX, decompY, decompT);
   if (method.compare("POINTBASED-SYMOMP-OBSDECOMP-COLORSCHED-REP") == 0)
     dens = stkde_pointbased_symomp_obsdecomp_colorsched_rep (bb, inst, param, decompX, decompY, decompT);
-
+  
   if (method.compare("POINTBASED-SYMOMP-POINTDECOMP") == 0)
     dens = stkde_pointbased_symomp_point (bb, inst, param);
+#endif
+  
   if (method.compare("VOXELBASED") == 0)
     dens = stkde_voxelbased(bb, inst, param);
+
+#ifndef NO_OMP
   if (method.compare("VOXELBASED-OMP") == 0)
     dens = stkde_voxelbased_omp(bb, inst, param);
+#endif
   if (method.compare("VOXELBASED-OBSDECOMP") == 0) 
     dens = stkde_voxelbased_obsdecomp(bb, inst, param, decompX, decompY, decompT);
-    
+
+#ifndef NO_OMP
   if (method.compare("VOXELBASED-OMP-OBSDECOMP") == 0)
     dens = stkde_voxelbased_omp_obsdecomp(bb, inst, param, decompX, decompY, decompT);
+#endif
   
   util::timestamp end;
 
