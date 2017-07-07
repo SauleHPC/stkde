@@ -8,10 +8,17 @@
 #LDFLAGS= -O3 -march=native -fopenmp
 
 #une this one for clang
-CXX=clang++-3.8
-LD=clang++-3.8
-CXXFLAGS = -fdiagnostics-color=auto -g -std=c++14 -O3 -march=native -DNO_OMP -DNDEBUG
-LDFLAGS= -O3 -march=native
+#CXX=clang++-3.8
+#LD=clang++-3.8
+#CXXFLAGS = -fdiagnostics-color=auto -g -std=c++14 -O3 -march=native -DNO_OMP -DNDEBUG
+#LDFLAGS= -O3 -march=native
+
+#use this one for nvcc
+CXX=nvcc -ccbin clang++-3.8
+LD=nvcc  -ccbin clang++-3.8
+CXXFLAGS = -Xcompiler "-fdiagnostics-color=auto -g -std=c++14 -O3 -march=native -DNO_OMP -DNDEBUG" -arch=sm_35
+LDFLAGS= -Xlinker "-O3 -march=native" -arch=sm_35
+
 
 #CXXFLAGS = -std=c++14 -O3 -march=native  -DNDEBUG
 #LDFLAGS= -O3 -march=native -fopenmp
