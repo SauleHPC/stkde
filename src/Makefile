@@ -27,8 +27,12 @@ LDFLAGS= -Xlinker "-O3 -march=native" -arch=sm_35
 
 OBJS = point-based.o
 
-point-based: point-based.o
-	$(LD) $(LDFLAGS) -o point-based point-based.o
+
+point-based: point-based.o voxel-based-gpu.o
+	$(LD) $(LDFLAGS) -o point-based point-based.o voxel-based-gpu.o
+
+voxel-based-gpu.o: voxel-based-gpu.cu
+	$(CXX) voxel-based-gpu.cu -c -o voxel-based-gpu.o $(CXXFLAGS)
 
 graphanalysis: graphanalysis.o
 	$(LD) $(LDFLAGS) -o graphanalysis graphanalysis.o
@@ -50,6 +54,9 @@ test-med: point-based
 
 test-hard: point-based
 	./point-based ../dataset/Dengue-allcases-2010-2011/AllCases2010_11_clip_bds.txt  ../dataset/Dengue-allcases-2010-2011/AllCases2010_11_clip.txt  ../dataset/Dengue-allcases-2010-2011/highres-highbw POINTBASED
+
+test-voxel-gpu: point-based
+	./point-based ../dataset/Dengue-allcases-2010-2011/AllCases2010_11_clip_bds.txt  ../dataset/Dengue-allcases-2010-2011/AllCases2010_11_clip.txt  ../dataset/Dengue-allcases-2010-2011/lowres-lowbw GPU-VOXELBASED
 
 clean:
 	-rm $(OBJS)
