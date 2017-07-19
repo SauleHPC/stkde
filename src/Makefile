@@ -14,9 +14,9 @@
 #LDFLAGS= -O3 -march=native
 
 #use this one for nvcc
-CXX=nvcc -ccbin clang++-3.8
-LD=nvcc  -ccbin clang++-3.8
-CXXFLAGS = -Xcompiler "-fdiagnostics-color=auto -g -std=c++14 -O3 -march=native -DNO_OMP -DNDEBUG" -arch=sm_35
+CXX=nvcc 
+LD=nvcc 
+CXXFLAGS = -std=c++11 -Xcompiler "-fdiagnostics-color=auto -g -std=c++11 -O3 -march=native -DNO_OMP -DNDEBUG" -arch=sm_35
 LDFLAGS= -Xlinker "-O3 -march=native" -arch=sm_35
 
 
