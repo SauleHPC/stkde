@@ -25,6 +25,7 @@
 #endif
 
 #include "voxel-based.hpp"
+#include "voxel-based-gpu.hpp"
 #ifndef NO_OMP
 #include "voxel-based-omp.hpp"
 #endif
@@ -83,7 +84,7 @@ int main (int argc, char* argv[]) {
   std::string paramfile = argv[3];
   std::string method = argv[4];
 
-  index decompX=-1, decompY=-1, decompT=-1;
+  indexi decompX=-1, decompY=-1, decompT=-1;
   
   if (method.compare("POINTBASED-SYMOMP") == 0
       || method.compare("POINTBASED-SYMOMP-OBSDECOMP") == 0
@@ -195,6 +196,9 @@ int main (int argc, char* argv[]) {
   if (method.compare("VOXELBASED") == 0)
     dens = stkde_voxelbased(bb, inst, param);
 
+  if (method.compare("VOXELBASED-GPU") == 0)
+    dens = stkde_voxelbased_gpu(bb, inst, param);
+	
 #ifndef NO_OMP
   if (method.compare("VOXELBASED-OMP") == 0)
     dens = stkde_voxelbased_omp(bb, inst, param);
@@ -228,8 +232,8 @@ int main (int argc, char* argv[]) {
     std::ofstream out ("log");
     //for debugging purpose
     for (int k=0; k< dens->getSizeZ(); ++k) {
-	for (int j=0; j<std::min(dens->getSizeY(), (index)4000); ++j) {
-	  for (int i=0; i<std::min(dens->getSizeX(), (index)4000); ++i) {
+	for (int j=0; j<std::min(dens->getSizeY(), (indexi)4000); ++j) {
+	  for (int i=0; i<std::min(dens->getSizeX(), (indexi)4000); ++i) {
 	  //      for (int k=0; k<std::min(dens->getSizeZ(), 10); ++k)
 	  out<<(*dens)(i, j, k)<<" ";
 	}

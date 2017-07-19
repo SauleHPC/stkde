@@ -5,39 +5,42 @@
 #include "io.hpp"
 #include "density.hpp"
 #include <memory>
+#include "compact.hpp"
 
 #define N 5000
 
 __device__ int function(int m, int n){
 
-  return(m+n)
+  return(m+n);
 
 }
 
-__global__ void densityG(char* f, int N){
+__global__ void densityG(char* f, int n){
 
 //..
-	function(f,N);
+//	function(f,n);
   
   
     
-  int id = threadIdx.x + blockIdx.x * blockDim.x;
-  if (id < N)
+  //int id = threadIdx.x + blockIdx.x * blockDim.x;
+  //if (id < n)
     //c[id] = a[id] + b[id];
-    c[id]= function(a[id],b[id]);
+    //c[id]= function(a[id],b[id]);
     
 //..
 
 }
 
 
-std::shared_ptr<util::Compact3D<values>> stkde_voxelbased(const bounding_box& bb,
+std::shared_ptr<util::Compact3D<values>> stkde_voxelbased_gpu(const bounding_box& bb,
 				 const instance& inst,
 				 const parameters& pa){
          
-  index voxx = std::lround(std::ceil((bb.xh - bb.xl) / pa.xres)) + 1;
-  index voxy = std::lround(std::ceil((bb.yh - bb.yl) / pa.yres)) + 1;
-  index voxt = std::lround(std::ceil((bb.th - bb.tl) / pa.tres)) + 1;                
+				 std::cout<<"inside stkde_voxelbased_gpu"<<std::endl;
+				 
+  indexi voxx = std::lround(std::ceil((bb.xh - bb.xl) / pa.xres)) + 1;
+  indexi voxy = std::lround(std::ceil((bb.yh - bb.yl) / pa.yres)) + 1;
+  indexi voxt = std::lround(std::ceil((bb.th - bb.tl) / pa.tres)) + 1;                
   
   long n = inst.obsx.size();
  
@@ -47,9 +50,9 @@ std::shared_ptr<util::Compact3D<values>> stkde_voxelbased(const bounding_box& bb
   std::shared_ptr<util::Compact3D<values>> p = std::make_shared<util::Compact3D<values>>(voxx, voxy, voxt);
   util::Compact3D<values>& co = *p;
   
-  for(index i = 0; i < voxx; i++) {
-    for(index j = 0; j < voxy; j++) {
-      for(index k = 0; k < voxt; k++) {
+  for(indexi i = 0; i < voxx; i++) {
+    for(indexi j = 0; j < voxy; j++) {
+      for(indexi k = 0; k < voxt; k++) {
 	
 	// contruct the point
 	coordinate px = bb.xl + i * pa.xres;

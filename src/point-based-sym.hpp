@@ -16,12 +16,12 @@
 std::shared_ptr<util::Compact3D<values>> stkde_pointbased_sym(const bounding_box& bb,
 							      const instance& inst,
 							      const parameters& pa) {
-  index voxX = std::lround(std::ceil((bb.xh-bb.xl)/pa.xres))+1;
-  index voxY = std::lround(std::ceil((bb.yh-bb.yl)/pa.yres))+1;
-  index voxT = std::lround(std::ceil((bb.th-bb.tl)/pa.tres))+1;
+  indexi voxX = std::lround(std::ceil((bb.xh-bb.xl)/pa.xres))+1;
+  indexi voxY = std::lround(std::ceil((bb.yh-bb.yl)/pa.yres))+1;
+  indexi voxT = std::lround(std::ceil((bb.th-bb.tl)/pa.tres))+1;
 
-  index voxsbw = std::lround(std::ceil(pa.xbw/pa.xres));
-  index voxtbw = std::lround(std::ceil(pa.tbw/pa.tres));
+  indexi voxsbw = std::lround(std::ceil(pa.xbw/pa.xres));
+  indexi voxtbw = std::lround(std::ceil(pa.tbw/pa.tres));
 
   std::cerr.precision(4);
     
@@ -53,7 +53,7 @@ std::shared_ptr<util::Compact3D<values>> stkde_pointbased_sym(const bounding_box
   long int eval = 0;
     
   //account for observations
-  for (index ob=0; ob<inst.obsx.size(); ++ob) {
+  for (indexi ob=0; ob<inst.obsx.size(); ++ob) {
     //observation
     coordinate ox = inst.obsx[ob];
     coordinate oy = inst.obsy[ob];
@@ -67,8 +67,8 @@ std::shared_ptr<util::Compact3D<values>> stkde_pointbased_sym(const bounding_box
     //std::cerr<<"obsv: "<<obsvx<<" "<<obsvy<<" "<<obsvt<<std::endl;
 
 
-    for (index i = std::max(obsvx - voxsbw, (index)0); i< std::min(obsvx + voxsbw+1, voxX); ++i) {
-      for (index j = std::max(obsvy - voxsbw, (index)0); j< std::min(obsvy + voxsbw+1, voxY); ++j) {
+    for (indexi i = std::max(obsvx - voxsbw, (indexi)0); i< std::min(obsvx + voxsbw+1, voxX); ++i) {
+      for (indexi j = std::max(obsvy - voxsbw, (indexi)0); j< std::min(obsvy + voxsbw+1, voxY); ++j) {
 	coordinate vox_x = bb.xl + i*pa.xres;
 	coordinate vox_y = bb.yl + j*pa.yres;
 
@@ -82,7 +82,7 @@ std::shared_ptr<util::Compact3D<values>> stkde_pointbased_sym(const bounding_box
       }
     }
 
-    for (index k = std::max(obsvt - voxtbw, (index)0); k< std::min(obsvt + voxtbw+1, voxT); ++k) {
+    for (indexi k = std::max(obsvt - voxtbw, (indexi)0); k< std::min(obsvt + voxtbw+1, voxT); ++k) {
       coordinate vox_t = bb.tl + k*pa.tres;
       
       if (std::abs(vox_t - ot) <= pa.tbw) {
@@ -95,10 +95,10 @@ std::shared_ptr<util::Compact3D<values>> stkde_pointbased_sym(const bounding_box
     
     
     //BW around observation
-    for (index i = std::max(obsvx - voxsbw, (index)0); i< std::min(obsvx + voxsbw+1, voxX); ++i) {
-      for (index j = std::max(obsvy - voxsbw, (index)0); j< std::min(obsvy + voxsbw+1, voxY); ++j) {
+    for (indexi i = std::max(obsvx - voxsbw, (indexi)0); i< std::min(obsvx + voxsbw+1, voxX); ++i) {
+      for (indexi j = std::max(obsvy - voxsbw, (indexi)0); j< std::min(obsvy + voxsbw+1, voxY); ++j) {
 	
-	for (index k = std::max(obsvt - voxtbw, (index)0); k< std::min(obsvt + voxtbw+1, voxT); ++k) {
+	for (indexi k = std::max(obsvt - voxtbw, (indexi)0); k< std::min(obsvt + voxtbw+1, voxT); ++k) {
 	  values val = disk[i][j]*bar[k];
 	  
 	  //std::cerr<<vox_x<<" "<<vox_y<<" "<<vox_t<<" "<<val<<std::endl;

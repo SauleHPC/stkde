@@ -4,19 +4,19 @@
 
 struct computation {
   //size of the space in voxels
-  index voxX;
-  index voxY;
-  index voxT;
+  indexi voxX;
+  indexi voxY;
+  indexi voxT;
 
   //span of bandwidth in voxels
-  index voxsbw;
-  index voxtbw;
+  indexi voxsbw;
+  indexi voxtbw;
 
   //return
   std::shared_ptr<util::Compact3D<values>> p;
 
   //total obs and box
-  index totalobs;
+  indexi totalobs;
   bounding_box bb;
 
   //parameters
