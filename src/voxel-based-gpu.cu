@@ -91,6 +91,11 @@ std::shared_ptr<util::Compact3D<values>> stkde_voxelbased_gpu(const bounding_box
 
  //Copying from GPU to CPU
  cudaMemcpy( co.raw(), d_v, nv * sizeof(values), cudaMemcpyDeviceToHost );
+
+ cudaError_t err = cudaGetLastError();
+ if (err != cudaSuccess) {
+ std::cerr<< "Error in cuda: "<< cudaGetErrorName(err)<<" : "<<cudaGetErrorString(err)<<std::endl;
+}
  
  cudaFree( d_v ); cudaFree( d_obsx );cudaFree( d_obsy );cudaFree( d_obst );
   
