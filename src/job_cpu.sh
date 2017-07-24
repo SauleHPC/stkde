@@ -1,7 +1,7 @@
 #!/bin/sh
 # ===== PBS OPTIONS =====
 ### Set the job name
-#PBS -N "CUDA-Pollen-Hr-Mb"
+#PBS -N "CPU-Pollen-Hr-Mb"
 
 ### Specify queue to run in
 #PBS -q copperhead
@@ -13,4 +13,4 @@
 # ==== Main ======
 ### make /users/tefaz/stkde/src
 cd stkde/src
-./point-based ../dataset/Pollen/boundary-UScropped  ../dataset/Pollen/Pollen-xyt.txt ../dataset/Pollen/highres-medbw VOXELBASED-GPU compare compare compare compare compare
+./point-based ../dataset/Pollen/boundary-UScropped  ../dataset/Pollen/Pollen-xyt.txt ../dataset/Pollen/highres-medbw VOXELBASED compare compare compare compare compare

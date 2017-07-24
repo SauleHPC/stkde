@@ -1,0 +1,11 @@
+hostname : cph-gpu2.uncc.edu
+bounding: [-130;-65]x[20;50]x[5875;5958]
+read 588189 observations
+res: 0.5 0.5 1 bw: 1 5.180871175e-318 0
+time: 8.936907 seconds
+========Comparing to POINT-BASED=========
+voxsize: 131x61x84 size:2.561MB
+voxBW: 2 0
+Initialization time: 0.001257
+evaluations: 7322757
+Distance to POINT-BASED=nan max=0 totaldensity=nan

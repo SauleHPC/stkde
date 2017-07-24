@@ -221,7 +221,7 @@ int main (int argc, char* argv[]) {
     std::cerr<<"========Comparing to POINT-BASED========="<<std::endl;
     std::shared_ptr<util::Compact3D<values>> dens2 = stkde_pointbased (bb, inst, param);
     
-    values dsum, dmax, total_dens;
+    values dsum=0., dmax=0., total_dens=0.;
 
     density_compare(dens, dens2, &dsum, &dmax, &total_dens);
 
