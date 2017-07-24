@@ -36,6 +36,7 @@ __global__ void voxel_gpu(values *val,coordinate *obxx,coordinate *obyy,coordina
 	coordinate pt = bb.tl + idt * pa.tres;
 	
 	if(idx < sizeX && idy <sizeY && idt < sizeZ){
+			val[sizeY*sizeX*idt+sizeX*idy+idx] = 0.;
 			for(int o=0; o < n; o++){
 				coordinate ox = obxx[o];
 				coordinate oy = obyy[o];
@@ -67,7 +68,7 @@ std::shared_ptr<util::Compact3D<values>> stkde_voxelbased_gpu(const bounding_box
   std::shared_ptr<util::Compact3D<values>> p = std::make_shared<util::Compact3D<values>>(voxx, voxy, voxt);
   util::Compact3D<values>& co = *p;
   
-	dim3 bl(16,16,16);
+	dim3 bl(8,8,8);
 	dim3 gr(voxx/bl.x+1,voxy/bl.y+1,voxt/bl.z+1);
 	
   indexi nv = voxx * voxy * voxt;
