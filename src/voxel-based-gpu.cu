@@ -3,11 +3,8 @@
 #include <iostream>
 #include "types.hpp"
 #include "io.hpp"
-
 #include <memory>
 #include "compact.hpp"
-
-#define N 5000
 
 __device__ values densityF(coordinate obsX, coordinate obsY, coordinate obsT,
 		 coordinate voxX, coordinate voxY, coordinate voxT,
@@ -28,21 +25,30 @@ __device__ values densityF(coordinate obsX, coordinate obsY, coordinate obsT,
 
 }
 
-__global__ void voxel_gpu(value *val, long int *ev,coordinate *xx,coordinate *yy,coordinate *tt,coordinate *obxx,coordinate *obyy,coordinate *obtt,coordinate *xw,coordinate *tw){
+__global__ void voxel_gpu(values *val,coordinate *obxx,coordinate *obyy,coordinate *obtt, parameters pa, bounding_box bb, long n, indexi sizeX, indexi sizeY, indexi sizeZ){
     
-  int id = threadIdx.x + blockIdx.x * blockDim.x;
-
-  coordinate ox = obxx[id];
-  coordinate oy = obyy[id];
-  coordinate ot = obtt[id];	  
-  if(std::abs(tt - ot) <= tw) {
-    if(std::sqrt((xx - ox) * (xx - ox) + (yy - oy) * (yy - oy)) <= xw) {
-      val += densityF(xx, yy, tt,
-			      ox, oy, ot,
-			      id, xw, tw);
-      ev++;
-    }
-  }
+  int idx = threadIdx.x + blockIdx.x * blockDim.x;
+	int idy = threadIdx.y + blockIdx.y * blockDim.y;
+	int idt = threadIdx.z + blockIdx.z * blockDim.z;
+	
+	coordinate px = bb.xl + idx * pa.xres;
+	coordinate py = bb.yl + idy * pa.yres;
+	coordinate pt = bb.tl + idt * pa.tres;
+	
+	if(idx < sizeX && idy <sizeY && idt < sizeZ){
+			for(int o=0; o < n; o++){
+				coordinate ox = obxx[o];
+				coordinate oy = obyy[o];
+				coordinate ot = obtt[o];	  
+				if(std::abs(pt - ot) <= pa.tbw) {
+					if(std::sqrt((px - ox) * (px - ox) + (py - oy) * (py - oy)) <= pa.xbw) {
+						val[sizeY*sizeX*idt+sizeX*idy+idx] += densityF(px, py, pt,
+									ox, oy, ot,
+									n, pa.xbw, pa.tbw);
+						}
+				}
+			}
+	}
 }
 
 
@@ -57,75 +63,37 @@ std::shared_ptr<util::Compact3D<values>> stkde_voxelbased_gpu(const bounding_box
   indexi voxt = std::lround(std::ceil((bb.th - bb.tl) / pa.tres)) + 1;                
   
   long n = inst.obsx.size();
- 
-  long int evals = 0;
-  
 
   std::shared_ptr<util::Compact3D<values>> p = std::make_shared<util::Compact3D<values>>(voxx, voxy, voxt);
   util::Compact3D<values>& co = *p;
   
-  for(indexi i = 0; i < voxx; i++) {
-    for(indexi j = 0; j < voxy; j++) {
-      for(indexi k = 0; k < voxt; k++) {
+	dim3 bl(16,16,16);
+	dim3 gr(voxx/bl.x+1,voxy/bl.y+1,voxt/bl.z+1);
 	
-	// contruct the point
-	coordinate px = bb.xl + i * pa.xres;
-	coordinate py = bb.yl + j * pa.yres;
-	coordinate pt = bb.tl + k * pa.tres;
-
-	values v = 0;
- 
- coordinate *d_px, *d_py, *d_pt;
- coordinate *d_obsx[n], *d_obsy[n], *d_obst[n];
+  indexi nv = voxx * voxy * voxt;
+	
+ coordinate *d_obsx, *d_obsy, *d_obst;
+ values *d_v;
  
  // device copy of v
- cudaMalloc((void**)&d_v, sizeof(values));
- 
- // device copy of the points
- cudaMalloc((void**)&d_px, sizeof(coordinate));
- cudaMalloc((void**)&d_py, sizeof(coordinate));
- cudaMalloc((void**)&d_pt, sizeof(coordinate));
+ cudaMalloc((void**)&d_v, nv * sizeof(values));
  
  //device copy of the observation points
  cudaMalloc((void**)&d_obsx, n * sizeof(coordinate));
  cudaMalloc((void**)&d_obsy, n * sizeof(coordinate));
  cudaMalloc((void**)&d_obst, n * sizeof(coordinate));
  
- //device copy of pa.xbw and pa.tbw
- cudaMalloc((void**)&d_pax, sizeof(coordinate));
- cudaMalloc((void**)&d_pat, sizeof(coordinate));
- 
- //device copy of evals
- cudaMalloc((void**)&d_e, sizeof(long int));
- 
- //Copying to the GPU
- 
- cudaMemcpy( d_v, v, sizeof(values), cudaMemcpyHostToDevice);
- 
- cudaMemcpy( d_px, px, sizeof(coordinate), cudaMemcpyHostToDevice);
- cudaMemcpy( d_py, py, sizeof(coordinate), cudaMemcpyHostToDevice);
- cudaMemcpy( d_pt, pt, sizeof(coordinate), cudaMemcpyHostToDevice);
+ cudaMemcpy( d_obsx, &(inst.obsx[0]), n * sizeof(coordinate), cudaMemcpyHostToDevice);
+ cudaMemcpy( d_obsy, &(inst.obsy[0]), n * sizeof(coordinate), cudaMemcpyHostToDevice);
+ cudaMemcpy( d_obst, &(inst.obst[0]), n * sizeof(coordinate), cudaMemcpyHostToDevice);
 
- cudaMemcpy( d_obx, inst.obsx, n * sizeof(coordinate), cudaMemcpyHostToDevice);
- cudaMemcpy( d_oby, inst.obsy, n * sizeof(coordinate), cudaMemcpyHostToDevice);
- cudaMemcpy( d_obt, inst.obst, n * sizeof(coordinate), cudaMemcpyHostToDevice);
- 
- cudaMemcpy( d_pax, pa.xbw, sizeof(coordinate), cudaMemcpyHostToDevice);
- cudaMemcpy( d_pat, pa.tbw, sizeof(coordinate), cudaMemcpyHostToDevice);
- 
- cudaMemcpy( d_e, evals, sizeof(long int), cudaMemcpyHostToDevice);
-
- voxel_gpu<<<(n+127)/128,128>>>(d_v, d_e, d_px, d_py, d_pt, d_obx, d_oby, d_obt, d_pax, d_pat); 
+ voxel_gpu<<<gr,bl>>>(d_v, d_obsx, d_obsy, d_obst, pa, bb, n, voxx, voxy, voxt); 
 
  //Copying from GPU to CPU
- cudaMemcpy( v, d_v, sizeof(values), cudaMemcpyDeviceToHost);
- cudaMemcpy( evals, d_c, sizeof(long int), cudaMemcpyDeviceToHost);
+ cudaMemcpy( co.raw(), d_v, nv * sizeof(values), cudaMemcpyDeviceToHost );
  
-  co(i, j, k) = v;
-     }
-   }
- }
+ cudaFree( d_v ); cudaFree( d_obsx );cudaFree( d_obsy );cudaFree( d_obst );
   
-  std::cout<<"evals: "<< evals << std::endl;
+  //std::cout<<"evals: "<< evals << std::endl;
   return p;
 }

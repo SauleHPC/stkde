@@ -141,6 +141,7 @@ namespace util
       return *(data+x);
     }
 
+		inline T* raw () {return data;}
     
     inline
     ~Compact3D()
