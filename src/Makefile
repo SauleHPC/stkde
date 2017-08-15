@@ -1,15 +1,38 @@
-LD=g++
+
+
 #CXXFLAGS = -std=c++14 -O0 -g -fopenmp
-CXXFLAGS = -fdiagnostics-color=auto -g -std=c++14 -O3 -march=native -fopenmp -DNDEBUG
+
+#Use this one for g++
+#LD=g++
+#CXXFLAGS = -fdiagnostics-color=auto -g -std=c++14 -O3 -march=native -fopenmp -DNDEBUG
+#LDFLAGS= -O3 -march=native -fopenmp
+
+#une this one for clang
+#CXX=clang++-3.8
+#LD=clang++-3.8
+#CXXFLAGS = -fdiagnostics-color=auto -g -std=c++14 -O3 -march=native -DNO_OMP -DNDEBUG
+#LDFLAGS= -O3 -march=native
+
+#use this one for nvcc
+CXX=nvcc 
+LD=nvcc 
+CXXFLAGS = -std=c++11 -Xcompiler "-fdiagnostics-color=auto -g -std=c++11 -O3 -march=native -DNO_OMP -DNDEBUG" -arch=sm_35
+LDFLAGS= -Xlinker "-O3 -march=native" -arch=sm_35
+
+
 #CXXFLAGS = -std=c++14 -O3 -march=native  -DNDEBUG
 #LDFLAGS= -O3 -march=native -fopenmp
-LDFLAGS= -O3 -march=native -fopenmp
+#LDFLAGS= -O3 -march=native -fopenmp
 #LDFLAGS= -O0 -fopenmp
 
 OBJS = point-based.o
 
-point-based: point-based.o
-	$(LD) $(LDFLAGS) -o point-based point-based.o
+
+point-based: point-based.o voxel-based-gpu.o
+	$(LD) $(LDFLAGS) -o point-based point-based.o voxel-based-gpu.o
+
+voxel-based-gpu.o: voxel-based-gpu.cu
+	$(CXX) voxel-based-gpu.cu -c -o voxel-based-gpu.o $(CXXFLAGS)
 
 graphanalysis: graphanalysis.o
 	$(LD) $(LDFLAGS) -o graphanalysis graphanalysis.o
@@ -31,6 +54,9 @@ test-med: point-based
 
 test-hard: point-based
 	./point-based ../dataset/Dengue-allcases-2010-2011/AllCases2010_11_clip_bds.txt  ../dataset/Dengue-allcases-2010-2011/AllCases2010_11_clip.txt  ../dataset/Dengue-allcases-2010-2011/highres-highbw POINTBASED
+
+test-voxel-gpu: point-based
+	./point-based ../dataset/Dengue-allcases-2010-2011/AllCases2010_11_clip_bds.txt  ../dataset/Dengue-allcases-2010-2011/AllCases2010_11_clip.txt  ../dataset/Dengue-allcases-2010-2011/lowres-lowbw GPU-VOXELBASED
 
 clean:
 	-rm $(OBJS)

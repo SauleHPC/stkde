@@ -9,7 +9,7 @@
 #include <sstream>
 
 //the bounding box file is comma separated in format xl, xh, yl, yh, tl, th
-bounding_box load_bounding_box(std::string filename) {
+static bounding_box load_bounding_box(std::string filename) {
   char c;
   bounding_box bb;
 
@@ -45,7 +45,7 @@ bounding_box load_bounding_box(std::string filename) {
 //if filename is "-", read from stdin
 //
 // The output vectors are cleared before anything is added
-void load_observations (const std::string& filename,
+static void load_observations (const std::string& filename,
 			std::vector<coordinate>& xout,
 			std::vector<coordinate>& yout,
 			std::vector<coordinate>& tout) {
@@ -85,7 +85,7 @@ void load_observations (const std::string& filename,
 }
 
 //the bounding box file is comma separated in format xres, yres, tres, xbw, ybw, tbw
-parameters load_parameters(std::string filename) {
+static parameters load_parameters(std::string filename) {
   char c;
   parameters pa;
 
@@ -101,10 +101,10 @@ parameters load_parameters(std::string filename) {
   assert (in.good());
 
   in >> pa.xbw;
+  in >> pa.tbw;
   in >> c;
   in >> pa.ybw;
   in >> c;
-  in >> pa.tbw;
 
   assert (!in.fail());
   

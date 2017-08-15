@@ -8,11 +8,11 @@ void decomposition(//problem
 		    const bounding_box& bb,
 		    const instance& inst,
 		    const parameters& pa,
-		    index decompsizeX,
-		    index decompsizeY,
-		    index decompsizeT,
+		    indexi decompsizeX,
+		    indexi decompsizeY,
+		    indexi decompsizeT,
 		    //decomp
-		    util::Compact3D<index> &load,
+		    util::Compact3D<indexi> &load,
 		    util::Compact3D<std::vector<coordinate>> &decompX,
 		    util::Compact3D<std::vector<coordinate>> &decompY,
 		    util::Compact3D<std::vector<coordinate>> &decompT
@@ -31,14 +31,14 @@ void decomposition(//problem
     auto ot = inst.obst[i];
 
 
-    index dx = (ox-bb.xl)/(bb.xh-bb.xl)*decompsizeX;
-    index dy = (oy-bb.yl)/(bb.yh-bb.yl)*decompsizeY;
-    index dt = (ot-bb.tl)/(bb.th-bb.tl)*decompsizeT;
+    indexi dx = (ox-bb.xl)/(bb.xh-bb.xl)*decompsizeX;
+    indexi dy = (oy-bb.yl)/(bb.yh-bb.yl)*decompsizeY;
+    indexi dt = (ot-bb.tl)/(bb.th-bb.tl)*decompsizeT;
 
     //handling points out of rnage. Processing them with near by boundary
-    dx = std::max(dx, (index)0);
-    dy = std::max(dy, (index)0);
-    dt = std::max(dt, (index)0);
+    dx = std::max(dx, (indexi)0);
+    dy = std::max(dy, (indexi)0);
+    dt = std::max(dt, (indexi)0);
     dx = std::min(dx, decompsizeX-1);
     dy = std::min(dy, decompsizeY-1);
     dt = std::min(dt, decompsizeT-1);
@@ -68,11 +68,11 @@ void decomposition_ghost(//problem
 			 const bounding_box& bb,
 			 const instance& inst,
 			 const parameters& pa,
-			 index decompsizeX,
-			 index decompsizeY,
-			 index decompsizeT,
+			 indexi decompsizeX,
+			 indexi decompsizeY,
+			 indexi decompsizeT,
 			 //decomp
-			 util::Compact3D<index> &load,
+			 util::Compact3D<indexi> &load,
 			 util::Compact3D<std::vector<coordinate>> &decompX,
 			 util::Compact3D<std::vector<coordinate>> &decompY,
 			 util::Compact3D<std::vector<coordinate>> &decompT
@@ -88,9 +88,9 @@ void decomposition_ghost(//problem
   }
   
 
-  index decompBWx = std::lround(std::ceil(pa.xbw/((bb.xh-bb.xl)/decompsizeX)));
-  index decompBWy = std::lround(std::ceil(pa.ybw/((bb.yh-bb.yl)/decompsizeY)));
-  index decompBWt = std::lround(std::ceil(pa.tbw/((bb.th-bb.tl)/decompsizeT)));
+  indexi decompBWx = std::lround(std::ceil(pa.xbw/((bb.xh-bb.xl)/decompsizeX)));
+  indexi decompBWy = std::lround(std::ceil(pa.ybw/((bb.yh-bb.yl)/decompsizeY)));
+  indexi decompBWt = std::lround(std::ceil(pa.tbw/((bb.th-bb.tl)/decompsizeT)));
   
   //
   long inter = 0;
@@ -100,21 +100,21 @@ void decomposition_ghost(//problem
     auto ot = inst.obst[i];
 
 
-    index odx = (ox-bb.xl)/(bb.xh-bb.xl)*decompsizeX;
-    index ody = (oy-bb.yl)/(bb.yh-bb.yl)*decompsizeY;
-    index odt = (ot-bb.tl)/(bb.th-bb.tl)*decompsizeT;
+    indexi odx = (ox-bb.xl)/(bb.xh-bb.xl)*decompsizeX;
+    indexi ody = (oy-bb.yl)/(bb.yh-bb.yl)*decompsizeY;
+    indexi odt = (ot-bb.tl)/(bb.th-bb.tl)*decompsizeT;
 
     //handling points out of range. Processing them with near by boundary
-    odx = std::max(odx, (index)0);
-    ody = std::max(ody, (index)0);
-    odt = std::max(odt, (index)0);
+    odx = std::max(odx, (indexi)0);
+    ody = std::max(ody, (indexi)0);
+    odt = std::max(odt, (indexi)0);
     odx = std::min(odx, decompsizeX-1);
     ody = std::min(ody, decompsizeY-1);
     odt = std::min(odt, decompsizeT-1);
 
     
     //place in appropriate decomposition
-    for (index dx = std::max(odx-decompBWx, (index)0); dx<std::min(odx+decompBWx+1, decompsizeX); ++dx) {
+    for (indexi dx = std::max(odx-decompBWx, (indexi)0); dx<std::min(odx+decompBWx+1, decompsizeX); ++dx) {
       coordinate decxmin = bb.xl + ( dx   *(bb.xh-bb.xl)/decompsizeX );
       coordinate decxmax = bb.xl + ((dx+1)*(bb.xh-bb.xl)/decompsizeX );
 
@@ -133,7 +133,7 @@ void decomposition_ghost(//problem
       //a rounding error in sequential. So it is begnin.
       
       
-      for (index dy = std::max(ody-decompBWy, (index)0); dy < std::min(ody+decompBWy+1, decompsizeY); ++dy) {
+      for (indexi dy = std::max(ody-decompBWy, (indexi)0); dy < std::min(ody+decompBWy+1, decompsizeY); ++dy) {
 	coordinate decymin = bb.yl + ( dy   *(bb.yh-bb.yl)/decompsizeY );
 	coordinate decymax = bb.yl + ((dy+1)*(bb.yh-bb.yl)/decompsizeY );
 
@@ -150,7 +150,7 @@ void decomposition_ghost(//problem
 	}
 
 	
-	for (index dt = std::max(odt-decompBWt, (index)0); dt < std::min(odt+decompBWt+1, decompsizeT); ++dt) {
+	for (indexi dt = std::max(odt-decompBWt, (indexi)0); dt < std::min(odt+decompBWt+1, decompsizeT); ++dt) {
 	  coordinate dectmin = bb.tl + ( dt   *(bb.th-bb.tl)/decompsizeT );
 	  coordinate dectmax = bb.tl + ((dt+1)*(bb.th-bb.tl)/decompsizeT );
 

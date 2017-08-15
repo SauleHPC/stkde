@@ -13,15 +13,15 @@
 #include <memory>
 #include "timestamp.hpp"
 #include "density.hpp"
-#include "omp.h"
 #include "decompositions.hpp"
+#include "computation.hpp"
 
 std::shared_ptr<util::Compact3D<values>> stkde_voxelbased_obsdecomp(const bounding_box& bb,
 									   const instance& inst,
 									   const parameters& pa,
-									   index decompsizeX,
-									   index decompsizeY,
-									   index decompsizeT
+									   indexi decompsizeX,
+									   indexi decompsizeY,
+									   indexi decompsizeT
 ) {
   
   computation c;
@@ -78,7 +78,7 @@ std::shared_ptr<util::Compact3D<values>> stkde_voxelbased_obsdecomp(const boundi
   util::timestamp decbeg;
   //decomposition
   
-  util::Compact3D<index> load (decompsizeX, decompsizeY, decompsizeT);
+  util::Compact3D<indexi> load (decompsizeX, decompsizeY, decompsizeT);
 
   
   util::Compact3D<std::vector<coordinate>> decompX (decompsizeX, decompsizeY, decompsizeT);
@@ -97,25 +97,25 @@ std::shared_ptr<util::Compact3D<values>> stkde_voxelbased_obsdecomp(const boundi
   
   util::timestamp compbeg;
 
-  for (index vox=0; vox<c.voxX; ++vox) {
-    for (index voy=0; voy<c.voxY; ++voy) {
-      for (index vot=0; vot<c.voxT; ++vot) {
+  for (indexi vox=0; vox<c.voxX; ++vox) {
+    for (indexi voy=0; voy<c.voxY; ++voy) {
+      for (indexi vot=0; vot<c.voxT; ++vot) {
 	//process voxel vox, voy, vot at coordinate vox_x, vox_y, vox_t
 	coordinate vox_x = bb.xl + vox*pa.xres;
 	coordinate vox_y = bb.yl + voy*pa.yres;
 	coordinate vox_t = bb.tl + vot*pa.tres;
 
 	//voxel is in decomposition decX, decY, decT
-	index decX = (vox_x-bb.xl)/(bb.xh-bb.xl)*decompsizeX;
-	index decY = (vox_y-bb.yl)/(bb.yh-bb.yl)*decompsizeY;
-	index decT = (vox_t-bb.tl)/(bb.th-bb.tl)*decompsizeT;
+	indexi decX = (vox_x-bb.xl)/(bb.xh-bb.xl)*decompsizeX;
+	indexi decY = (vox_y-bb.yl)/(bb.yh-bb.yl)*decompsizeY;
+	indexi decT = (vox_t-bb.tl)/(bb.th-bb.tl)*decompsizeT;
 	
 	values v = 0;
 
 	//enumerate all nearby decomposition
-	for (index dx = std::max(decX-1, (index)0); dx <= std::min(decX+1, decompsizeX-1); dx++)
-	  for (index dy = std::max(decY-1, (index)0); dy <= std::min(decY+1, decompsizeY-1); dy++)
-	    for (index dt = std::max(decT-1, (index)0); dt <= std::min(decT+1, decompsizeT-1); dt++) {
+	for (indexi dx = std::max(decX-1, (indexi)0); dx <= std::min(decX+1, decompsizeX-1); dx++)
+	  for (indexi dy = std::max(decY-1, (indexi)0); dy <= std::min(decY+1, decompsizeY-1); dy++)
+	    for (indexi dt = std::max(decT-1, (indexi)0); dt <= std::min(decT+1, decompsizeT-1); dt++) {
 
 	      //enumerate all observation in that decomposition
 	      for(int o = 0; o < decompX(dx, dy, dt).size(); o++) {
