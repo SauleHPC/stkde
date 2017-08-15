@@ -216,7 +216,7 @@
     \begin{itemize}
     \item Compute the $K_t$
     \item Compute the $K_s$
-    \item Cross product
+    \item Do the cross product
     \end{itemize}
 
     Complexity is the same, but saves computation in practice
@@ -367,12 +367,13 @@
   One can replicate a subdomain and get perfect work parallelism. (at
   the expense of some memory initialization and reduction.)
 
-  Does that sound like moldable DAG scheduling? (Actually a bit more
-  complicated than that, but close enough.)
   
   Heuristic: for all path longer than $\frac{n}{2P}$, add one copy to all tasks on the path
 
   \includegraphics[width=\linewidth]{../../paper/icpp17/analysis/SYM-PD-COLOR-REP-speedup16.pdf}  
+
+  (This sounds like moldable DAG scheduling.)
+
 \end{frame}
 
 \section{Conclusion}
