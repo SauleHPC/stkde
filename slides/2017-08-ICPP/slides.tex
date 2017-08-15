@@ -1,0 +1,442 @@
+\documentclass{beamer}
+\usepackage{xspace}
+\usepackage{graphicx}
+\usepackage{epsfig}
+%\usepackage{figlatex}
+\usepackage{verbatim}
+\usepackage{listings}
+
+\usepackage{subfigure}
+
+%\usepackage{algorithm}
+%\usepackage[noend]{algpseudocode}
+
+\usepackage{algorithm}% http://ctan.org/pkg/algorithm
+\usepackage[noend]{algpseudocode}% http://ctan.org/pkg/algorithmicx
+
+%\usepackage[ruled,vlined]{algorithm2e}
+
+\usepackage{float}
+
+%\usetheme{Columbus}
+\usetheme{Madrid}
+ \setbeamertemplate{navigation symbols}{}
+ \setbeamercovered{transparent}
+
+\newcommand{\card}[1]{\ensuremath{|#1|}}
+\newcommand{\union}{\ensuremath{\cup}}
+
+\newcommand{\ceil}[1]{\left\lceil#1\right\rceil}
+\newcommand{\floor}[1]{\lfloor#1\rfloor}
+
+\usealerttemplate{\color{red}\bf}{}
+
+%\graphicspath{{fig/}}
+
+\title[Shared-memory STKDE]{Parallel Space-Time Kernel Density Estimation}
+
+
+\date[ICPP 2017]{ICPP 2017\\August 17th, 2017}
+
+\author[Erik Saule]{{\bf Erik  Saule}$^\dag$, Dinesh Panchananam$^\dag$,\\
+  Alexander Hohl$^\ddag$, Wenwu Tang$^\ddag$, Eric Delmelle$^\ddag$}
+ 
+\institute[UNC Charlotte]{
+  $^\dag$ Dept. of Computer Science\\
+  $^\ddag$Dept. of Geography and Earth Sciences\\
+  UNC Charlotte\\
+  Email: \{esaule,dpanchan,ahohl,wtang4,eric.delmelle\}@uncc.edu
+}
+
+
+\begin{document}
+
+\maketitle
+
+\begin{frame}
+  \frametitle{Outline}
+  \tableofcontents
+\end{frame}
+
+\section{Space Time Kernel Density}
+
+\AtBeginSection[]
+{
+  \begin{frame}<beamer>
+    \frametitle{Outline}
+    \tableofcontents[currentsection]
+  \end{frame}
+}
+
+
+\begin{frame}
+  \frametitle{Space Time Kernel Density}
+  
+  \begin{block}{What is it?}
+    \begin{itemize}
+    \item Common way of visualizing events with time and place
+      information
+    \item Basically voxelize the space
+    \item Give a value to each voxel that depends on the number of
+      {\it neighboring} event to the voxel (with some kind of decay).
+    \item Essentially a generalization of density maps (e.g.,
+      population density)
+    \end{itemize}
+  \end{block}
+
+  \begin{block}{What is it useful for?}
+    \begin{itemize}
+    \item Monitoring disease outbreak
+    \item Political analysis
+    \item Social media analysis
+    \item Ornithology
+    \end{itemize}
+  \end{block}  
+\end{frame}
+
+\begin{frame}
+  \frametitle{Space-Time Kernel Density Estimate Formally}
+
+  \begin{columns}
+    \column{.59\linewidth}
+
+    \begin{block}{For a voxel $x,y,t$}
+      $\hat{f} (x, y, t) = \frac{1}{n h_s^2 h_t} \sum_{i | d_i < h_s,
+        t_i<h_t} k_s (\frac{x-x_i}{h_s},\frac{y-y_i}{h_s})
+      k_t(\frac{t-t_i}{h_t})$
+    
+      $$k_s (u,v) = \frac{\pi}{2} (1-u)^2 (1-v)^2$$
+      $$k_t (w) = \frac{3}{4} (1-w)^2$$
+
+      $h_s$ is the spatial bandwidth
+
+      $h_t$ is the temporal bandwidth
+
+      $n$ is the number of points (events)
+    \end{block}
+    
+    \column{.4\linewidth}
+
+    \begin{block}{Each event radiates density}
+    
+      \includegraphics[width=\linewidth]{../../paper/icpp17/figures/stkde.pdf}
+    \end{block}
+  \end{columns}
+
+  Similar to computing sums of radial basis functions from physics.
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Dengue Fever in Cali, Colombia}
+
+  \begin{columns}
+    \column{.49\linewidth}
+    \includegraphics[width=\linewidth]{../../paper/icpp17/figures/Dengue-2500-14.pdf}
+
+    $h_s = 2500m$, $h_t = 14 days$
+
+    \column{.49\linewidth}
+    \includegraphics[width=\linewidth]{../../paper/icpp17/figures/Dengue-500-7.pdf}
+
+    $h_s=500m$, $h_t = 7 days$
+  \end{columns}
+\end{frame}
+
+\section{Sequential Algorithms}
+
+\begin{frame}[fragile]
+  \frametitle{Voxel Based Algorithm \textsc{VB}}
+
+  \begin{block}{Algorithm}
+    \begin{algorithmic}
+      \For{all voxels $s=(x,y,t)$}
+      \State $sum = 0$
+      \For{all points $i$ at $x_i, y_i, t_i$}
+      \If{$\sqrt{(x_i-x)^2+(y_i-y)^2}< h_s$ and $|t_i-t| \leq h_t$}
+      \State $sum += k_s(\frac{x-x_i}{h_s},\frac{y-y_i}{h_s}) k_t(\frac{t-t_i}{h_t})$
+      \EndIf
+      \EndFor
+      \State $stkde[X][Y][T] = \frac{sum}{n h_s^2h_t}$
+      \EndFor
+    \end{algorithmic}
+  \end{block}
+
+  \begin{itemize}
+  \item $\theta(G_x G_y G_t n)$ distance tests
+  \item $\theta(n H_s^2 H_t )$ density values
+  \item Complexity: $\theta(G_x G_y G_t n )$
+  \end{itemize}
+
+  But pleasingly parallel.    
+\end{frame}
+
+\begin{frame}
+  \frametitle{Point Based Algorithm \textsc{PB}}
+  
+  \begin{block}{Algorithm}
+    \begin{algorithmic}
+      \For{all voxels $s=(x,y,t)$}
+        \State $stkde[X][Y][T] = 0$
+      \EndFor
+      %
+      \For{each points $i$ at $x_i, y_i, t_i$}
+        \For{$X_i - H_s\leq X \leq X_i+H_s$}
+          \For{$Y_i - H_s\leq Y \leq Y_i+H_s$}
+            \For{$T_i - T_s\leq T \leq T_i+H_s$}
+              \If{$\sqrt{(x_i-x)^2+(y_i-y)^2}< h_s$ and $|t_i-t| \leq h_t$}
+                \State $stkde[X][Y][T] += \frac{k_s(\frac{x-x_i}{h_s},\frac{y-y_i}{h_s}) k_t(\frac{t-t_i}{h_t})}{n h_s^2h_t}$
+              \EndIf
+            \EndFor
+          \EndFor
+        \EndFor
+      \EndFor
+    \end{algorithmic}
+  \end{block}
+    
+  \begin{itemize}
+  \item $\Theta(G_x G_y G_t)$ for memory initialization
+  \item $\Theta(n H_s^2 H_t)$ density computations
+  \item Complexity:  $\Theta(G_x G_y G_t + n H_s^2 H_t)$
+  \item (Gain the $\theta(G_x G_y G_t n)$ distance tests)
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Exploiting Symmetries \textsc{PB-SYM}}
+
+  \begin{columns}
+    \column{.49\linewidth}
+  
+    \includegraphics[width=\linewidth]{../../paper/icpp17/figures/PB-SYM.pdf}
+
+    \column{.49\linewidth}
+
+    For each point:
+    \begin{itemize}
+    \item Compute the $K_t$
+    \item Compute the $K_s$
+    \item Cross product
+    \end{itemize}
+
+    Complexity is the same, but saves computation in practice
+  \end{columns}
+
+\end{frame}
+
+\begin{frame}
+  \frametitle{Experimental settings}
+
+  \begin{center}
+    \resizebox{.55\linewidth}{!}{\input{../../paper/icpp17/analysis/instance_table.tex}}
+  \end{center}
+
+  Shared memory machine:
+  \begin{itemize}
+  \item 2 Intel Xeon E5-2667 v3 (2 times 8 cores)
+  \item 128GB of DRAM
+  \item G++ 5.3 (with OpenMP 4.0)
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{In practice}
+
+  \begin{center}
+    \resizebox{.9\linewidth}{!}{\input{../../paper/icpp17/analysis/seq_table.tex}}
+  \end{center}
+
+    Clearly, \textsc{PB-SYM} is the algorithm to make parallel.
+\end{frame}
+
+\section{Domain-Based Parallelism}
+
+\begin{frame}
+  \frametitle{Domain Replication \textsc{PB-SYM-DR}}
+
+  Each worker:
+  \begin{itemize}
+  \item Initializes its own memory buffer
+  \item Processes some points in its own buffer (with load balancing)
+  \item Participates in reducing the result
+  \end{itemize}
+  
+  \includegraphics[width=1.05\linewidth]{../../paper/icpp17/analysis/SYM-DR-speedup.pdf}  
+\end{frame}
+
+\begin{frame}
+  \frametitle{Why is DR bad? Some instances have little computation!}
+
+    \includegraphics[width=.8\linewidth]{../../paper/icpp17/analysis/seq_breakup.pdf}
+
+    (and some run out of memory)
+\end{frame}
+
+\begin{frame}
+  \frametitle{Domain Decomposition \textsc{PB-SYM-DD}}
+  
+  \begin{itemize}
+  \item Decompose the domain in $K \times K$ subdomains
+  \item Each worker processes different subdomains (load balanced on the subdomains)
+  \end{itemize}
+
+  \includegraphics[width=1.05\linewidth]{../../paper/icpp17/analysis/SYM-DD-speedup16.pdf}  
+\end{frame}
+
+\begin{frame}
+  \frametitle{Why is DD bad? Work overhead. Some cylinders are cut!}
+  \centering
+  
+  \includegraphics[width=.4\linewidth]{../../paper/icpp17/figures/PB-SYM-DD-overhead.pdf}
+
+  \includegraphics[width=\linewidth]{../../paper/icpp17/analysis/SYM-DD-overhead.pdf}
+
+  %Does anyone know a cheap way to partition better?
+  %Some structures admit dynamic programming.
+
+  Since submission: Better decompositions can be found by dynamic programming. But they are expensive.
+\end{frame}
+
+\section{Point-Based Parallelism}
+
+\begin{frame}
+  \frametitle{Point decomposition \textsc{PB-SYM-PD}}
+
+  \begin{itemize}
+  \item Partition the points in a regular AxBxC grid such that each
+    dimension is bigger than the bandwidth.
+  \item For $(a,b,c) \in \{0,1\}^3$
+    \begin{itemize}
+    \item Do in parallel grids $2i+a,2j+b,2k+c, \forall i,j,k$
+    \end{itemize}
+  \end{itemize}
+  
+  \includegraphics[width=1.05\linewidth]{../../paper/icpp17/analysis/SYM-PD-speedup16.pdf}  
+\end{frame}
+
+\begin{frame}
+  \frametitle{Why is this bad? Too many dependencies?}
+
+  Since all $2i, 2j, 2k$ are done before any $2i+1, 2j, 2k$, there is
+  a forced precedence of $0, 0, 0$ over $3, 0, 0$. But they are not
+  dependent.
+
+  This does coloring, instead of doing scheduling.
+  \begin{center}
+    \includegraphics[width=.5\linewidth]{../../paper/icpp17/figures/PB-SYM-PD-graph.pdf}
+  \end{center}
+  
+  Building the graph from a coloring is simple (and easily expressed in OpenMP 4.0).
+\end{frame}
+
+\begin{frame}
+  \frametitle{A better coloring with \textsc{PD-SYM-PD-SCHED}}
+
+  We don't need to color subdomains to minimize the number of colors.
+
+  We need a coloring that minimizes the longest chain in the implied graph.
+
+  Heuristic: greedily color subdomains in highest number of points first.
+   
+  \includegraphics[width=\linewidth]{../../paper/icpp17/analysis/SYM-PD-COLOR-SCHED-speedup16.pdf}
+
+  (If you don't have a good eye, it is a bit better than before)
+\end{frame}
+
+\begin{frame}
+  \frametitle{Why is it bad? Still too long critical path!}
+  \begin{center}
+    \includegraphics[width=.6\linewidth]{../../paper/icpp17/analysis/PB-SYM-PD-imbalance.pdf}
+  \end{center}
+    
+  How hard is the coloring/edge-orientation problem to minimize critical path?
+  \begin{itemize}
+  \item NP-hard in general graph (harder than coloring)
+  \item Trivial on chains
+  \item Other?
+  \end{itemize}
+
+  How good is the heuristic?
+
+  I need to think more about this...
+\end{frame}
+
+\begin{frame}
+  \frametitle{Parallelize long path \textsc{PB-SYM-PD-SCHED-REP}}
+
+  One can replicate a subdomain and get perfect work parallelism. (at
+  the expense of some memory initialization and reduction.)
+
+  Does that sound like moldable DAG scheduling? (Actually a bit more
+  complicated than that, but close enough.)
+  
+  Heuristic: for all path longer than $\frac{n}{2P}$, add one copy to all tasks on the path
+
+  \includegraphics[width=\linewidth]{../../paper/icpp17/analysis/SYM-PD-COLOR-REP-speedup16.pdf}  
+\end{frame}
+
+\section{Conclusion}
+
+\begin{frame}
+  \frametitle{All methods}
+  \includegraphics[width=\linewidth]{../../paper/icpp17/analysis/bestof.pdf}
+  
+\end{frame}
+
+\begin{frame}
+  \frametitle{Future Works}
+
+  Other platforms:
+  \begin{itemize}
+  \item GPU (not quite sure how to approach it)
+  \item KNL
+  \item Distributed Memory
+  \end{itemize}
+
+  Some algorithmic problems:
+  \begin{itemize}
+  \item Better way to decompose for \textsc{PB-SYM-DD}
+  \item Formally study the edge orientation problem for \textsc{PB-SYM-DD-SCHED}
+  \item Look deeper into the moldable scheduling connection for \textsc{PB-SYM-PD-SCHED-REP}
+  \item Model everything and derive analytical bounds on performance
+  \end{itemize}
+\end{frame}
+
+%% \begin{frame}
+%%   \frametitle{Food for thoughts!}
+
+%%   \begin{itemize}
+%%   \item Scheduling makes me think about parallel problems differently.
+%%   \item Scheduling helps me understand performance.
+%%   \item Maybe the real problem is to figure which instance of the
+%%     problem to give to the scheduler.
+%%   \item Maybe the scheduling algorithm is not always what is most
+%%     important.
+%%   \end{itemize}
+%% \end{frame}
+
+\begin{frame}
+  \frametitle{Thank you!}
+
+  And thanks:
+  \begin{itemize}
+  \item Dan Janies for pointing out the Flu dataset
+  \item Bora U\c{c}ar for pointing out the Gallai-Hasse-Roy-Vitaver theorem
+  \item The US tax payer
+    \begin{itemize}
+    \item Support from US NSF XSEDE Supercomputing Resource Allocation (SES170007) is acknowledged.
+    \item This material is based upon work supported by the National Science Foundation under Grant No. 1652442.
+    \end{itemize}
+  \end{itemize}
+
+  \begin{block}{Want to know more?}
+    Contact: \url{esaule@uncc.edu}
+
+    Visit: \url{http://webpages.uncc.edu/~esaule}
+  \end{block}
+\end{frame}
+
+\bibliographystyle{alpha}
+\bibliography{slides}
+
+\end{document}
