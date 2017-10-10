@@ -58,6 +58,21 @@ namespace stkde {
       index obsvy = (oy - c.bb.yl)/c.pa.yres;
       index obsvt = (ot - c.bb.tl)/c.pa.tres;
 
+      if (obsvx-c.voxsbw >= voxXmax)
+	continue;
+      if (obsvy-c.voxsbw >= voxYmax)
+	continue;
+      if (obsvt-c.voxtbw >= voxTmax)
+	continue;
+
+      if (obsvx+c.voxsbw < voxXmin)
+	continue;
+      if (obsvy+c.voxsbw < voxYmin)
+	continue;
+      if (obsvt+c.voxtbw < voxTmin)
+	continue;
+      
+      
       //std::cerr<<"obsv: "<<obsvx<<" "<<obsvy<<" "<<obsvt<<std::endl;
 
 

@@ -97,7 +97,8 @@ int main (int argc, char* argv[]) {
       || method.compare("POINTBASED-SYMOMP-OBSDECOMP-COLORSCHED-REP") == 0
       || method.compare("VOXELBASED-OBSDECOMP") == 0
       || method.compare("VOXELBASED-OMP-OBSDECOMP") == 0
-      || method.compare("POINTBASED-SYMOMP-OBSDECOMP-SCHED") == 0) {
+      || method.compare("POINTBASED-SYMOMP-OBSDECOMP-SCHED") == 0
+      || method.compare("POINTBASED-SYMOMP-BOXDECOMP") == 0 ) {
     decompX = atoi(argv[5]);
     decompY = atoi(argv[6]);
     decompT = atoi(argv[7]);
@@ -200,9 +201,9 @@ int main (int argc, char* argv[]) {
   if (method.compare("POINTBASED-SYMOMP-BOXDECOMP") == 0) {
     std::vector<stkde::voxelbox> decomp;
 
-    stkde::computation c (bb,inst, param);
+    stkde::computation c (bb,inst, param, false);
 
-    int decompsizeX=64, decompsizeY=64, decompsizeT=64;
+    int decompsizeX=decompX, decompsizeY=decompY, decompsizeT=decompT;
     for (int dx = 0; dx<decompsizeX; ++dx) {
       for (int dy = 0; dy<decompsizeY; ++dy) {
 	for (int dt = 0; dt<decompsizeT; ++dt) {

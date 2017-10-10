@@ -35,7 +35,7 @@ void decomposition(//problem
     stkde::index dy = (oy-bb.yl)/(bb.yh-bb.yl)*decompsizeY;
     stkde::index dt = (ot-bb.tl)/(bb.th-bb.tl)*decompsizeT;
 
-    //handling points out of rnage. Processing them with near by boundary
+    //handling points out of range. Processing them with near by boundary
     dx = std::max(dx, (stkde::index)0);
     dy = std::max(dy, (stkde::index)0);
     dt = std::max(dt, (stkde::index)0);

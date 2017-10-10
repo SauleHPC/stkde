@@ -15,10 +15,10 @@ LD=g++
 
 
 
-CXXFLAGS = -fdiagnostics-color=auto -std=c++14  -DNO_GPU -g -O1
+CXXFLAGS = -fdiagnostics-color=auto -std=c++14  -DNO_GPU
 #CXXFLAGS+=-O3 -march=native  -DNDEBUG
 CXXFLAGS+=-O1 -g
-CXXFLAGS+=-fopenmp
+#CXXFLAGS+=-fopenmp
 
 LDFLAGS= -O3 -march=native -fopenmp -DNO_GPU
 #LDFLAGS= -O0 -fopenmp -DNO_GPU
@@ -74,15 +74,16 @@ depend:
 # DO NOT DELETE
 
 graphanalysis.o: graphanalysis.hpp compact.hpp compact_impl.hpp timestamp.hpp
-point-based.o: types.hpp io.hpp compact.hpp compact_impl.hpp timestamp.hpp
+point-based.o: types.hpp compact.hpp compact_impl.hpp io.hpp timestamp.hpp
 point-based.o: density.hpp point-based.hpp point-based-symdisk.hpp
 point-based.o: point-based-symbar.hpp point-based-sym.hpp
-point-based.o: point-based-symomp.hpp decompositions.hpp
+point-based.o: point-based-symomp.hpp decompositions.hpp computation.hpp
+point-based.o: point-based-symomp-boxdecomposition.hpp
 point-based.o: point-based-symomp-pointdecomp.hpp
 point-based.o: point-based-symomp-obsdecomp.hpp
 point-based.o: point-based-symomp-obsdecomp-sched.hpp
 point-based.o: point-based-symomp-obsdecomp-colorsched.hpp graphanalysis.hpp
 point-based.o: point-based-symomp-obsdecomp-colorsched-rep.hpp
-point-based.o: voxel-based.hpp voxel-based-omp.hpp voxel-based-obsdecomp.hpp
-point-based.o: voxel-based-omp-obsdecomp.hpp
+point-based.o: voxel-based.hpp voxel-based-gpu.hpp voxel-based-omp.hpp
+point-based.o: voxel-based-obsdecomp.hpp voxel-based-omp-obsdecomp.hpp
 t.o: timestamp.hpp

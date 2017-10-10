@@ -56,7 +56,8 @@ namespace stkde {
     computation(){} //for compatibility
     computation(const bounding_box& bb,
 		const instance& inst,
-		const parameters& pa){
+		const parameters& pa,
+		bool init = true){
       this->voxX = std::lround(std::ceil((bb.xh-bb.xl)/pa.xres))+1;
       this->voxY = std::lround(std::ceil((bb.yh-bb.yl)/pa.yres))+1;
       this->voxT = std::lround(std::ceil((bb.th-bb.tl)/pa.tres))+1;
@@ -68,8 +69,8 @@ namespace stkde {
       this->bb = bb;
       this->pa = pa;
 
-          
-      this->p = std::make_shared<util::Compact3D<values>>(this->voxX, this->voxY, this->voxT);
+      if (init)
+	this->p = std::make_shared<util::Compact3D<values>>(this->voxX, this->voxY, this->voxT);
     }
     
   };
