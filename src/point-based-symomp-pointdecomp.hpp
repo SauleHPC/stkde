@@ -14,6 +14,8 @@
 #include "timestamp.hpp"
 #include "density.hpp"
 
+namespace stkde {
+
 std::shared_ptr<util::Compact3D<values>> stkde_pointbased_symomp_point(const bounding_box& bb,
 								       const instance& inst,
 								       const parameters& pa) {
@@ -173,5 +175,5 @@ std::shared_ptr<util::Compact3D<values>> stkde_pointbased_symomp_point(const bou
 }
 
 
-
+}
 #endif

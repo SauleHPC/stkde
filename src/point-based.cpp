@@ -34,6 +34,8 @@
 #include "voxel-based-omp-obsdecomp.hpp"
 #endif
 
+namespace stkde {
+
 void density_compare(std::shared_ptr<util::Compact3D<values>> dens1, 
 		     std::shared_ptr<util::Compact3D<values>> dens2,
 		     values* dist_sum,
@@ -61,6 +63,7 @@ void density_compare(std::shared_ptr<util::Compact3D<values>> dens1,
 	*dist_sum += d;
       }
 }
+}
 
 
 int main (int argc, char* argv[]) {
@@ -84,7 +87,7 @@ int main (int argc, char* argv[]) {
   std::string paramfile = argv[3];
   std::string method = argv[4];
 
-  indexi decompX=-1, decompY=-1, decompT=-1;
+  stkde::index decompX=-1, decompY=-1, decompT=-1;
   
   if (method.compare("POINTBASED-SYMOMP") == 0
       || method.compare("POINTBASED-SYMOMP-OBSDECOMP") == 0
@@ -112,7 +115,7 @@ int main (int argc, char* argv[]) {
   }
   
   
-  bounding_box bb = load_bounding_box(bbfile);
+  stkde::bounding_box bb = stkde::load_bounding_box(bbfile);
 
   
   std::cerr.precision(10);
@@ -128,9 +131,9 @@ int main (int argc, char* argv[]) {
     	   <<"["<<bb.yl<<";"<<bb.yh<<"]"<<"x"
     	   <<"["<<bb.tl<<";"<<bb.th<<"]"<<std::endl;
 
-  instance inst;
+  stkde::instance inst;
 
-  load_observations (obsfile, inst.obsx, inst.obsy, inst.obst);
+  stkde::load_observations (obsfile, inst.obsx, inst.obsy, inst.obst);
 
   if (0) {
     //randomize the order
@@ -148,7 +151,7 @@ int main (int argc, char* argv[]) {
   if (0) {
     //show first 5 observation
     std::cerr<<"first 5 observations"<<std::endl;
-    std::cerr.precision(std::numeric_limits< coordinate > ::max_digits10);
+    std::cerr.precision(std::numeric_limits< stkde::coordinate > ::max_digits10);
     for (int i=0; i<std::min((size_t)5, (size_t)inst.obsx.size()); ++i) {
       std::cerr<<inst.obsx[i]<<" "
 	       <<inst.obsy[i]<<" "
@@ -156,7 +159,7 @@ int main (int argc, char* argv[]) {
     }
   }
 
-  parameters param = load_parameters(paramfile);
+  stkde::parameters param = stkde::load_parameters(paramfile);
 
   std::cerr<<"res: "<<param.xres<<" "<<param.yres<<" "<<param.tres<<" "
 	   <<"bw: "<<param.xbw<<" "<<param.ybw<<" "<<param.tbw<<std::endl;
@@ -166,49 +169,49 @@ int main (int argc, char* argv[]) {
   
   //
   util::timestamp beg;
-  std::shared_ptr<util::Compact3D<values>> dens;
+  std::shared_ptr<util::Compact3D<stkde::values>> dens;
 
   if (method.compare("POINTBASED") == 0)
-    dens = stkde_pointbased (bb, inst, param);
+    dens = stkde::stkde_pointbased (bb, inst, param);
   if (method.compare("POINTBASED-SYMDISK") == 0)
-    dens = stkde_pointbased_symdisk (bb, inst, param);
+    dens = stkde::stkde_pointbased_symdisk (bb, inst, param);
   if (method.compare("POINTBASED-SYMBAR") == 0)
-    dens = stkde_pointbased_symbar (bb, inst, param);
+    dens = stkde::stkde_pointbased_symbar (bb, inst, param);
   if (method.compare("POINTBASED-SYM") == 0)
-    dens = stkde_pointbased_sym (bb, inst, param);
+    dens = stkde::stkde_pointbased_sym (bb, inst, param);
 
 #ifndef NO_OMP
   if (method.compare("POINTBASED-SYMOMP") == 0)
-    dens = stkde_pointbased_symomp (bb, inst, param, decompX, decompY, decompT);
+    dens = stkde::stkde_pointbased_symomp (bb, inst, param, decompX, decompY, decompT);
   if (method.compare("POINTBASED-SYMOMP-OBSDECOMP") == 0)
-    dens = stkde_pointbased_symomp_obsdecomp (bb, inst, param, decompX, decompY, decompT);
+    dens = stkde::stkde_pointbased_symomp_obsdecomp (bb, inst, param, decompX, decompY, decompT);
   if (method.compare("POINTBASED-SYMOMP-OBSDECOMP-SCHED") == 0)
-    dens = stkde_pointbased_symomp_obsdecomp_sched (bb, inst, param, decompX, decompY, decompT);
+    dens = stkde::stkde_pointbased_symomp_obsdecomp_sched (bb, inst, param, decompX, decompY, decompT);
   if (method.compare("POINTBASED-SYMOMP-OBSDECOMP-COLORSCHED") == 0)
-    dens = stkde_pointbased_symomp_obsdecomp_colorsched (bb, inst, param, decompX, decompY, decompT);
+    dens = stkde::stkde_pointbased_symomp_obsdecomp_colorsched (bb, inst, param, decompX, decompY, decompT);
   if (method.compare("POINTBASED-SYMOMP-OBSDECOMP-COLORSCHED-REP") == 0)
-    dens = stkde_pointbased_symomp_obsdecomp_colorsched_rep (bb, inst, param, decompX, decompY, decompT);
+    dens = stkde::stkde_pointbased_symomp_obsdecomp_colorsched_rep (bb, inst, param, decompX, decompY, decompT);
   
   if (method.compare("POINTBASED-SYMOMP-POINTDECOMP") == 0)
-    dens = stkde_pointbased_symomp_point (bb, inst, param);
+    dens = stkde::stkde_pointbased_symomp_point (bb, inst, param);
 #endif
   
   if (method.compare("VOXELBASED") == 0)
-    dens = stkde_voxelbased(bb, inst, param);
+    dens = stkde::stkde_voxelbased(bb, inst, param);
 
   if (method.compare("VOXELBASED-GPU") == 0)
-    dens = stkde_voxelbased_gpu(bb, inst, param);
+    dens = stkde::stkde_voxelbased_gpu(bb, inst, param);
 	
 #ifndef NO_OMP
   if (method.compare("VOXELBASED-OMP") == 0)
-    dens = stkde_voxelbased_omp(bb, inst, param);
+    dens = stkde::stkde_voxelbased_omp(bb, inst, param);
 #endif
   if (method.compare("VOXELBASED-OBSDECOMP") == 0) 
-    dens = stkde_voxelbased_obsdecomp(bb, inst, param, decompX, decompY, decompT);
+    dens = stkde::stkde_voxelbased_obsdecomp(bb, inst, param, decompX, decompY, decompT);
 
 #ifndef NO_OMP
   if (method.compare("VOXELBASED-OMP-OBSDECOMP") == 0)
-    dens = stkde_voxelbased_omp_obsdecomp(bb, inst, param, decompX, decompY, decompT);
+    dens = stkde::stkde_voxelbased_omp_obsdecomp(bb, inst, param, decompX, decompY, decompT);
 #endif
   
   util::timestamp end;
@@ -219,11 +222,11 @@ int main (int argc, char* argv[]) {
   
   if (compare) {
     std::cerr<<"========Comparing to POINT-BASED========="<<std::endl;
-    std::shared_ptr<util::Compact3D<values>> dens2 = stkde_pointbased (bb, inst, param);
+    std::shared_ptr<util::Compact3D<stkde::values>> dens2 = stkde_pointbased (bb, inst, param);
     
-    values dsum=0., dmax=0., total_dens=0.;
+    stkde::values dsum=0., dmax=0., total_dens=0.;
 
-    density_compare(dens, dens2, &dsum, &dmax, &total_dens);
+    stkde::density_compare(dens, dens2, &dsum, &dmax, &total_dens);
 
     std::cerr<<"Distance to POINT-BASED="<<dsum<<" max="<<dmax<<" totaldensity="<<total_dens<<std::endl;
   }
@@ -232,8 +235,8 @@ int main (int argc, char* argv[]) {
     std::ofstream out ("log");
     //for debugging purpose
     for (int k=0; k< dens->getSizeZ(); ++k) {
-	for (int j=0; j<std::min(dens->getSizeY(), (indexi)4000); ++j) {
-	  for (int i=0; i<std::min(dens->getSizeX(), (indexi)4000); ++i) {
+	for (int j=0; j<std::min(dens->getSizeY(), (stkde::index)4000); ++j) {
+	  for (int i=0; i<std::min(dens->getSizeX(), (stkde::index)4000); ++i) {
 	  //      for (int k=0; k<std::min(dens->getSizeZ(), 10); ++k)
 	  out<<(*dens)(i, j, k)<<" ";
 	}

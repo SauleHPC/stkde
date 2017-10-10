@@ -15,6 +15,8 @@
 #include "omp.h"
 #include "decompositions.hpp"
 
+namespace stkde {
+
 std::shared_ptr<util::Compact3D<values>> stkde_pointbased_symomp_obsdecomp(const bounding_box& bb,
 									   const instance& inst,
 									   const parameters& pa,
@@ -171,4 +173,5 @@ std::shared_ptr<util::Compact3D<values>> stkde_pointbased_symomp_obsdecomp(const
 }
 
 
+}
 #endif

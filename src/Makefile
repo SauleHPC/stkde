@@ -2,34 +2,38 @@
 
 #CXXFLAGS = -std=c++14 -O0 -g -fopenmp
 
-#Use this one for g++
-#LD=g++
-#CXXFLAGS = -fdiagnostics-color=auto -g -std=c++14 -O3 -march=native -fopenmp -DNDEBUG
-#LDFLAGS= -O3 -march=native -fopenmp
-
 #une this one for clang
 #CXX=clang++-3.8
 #LD=clang++-3.8
 #CXXFLAGS = -fdiagnostics-color=auto -g -std=c++14 -O3 -march=native -DNO_OMP -DNDEBUG
 #LDFLAGS= -O3 -march=native
 
+
+
+#Use this one for g++
+LD=g++
+CXXFLAGS = -fdiagnostics-color=auto -g -std=c++14 -O3 -march=native -fopenmp -DNDEBUG
+LDFLAGS= -O3 -march=native -fopenmp
+
+
+CXXFLAGS = -std=c++14 -O3 -march=native  -DNDEBUG -DNO_GPU
+LDFLAGS= -O3 -march=native -fopenmp -DNO_GPU
+#LDFLAGS= -O0 -fopenmp -DNO_GPU
+
+
 #use this one for nvcc
+ifeq ($(MODE), nvcc)
 CXX=nvcc 
 LD=nvcc 
 CXXFLAGS = -std=c++11 -Xcompiler "-fdiagnostics-color=auto -g -std=c++11 -O3 -march=native -DNO_OMP -DNDEBUG" -arch=sm_35
 LDFLAGS= -Xlinker "-O3 -march=native" -arch=sm_35
-
-
-#CXXFLAGS = -std=c++14 -O3 -march=native  -DNDEBUG
-#LDFLAGS= -O3 -march=native -fopenmp
-#LDFLAGS= -O3 -march=native -fopenmp
-#LDFLAGS= -O0 -fopenmp
+endif
 
 OBJS = point-based.o
 
 
-point-based: point-based.o voxel-based-gpu.o
-	$(LD) $(LDFLAGS) -o point-based point-based.o voxel-based-gpu.o
+point-based: point-based.o #voxel-based-gpu.o
+	$(LD) $(LDFLAGS) -o point-based point-based.o #voxel-based-gpu.o
 
 voxel-based-gpu.o: voxel-based-gpu.cu
 	$(CXX) voxel-based-gpu.cu -c -o voxel-based-gpu.o $(CXXFLAGS)

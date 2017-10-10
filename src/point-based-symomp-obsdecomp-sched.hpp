@@ -15,6 +15,8 @@
 #include "omp.h"
 
 
+namespace stkde {
+
 std::shared_ptr<util::Compact3D<values>> stkde_pointbased_symomp_obsdecomp_sched(const bounding_box& bb,
 										 const instance& inst,
 										 const parameters& pa,
@@ -218,4 +220,5 @@ std::shared_ptr<util::Compact3D<values>> stkde_pointbased_symomp_obsdecomp_sched
 }
 
 
+}
 #endif

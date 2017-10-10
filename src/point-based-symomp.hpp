@@ -16,7 +16,8 @@
 #include "decompositions.hpp"
 #include "computation.hpp"
 
-
+namespace stkde {
+  
 long process_observation_boxed_sym (computation& c,
 				    index voxXmin, index voxXmax,//bounding box [min;max[
 				    index voxYmin, index voxYmax,
@@ -244,5 +245,5 @@ std::shared_ptr<util::Compact3D<values>> stkde_pointbased_symomp(const bounding_
   return c.p;
 }
 
-
+}
 #endif

@@ -5,54 +5,54 @@
 #include "types.hpp"
 
 inline
-values densityF( coordinate obsX, coordinate obsY, coordinate obsT,
-		 coordinate voxX, coordinate voxY, coordinate voxT,
-		 int nbObs, coordinate xbw, coordinate tbw
+stkde::values densityF( stkde::coordinate obsX, stkde::coordinate obsY, stkde::coordinate obsT,
+		 stkde::coordinate voxX, stkde::coordinate voxY, stkde::coordinate voxT,
+		 int nbObs, stkde::coordinate xbw, stkde::coordinate tbw
 		 ) {
 
-  values u = (obsX-voxX) / xbw;
-  values v = (obsY-voxY) / xbw;
-  values w = (obsT-voxT) / tbw;
+  stkde::values u = (obsX-voxX) / xbw;
+  stkde::values v = (obsY-voxY) / xbw;
+  stkde::values w = (obsT-voxT) / tbw;
     
-  values constantTerm = 1000.*1000.*1000.*10 / (nbObs * pow(xbw, 2) * tbw);
-  values Ks = (0.5 * M_PI) * (1 - pow(u, 2) - pow(v, 2));
-  values Kt = 0.75 * (1 - pow(w, 2));
+  stkde::values constantTerm = 1000.*1000.*1000.*10 / (nbObs * pow(xbw, 2) * tbw);
+  stkde::values Ks = (0.5 * M_PI) * (1 - pow(u, 2) - pow(v, 2));
+  stkde::values Kt = 0.75 * (1 - pow(w, 2));
   
-  values spaceTimeKDE = constantTerm * Ks * Kt;
+  stkde::values spaceTimeKDE = constantTerm * Ks * Kt;
     
   return spaceTimeKDE;
 }
 
 //compute the part of the density estimation that comes from the disk
 inline
-values densityF_disk( coordinate obsX, coordinate obsY, coordinate obsT,
-		      coordinate voxX, coordinate voxY, coordinate voxT,
-		      int nbObs, coordinate xbw, coordinate tbw
+stkde::values densityF_disk( stkde::coordinate obsX, stkde::coordinate obsY, stkde::coordinate obsT,
+		      stkde::coordinate voxX, stkde::coordinate voxY, stkde::coordinate voxT,
+		      int nbObs, stkde::coordinate xbw, stkde::coordinate tbw
 		      ) {
 
-  values u = (obsX-voxX) / xbw;
-  values v = (obsY-voxY) / xbw;
+  stkde::values u = (obsX-voxX) / xbw;
+  stkde::values v = (obsY-voxY) / xbw;
     
-  values constantTerm = 1000.*1000.*1000.*10 / (nbObs * pow(xbw, 2) * tbw);
-  values Ks = (0.5 * M_PI) * (1 - pow(u, 2) - pow(v, 2));
+  stkde::values constantTerm = 1000.*1000.*1000.*10 / (nbObs * pow(xbw, 2) * tbw);
+  stkde::values Ks = (0.5 * M_PI) * (1 - pow(u, 2) - pow(v, 2));
   
-  values spaceTimeKDE = constantTerm * Ks ;
+  stkde::values spaceTimeKDE = constantTerm * Ks ;
     
   return spaceTimeKDE;
 }
 
 //compute the part of the density estimation that comes from the bar
 inline
-values densityF_bar( coordinate obsX, coordinate obsY, coordinate obsT,
-		     coordinate voxX, coordinate voxY, coordinate voxT,
-		     int nbObs, coordinate xbw, coordinate tbw
+stkde::values densityF_bar( stkde::coordinate obsX, stkde::coordinate obsY, stkde::coordinate obsT,
+		     stkde::coordinate voxX, stkde::coordinate voxY, stkde::coordinate voxT,
+		     int nbObs, stkde::coordinate xbw, stkde::coordinate tbw
 		     ) {
 
-  values w = (obsT-voxT) / tbw;
+  stkde::values w = (obsT-voxT) / tbw;
     
-  values Kt = 0.75 * (1 - pow(w, 2));
+  stkde::values Kt = 0.75 * (1 - pow(w, 2));
   
-  values spaceTimeKDE = Kt;
+  stkde::values spaceTimeKDE = Kt;
     
   return spaceTimeKDE;
 }

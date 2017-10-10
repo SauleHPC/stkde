@@ -1,3 +1,6 @@
+#ifndef VOXEL_BASED_OMP_HPP
+#define VOXEL_BASED_OMP_HPP
+
 #include <cstdio>
 #include <cmath>
 #include <iostream>
@@ -5,6 +8,8 @@
 #include "io.hpp"
 #include <memory>
 #include "density.hpp"
+
+namespace stkde {
 
 std::shared_ptr<util::Compact3D<values>> stkde_voxelbased_omp(const bounding_box& bb,
 				 const instance& inst,
@@ -59,4 +64,6 @@ std::shared_ptr<util::Compact3D<values>> stkde_voxelbased_omp(const bounding_box
   std::cout<<"evals: "<< evals << std::endl;
   return p;
 }
+}
 
+#endif

@@ -8,10 +8,12 @@
 #include <vector>
 #include <sstream>
 
+namespace stkde {
+
 //the bounding box file is comma separated in format xl, xh, yl, yh, tl, th
-static bounding_box load_bounding_box(std::string filename) {
+static stkde::bounding_box load_bounding_box(std::string filename) {
   char c;
-  bounding_box bb;
+  stkde::bounding_box bb;
 
   std::ifstream in (filename.c_str());
 
@@ -46,9 +48,9 @@ static bounding_box load_bounding_box(std::string filename) {
 //
 // The output vectors are cleared before anything is added
 static void load_observations (const std::string& filename,
-			std::vector<coordinate>& xout,
-			std::vector<coordinate>& yout,
-			std::vector<coordinate>& tout) {
+			std::vector<stkde::coordinate>& xout,
+			std::vector<stkde::coordinate>& yout,
+			std::vector<stkde::coordinate>& tout) {
 
   
   std::ifstream in (filename.c_str());
@@ -71,7 +73,7 @@ static void load_observations (const std::string& filename,
     std::string line;
     std::getline(*realin, line);
     std::stringstream ss (line);
-    coordinate x, y, t;
+    stkde::coordinate x, y, t;
     ss>>x>>y>>t;
     if (ss) {
       xout.push_back(x);
@@ -85,9 +87,9 @@ static void load_observations (const std::string& filename,
 }
 
 //the bounding box file is comma separated in format xres, yres, tres, xbw, ybw, tbw
-static parameters load_parameters(std::string filename) {
+static stkde::parameters load_parameters(std::string filename) {
   char c;
-  parameters pa;
+  stkde::parameters pa;
 
   std::ifstream in (filename.c_str());
 
@@ -111,4 +113,5 @@ static parameters load_parameters(std::string filename) {
   return pa;
 }
 
+}
 #endif

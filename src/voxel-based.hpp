@@ -1,3 +1,6 @@
+#ifndef VOXEL_BASED_HPP
+#define VOXEL_BASED_HPP
+
 #include <cstdio>
 #include <cmath>
 #include <iostream>
@@ -6,14 +9,16 @@
 #include <memory>
 #include "density.hpp"
 
+namespace stkde {
+
 std::shared_ptr<util::Compact3D<values>> stkde_voxelbased(const bounding_box& bb,
 				 const instance& inst,
 				 const parameters& pa) {
   
   // std::cout << "Running the voxel based implementation." << std::endl;
-  indexi voxx = std::lround(std::ceil((bb.xh - bb.xl) / pa.xres)) + 1;
-  indexi voxy = std::lround(std::ceil((bb.yh - bb.yl) / pa.yres)) + 1;
-  indexi voxt = std::lround(std::ceil((bb.th - bb.tl) / pa.tres)) + 1;
+  index voxx = std::lround(std::ceil((bb.xh - bb.xl) / pa.xres)) + 1;
+  index voxy = std::lround(std::ceil((bb.yh - bb.yl) / pa.yres)) + 1;
+  index voxt = std::lround(std::ceil((bb.th - bb.tl) / pa.tres)) + 1;
 
   long n = inst.obsx.size();
  
@@ -24,9 +29,9 @@ std::shared_ptr<util::Compact3D<values>> stkde_voxelbased(const bounding_box& bb
   //co.zero(); //This is unnecessary since the correct value is directly written
 
   //for each voxel
-  for(indexi i = 0; i < voxx; i++) {
-    for(indexi j = 0; j < voxy; j++) {
-      for(indexi k = 0; k < voxt; k++) {
+  for(index i = 0; i < voxx; i++) {
+    for(index j = 0; j < voxy; j++) {
+      for(index k = 0; k < voxt; k++) {
 	
 	// contruct the location of the voxel
 	coordinate px = bb.xl + i * pa.xres;
@@ -58,4 +63,6 @@ std::shared_ptr<util::Compact3D<values>> stkde_voxelbased(const bounding_box& bb
   std::cout<<"evals: "<< evals << std::endl;
   return p;
 }
+}
 
+#endif
