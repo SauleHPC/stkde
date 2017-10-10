@@ -16,6 +16,8 @@
 
 namespace stkde {
 
+
+  ///each thread computes in its own memory space and aggregate the value at the end.
 std::shared_ptr<util::Compact3D<values>> stkde_pointbased_symomp_point(const bounding_box& bb,
 								       const instance& inst,
 								       const parameters& pa) {

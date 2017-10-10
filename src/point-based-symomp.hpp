@@ -17,7 +17,9 @@
 #include "computation.hpp"
 
 namespace stkde {
-  
+
+  ///process sequentially some observation in one particular bounding
+  ///box. An observation that should "spill" out of the bounding box is cut.
 long process_observation_boxed_sym (computation& c,
 				    index voxXmin, index voxXmax,//bounding box [min;max[
 				    index voxYmin, index voxYmax,
@@ -105,7 +107,8 @@ long process_observation_boxed_sym (computation& c,
   return eval;  
 }
 
-
+  ///decompose the space in regular subboxes. subboxes are processed in parallel.
+  ///an observation that impacts two subboxes is (partially) computed twice.
 std::shared_ptr<util::Compact3D<values>> stkde_pointbased_symomp(const bounding_box& bb,
 								 const instance& inst,
 								 const parameters& pa,
