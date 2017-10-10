@@ -20,6 +20,7 @@ namespace stkde {
 
   ///process sequentially some observation in one particular bounding
   ///box. An observation that should "spill" out of the bounding box is cut.
+  ///Conventino is [voXmin;voXmax[
   long process_observation_boxed_sym (computation& c,
 				      index voxXmin, index voxXmax,//bounding box [min;max[
 				      index voxYmin, index voxYmax,

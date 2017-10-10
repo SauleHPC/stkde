@@ -12,11 +12,14 @@
 
 #Use this one for g++
 LD=g++
-CXXFLAGS = -fdiagnostics-color=auto -g -std=c++14 -O3 -march=native -fopenmp -DNDEBUG
-LDFLAGS= -O3 -march=native -fopenmp
 
 
-CXXFLAGS = -std=c++14 -O3 -march=native  -DNDEBUG -DNO_GPU
+
+CXXFLAGS = -fdiagnostics-color=auto -std=c++14  -DNO_GPU -g -O1
+#CXXFLAGS+=-O3 -march=native  -DNDEBUG
+CXXFLAGS+=-O1 -g
+CXXFLAGS+=-fopenmp
+
 LDFLAGS= -O3 -march=native -fopenmp -DNO_GPU
 #LDFLAGS= -O0 -fopenmp -DNO_GPU
 

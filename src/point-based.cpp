@@ -17,11 +17,13 @@
 
 #ifndef NO_OMP
 #include "point-based-symomp.hpp"
+#include "point-based-symomp-boxdecomposition.hpp"
 #include "point-based-symomp-pointdecomp.hpp"
 #include "point-based-symomp-obsdecomp.hpp"
 #include "point-based-symomp-obsdecomp-sched.hpp"
 #include "point-based-symomp-obsdecomp-colorsched.hpp"
 #include "point-based-symomp-obsdecomp-colorsched-rep.hpp"
+
 #endif
 
 #include "voxel-based.hpp"
@@ -194,6 +196,54 @@ int main (int argc, char* argv[]) {
   
   if (method.compare("POINTBASED-SYMOMP-POINTDECOMP") == 0)
     dens = stkde::stkde_pointbased_symomp_point (bb, inst, param);
+
+  if (method.compare("POINTBASED-SYMOMP-BOXDECOMP") == 0) {
+    std::vector<stkde::voxelbox> decomp;
+
+    stkde::computation c (bb,inst, param);
+
+    int decompsizeX=64, decompsizeY=64, decompsizeT=64;
+    for (int dx = 0; dx<decompsizeX; ++dx) {
+      for (int dy = 0; dy<decompsizeY; ++dy) {
+	for (int dt = 0; dt<decompsizeT; ++dt) {
+
+	  stkde::coordinate decxmin = bb.xl + ( dx   *(bb.xh-bb.xl)/decompsizeX );
+	  stkde::index voxXmin = std::lround(std::ceil((decxmin-bb.xl)/param.xres));
+	  stkde::coordinate decxmax = bb.xl + ((dx+1)*(bb.xh-bb.xl)/decompsizeX );
+	  stkde::index voxXmax;
+	  if (dx != decompsizeX-1)
+	    voxXmax = std::lround(std::floor((decxmax-bb.xl)/param.xres))+1;
+	  else
+	    voxXmax = c.voxX;
+	  
+	  stkde::coordinate decymin = bb.yl + ( dy   *(bb.yh-bb.yl)/decompsizeY );
+	  stkde::index voxYmin = std::lround(std::ceil((decymin-bb.yl)/param.yres));
+	  stkde::coordinate decymax = bb.yl + ((dy+1)*(bb.yh-bb.yl)/decompsizeY );
+	  stkde::index voxYmax;
+	  if (dy != decompsizeY-1)
+	    voxYmax = std::lround(std::floor((decymax-bb.yl)/param.yres))+1;
+	  else
+	    voxYmax = c.voxY;
+	  
+	  
+	  stkde::coordinate dectmin = bb.tl + ( dt   *(bb.th-bb.tl)/decompsizeT );
+	  stkde::index voxTmin = std::lround(std::ceil((dectmin-bb.tl)/param.tres));
+	  stkde::coordinate dectmax = bb.tl + ((dt+1)*(bb.th-bb.tl)/decompsizeT );
+	  stkde::index voxTmax;
+	  if (dt != decompsizeT-1)
+	    voxTmax = std::lround(std::floor((dectmax-bb.tl)/param.tres))+1;
+	  else
+	    voxTmax = c.voxT;
+
+
+	  stkde::voxelbox vb(voxXmin, voxXmax,voxYmin, voxYmax,voxTmin, voxTmax);
+	  decomp.push_back(vb);
+	}
+      }
+    }
+    
+    dens = stkde::stkde_pointbased_symomp_boxdecomp (bb, inst, param, decomp);
+  }
 #endif
   
   if (method.compare("VOXELBASED") == 0)
@@ -228,7 +278,7 @@ int main (int argc, char* argv[]) {
 
     stkde::density_compare(dens, dens2, &dsum, &dmax, &total_dens);
 
-    std::cerr<<"Distance to POINT-BASED="<<dsum<<" max="<<dmax<<" totaldensity="<<total_dens<<std::endl;
+    std::cerr<<"Distance to POINTBASED="<<dsum<<" max="<<dmax<<" totaldensity="<<total_dens<<std::endl;
   }
 
   if (0) {

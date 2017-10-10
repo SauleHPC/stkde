@@ -2,26 +2,6 @@
 #define COMPUTATION_STR_HPP
 
 namespace stkde {
-  struct computation {
-    //size of the space in voxels
-    index voxX;
-    index voxY;
-    index voxT;
-    
-    //span of bandwidth in voxels
-    index voxsbw;
-    index voxtbw;
-    
-    //return
-    std::shared_ptr<util::Compact3D<values>> p;
-    
-    //total obs and box
-    index totalobs;
-    bounding_box bb;
-    
-    //parameters
-    parameters pa;
-  };
 
 
 void init_stkde (computation& c) {

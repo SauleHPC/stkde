@@ -35,7 +35,7 @@ static stkde::bounding_box load_bounding_box(std::string filename) {
   in >> c;
   in >> bb.th;
     
-  assert (!in.fail());
+  assert (!(in.fail()));
   
   return bb;
 }
@@ -103,10 +103,10 @@ static stkde::parameters load_parameters(std::string filename) {
   assert (in.good());
 
   in >> pa.xbw;
-  in >> pa.tbw;
   in >> c;
   in >> pa.ybw;
   in >> c;
+  in >> pa.tbw;
 
   assert (!in.fail());
   
