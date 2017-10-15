@@ -97,7 +97,7 @@ namespace stkde {
 
       index cyl_ysize = std::max(cyl_ymax-cyl_ymin, (stkde::index)0);
 
-      index cyl_tsize = std::max(cyl_ymax-cyl_tmin, (stkde::index)0);
+      index cyl_tsize = std::max(cyl_tmax-cyl_tmin, (stkde::index)0);
 
       //
       total_cost += param.alpha*cyl_xsize*cyl_ysize
@@ -248,9 +248,9 @@ namespace stkde {
     param.gamma = 1;
 
     param.nbstate = 0;
-    param.xstep = 1000;
-    param.ystep = 128;
-    param.tstep = 1000;
+    param.xstep = 16;
+    param.ystep = 64;
+    param.tstep = 64;
     
     stkde::voxelbox vb(0, c.voxX,
 		       0, c.voxY,
@@ -264,11 +264,16 @@ namespace stkde {
     auto sol = partition_hier_rec(param, inst, vb, nbparts);
     
     double naive = cost_of_box(param, vb, inst);
+
+    std::cerr<<param.nbstate<<" states processed"<<std::endl;
     
-    std::cerr<<"solution: "<<sol.maxload<<" in "<<sol.sol.size()<<" boxes. naive: "<<naive<<" speedup:"<<naive/sol.maxload <<" sumload:"<<sol.sumload<<std::endl;
+    std::cerr<<"solution: "<<sol.maxload<<" in "<<sol.sol.size()<<" boxes."<<std::endl
+	     <<"naive: "<<naive<<" speedup:"<<naive/sol.maxload<<std::endl
+	     <<" sumload:"<<sol.sumload<<" overhead:"<<sol.sumload/naive<<std::endl;
+
     
     for (auto b : sol.sol) {
-      std::cerr<<b<<std::endl;
+      std::cerr<<b<<" cost "<<cost_of_box(param, b, inst)<<std::endl;
     }
 
     return sol.sol;    
