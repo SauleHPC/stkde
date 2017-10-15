@@ -158,7 +158,7 @@ namespace stkde {
       //how many parts on the left
 
       //cutting x?
-      for (index cut = b.voxXmin+1; cut <b.voxXmax-1; cut += param.xstep) {
+      for (index cut = b.voxXmin+param.xstep; cut <b.voxXmax-1; cut += param.xstep) {
 	//cut is the last
 
 	voxelbox leftbox = b;
@@ -177,7 +177,7 @@ namespace stkde {
       }      
 
       //cutting y?
-      for (index cut = b.voxYmin+1; cut <b.voxYmax-1; cut += param.ystep) {
+      for (index cut = b.voxYmin+param.ystep; cut <b.voxYmax-1; cut += param.ystep) {
 	//cut is the last
 
 	voxelbox leftbox = b;
@@ -198,7 +198,7 @@ namespace stkde {
 
 
       //cutting t?
-      for (index cut = b.voxTmin+1; cut <b.voxTmax-1; cut += param.tstep) {
+      for (index cut = b.voxTmin+param.tstep; cut <b.voxTmax-1; cut += param.tstep) {
 	//cut is the last
 
 	voxelbox leftbox = b;
@@ -241,9 +241,9 @@ namespace stkde {
     param.gamma = 1;
 
     param.nbstate = 0;
-    param.xstep = 128;
-    param.ystep = 128;
-    param.tstep = 128;
+    param.xstep = 64;
+    param.ystep = 64;
+    param.tstep = 64;
     
     stkde::voxelbox vb(0, c.voxX,
 		       0, c.voxY,
