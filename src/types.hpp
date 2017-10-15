@@ -92,9 +92,19 @@ namespace stkde {
        voxYmin(ymi), voxYmax(yma),
        voxTmin(tmi), voxTmax(tma)
     {}
-	     
+    
   };
 
+  
+  template<typename ostream>
+  ostream& operator<< (ostream& out, const voxelbox& b){
+    out<<b.voxXmin<<" "<<b.voxXmax
+       <<" "<<b.voxYmin<<" "<<b.voxYmax
+       <<" "<<b.voxTmin<<" "<<b.voxTmax;
+
+    return out;
+  }
+  	     
 
 }
   

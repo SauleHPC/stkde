@@ -16,8 +16,8 @@ LD=g++
 
 
 CXXFLAGS = -fdiagnostics-color=auto -std=c++14  -DNO_GPU
-#CXXFLAGS+=-O3 -march=native  -DNDEBUG
-CXXFLAGS+=-O1 -g
+CXXFLAGS+=-O3 -march=native  -DNDEBUG
+#CXXFLAGS+=-O1 -g
 #CXXFLAGS+=-fopenmp
 
 LDFLAGS= -O3 -march=native -fopenmp -DNO_GPU

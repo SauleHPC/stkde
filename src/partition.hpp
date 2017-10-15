@@ -9,7 +9,7 @@ namespace stkde {
     stkde::voxelbox box;
     int nbpart;
 
-    bool operator<(const dp_hier_key& k2) {
+    bool operator<(const dp_hier_key& k2) const {
       if (this->box.voxXmin < k2.box.voxXmin)
 	return true;
       if (this->box.voxXmin > k2.box.voxXmin)
@@ -52,11 +52,16 @@ namespace stkde {
 
     const computation& c;
 
+    index xstep;
+    index ystep;
+    index tstep;
+    
     dp_hier_parameters (const computation& co)
       :c(co)
     {}
 
     std::map<dp_hier_key, dp_hier_val> memo;
+    size_t nbstate;
   };
   
   double cost_of_box (const dp_hier_parameters& param, const stkde::voxelbox& b,  const instance& inst) {
@@ -106,16 +111,32 @@ namespace stkde {
 			       int nbparts) {
 
     const computation& c = param.c;
+
+    dp_hier_key k;
+    k.box = b;
+    k.nbpart=nbparts;
+    
+    auto it = param.memo.find(k);
+
+    if (it != param.memo.end()) {
+      return it->second;
+    }
+
+
+    param.nbstate ++;
     
     dp_hier_val ret;
 
     ret.sol.push_back(b);
     ret.maxload = cost_of_box(param, b, inst);
 
+    std::cerr<<param.nbstate<<" Computing "<<b<<" "<<nbparts<<" naive cost: "<<ret.maxload<<std::endl;
+
+    
     for (int p=1; p<nbparts; ++p) {
       //how many parts on the left
 
-      for (index cut = b.voxXmin+1; cut <b.voxXmax-1; cut += 4) {
+      for (index cut = b.voxXmin+1; cut <b.voxXmax-1; cut += param.xstep) {
 	//cut is the last
 
 	voxelbox leftbox = b;
@@ -125,10 +146,12 @@ namespace stkde {
 	
 	auto left_cut = partition_hier_rec(param, inst, leftbox, p);
 
-	//TODO: maybe don't do the next cut if you already have a better solution
+	//TODO: maybe don't look for the next cut if you already have
+	//a better solution
 	auto right_cut = partition_hier_rec(param, inst, rightbox, nbparts-p);
 	
 	double max_cost = std::max(left_cut.maxload, right_cut.maxload);
+	
 	if (max_cost < ret.maxload) {
 	  ret.sol.clear();
 	  std::copy(left_cut.sol.begin(),
@@ -137,9 +160,13 @@ namespace stkde {
 	  std::copy(right_cut.sol.begin(),
 		    right_cut.sol.end(),
 		    ret.sol.end());
+	  ret.maxload = max_cost;
 	}	
       }      
     }
+    
+
+    param.memo[k] = ret;
     
     return ret;    
   }
@@ -158,6 +185,11 @@ namespace stkde {
     param.beta = 1;
     param.gamma = 1;
 
+    param.nbstate = 0;
+    param.xstep = 16;
+    param.ystep = 16;
+    param.tstep = 16;
+    
     stkde::voxelbox vb(0, c.voxX,
 		       0, c.voxY,
 		       0, c.voxT);
@@ -169,6 +201,8 @@ namespace stkde {
     
     auto sol = partition_hier_rec(param, inst, vb, nbparts);
     
+
+    std::cerr<<"solution of "<<sol.maxload<<std::endl;
     
     return sol.sol;    
   }
