@@ -85,14 +85,18 @@ namespace stkde {
       //
       index cyl_xmin = std::max(obsvx - c.voxsbw, b.voxXmin);
       index cyl_xmax = std::min(obsvx + c.voxsbw+1, b.voxXmax);
+
       index cyl_ymin = std::max(obsvy - c.voxsbw, b.voxYmin);
       index cyl_ymax = std::min(obsvy + c.voxsbw+1, b.voxYmax);
+
       index cyl_tmin = std::max(obsvt - c.voxtbw, b.voxTmin);
       index cyl_tmax = std::min(obsvt + c.voxtbw+1, b.voxTmax);
 
       //
       index cyl_xsize = std::max(cyl_xmax-cyl_xmin, (stkde::index)0);
+
       index cyl_ysize = std::max(cyl_ymax-cyl_ymin, (stkde::index)0);
+
       index cyl_tsize = std::max(cyl_ymax-cyl_tmin, (stkde::index)0);
 
       //
@@ -123,7 +127,6 @@ namespace stkde {
       return it->second;
     }
 
-
     param.nbstate ++;
     
     dp_hier_val ret;
@@ -136,15 +139,15 @@ namespace stkde {
 
     auto considerbest = [&](dp_hier_val& left_cut, dp_hier_val& right_cut) {
 	double max_cost = std::max(left_cut.maxload, right_cut.maxload);
-	
+
 	if (max_cost < ret.maxload) {
 	  ret.sol.clear();
 	  std::copy(left_cut.sol.begin(),
 		    left_cut.sol.end(),
-		    ret.sol.end());
+		    std::back_inserter(ret.sol));
 	  std::copy(right_cut.sol.begin(),
 		    right_cut.sol.end(),
-		    ret.sol.end());
+		    std::back_inserter(ret.sol));
 	  ret.maxload = max_cost;
 	  ret.sumload = left_cut.sumload + right_cut.sumload;
 	}	
@@ -221,6 +224,10 @@ namespace stkde {
     }
     
 
+    if (ret.sol.size() == 0) {
+      std::cerr<<"WTF "<< b<<std::endl;
+    }
+    
     param.memo[k] = ret;
     
     return ret;    
@@ -241,9 +248,9 @@ namespace stkde {
     param.gamma = 1;
 
     param.nbstate = 0;
-    param.xstep = 64;
-    param.ystep = 64;
-    param.tstep = 64;
+    param.xstep = 1000;
+    param.ystep = 128;
+    param.tstep = 1000;
     
     stkde::voxelbox vb(0, c.voxX,
 		       0, c.voxY,
@@ -258,8 +265,12 @@ namespace stkde {
     
     double naive = cost_of_box(param, vb, inst);
     
-    std::cerr<<"solution: "<<sol.maxload<<" naive: "<<naive<<" speedup:"<<naive/sol.maxload <<" sumload:"<<sol.sumload<<std::endl;
+    std::cerr<<"solution: "<<sol.maxload<<" in "<<sol.sol.size()<<" boxes. naive: "<<naive<<" speedup:"<<naive/sol.maxload <<" sumload:"<<sol.sumload<<std::endl;
     
+    for (auto b : sol.sol) {
+      std::cerr<<b<<std::endl;
+    }
+
     return sol.sol;    
   }
 }
