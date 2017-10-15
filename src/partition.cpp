@@ -11,16 +11,14 @@
 #include "timestamp.hpp"
 #include "density.hpp"
 
-
-
 #include "partition.hpp"
 
 
 int main (int argc, char* argv[]) {
 
-  if (argc < 5 ) {
-    std::cerr<<"usage: "<<argv[0]<<" boundary observations param method [decompX] [decompY] [decompZ] [...]"<<std::endl;
-    std::cerr<<"Methods: PARTITION-HIER"<<std::endl;
+  if (argc < 6 ) {
+    std::cerr<<"usage: "<<argv[0]<<" boundary observations param outfile  method [methodparams]"<<std::endl;
+    std::cerr<<"Methods: PARTITION-HIER nbparts xstep ystep tstep"<<std::endl;
      
     return -1;	
   }
@@ -29,24 +27,10 @@ int main (int argc, char* argv[]) {
   std::string bbfile = argv[1];
   std::string obsfile = argv[2];
   std::string paramfile = argv[3];
-  std::string method = argv[4];
-
-  stkde::index decompX=-1, decompY=-1, decompT=-1;
-
-  bool compare = false;
-
-  if (argc > 8) {
-    //extra args to process
-    for (int i = 8; i< argc; ++i) {
-      std::string opt = argv[i] ;
-      if (opt.compare("compare") == 0) {
-	compare = true;
-      }
-    }
-    
-  }
+  std::string outfile = argv[4]; //file to write the partition to
+  std::string method = argv[5];
   
-  
+
   stkde::bounding_box bb = stkde::load_bounding_box(bbfile);
   
   std::cerr.precision(10);
@@ -73,12 +57,37 @@ int main (int argc, char* argv[]) {
 
   assert (param.xres == param.yres);
   assert (param.xbw == param.ybw);
+
+  std::vector<stkde::voxelbox> parts;
+
+
   
+  util::timestamp begin;
+
   //
-  if (method.compare("PARTITION-HIER") == 0)
-    stkde::partition_hier (bb, inst, param, 16);
+  if (method.compare("PARTITION-HIER") == 0) {
+
+    int nbparts = atoi(argv[6]);
+    stkde::index xstep = atoi(argv[7]);
+    stkde::index ystep = atoi(argv[8]);
+    stkde::index tstep = atoi(argv[9]);
+    
+    parts = stkde::partition_hier (bb, inst, param, nbparts, xstep, ystep, tstep);
+  }
 
 
+  util::timestamp end;
+
+  std::cerr.precision(2);
+  std::cerr<<"partitioning time: "<<end-begin<<" seconds"<<std::endl;
+
+  
+  {
+    std::ofstream out (outfile);
+    out<<parts.size()<<std::endl;
+    for (auto vb : parts)
+      out<<vb<<std::endl;				   
+  }
     
   
   return 0;

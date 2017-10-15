@@ -2,6 +2,7 @@
 #define PARTITION_HPP_
 
 #include <map>
+#include <algorithm>
 
 namespace stkde {
 
@@ -238,9 +239,10 @@ namespace stkde {
   std::vector<stkde::voxelbox> partition_hier(const stkde::bounding_box& bb,
 					      const stkde::instance& inst,
 					      const stkde::parameters& pa,
-					      int nbparts) {
+					      int nbparts, //nbparts to make
+					      index xs, index ys, index ts) { //stepping
 
-    computation c (bb,inst, pa);
+    computation c (bb,inst, pa, false);
 
     dp_hier_parameters param (c);
     param.alpha = 1.2e-08;
@@ -248,9 +250,9 @@ namespace stkde {
     param.gamma = 2.2e-09;
 
     param.nbstate = 0;
-    param.xstep = 32;
-    param.ystep = 32;
-    param.tstep = 32;
+    param.xstep = xs;
+    param.ystep = ys;
+    param.tstep = ts;
     
     stkde::voxelbox vb(0, c.voxX,
 		       0, c.voxY,
@@ -283,6 +285,11 @@ namespace stkde {
 	     <<"naive: "<<naive<<" speedup:"<<naive/sol.maxload<<std::endl
 	     <<"sumload:"<<sol.sumload<<" overhead:"<<sol.sumload/naive<<std::endl;
 
+    std::sort(sol.sol.begin(), sol.sol.end(),
+	      [&] (const voxelbox& a, const voxelbox&b){
+		return cost_of_box(param, a, inst) > cost_of_box(param, b, inst);
+	      });
+    
     
     for (auto b : sol.sol) {
       std::cerr<<b<<" cost "<<cost_of_box(param, b, inst)<<std::endl;

@@ -104,7 +104,17 @@ namespace stkde {
 
     return out;
   }
-  	     
+
+  template<typename istream>
+  istream& operator>> (istream& in, const voxelbox& b){
+    in>>b.voxXmin>>b.voxXmax
+      >>b.voxYmin>>b.voxYmax
+      >>b.voxTmin>>b.voxTmax;
+
+    return in;
+  }
+
+  
 
 }
   
