@@ -132,7 +132,7 @@ namespace stkde {
     ret.maxload = cost_of_box(param, b, inst);
     ret.sumload = ret.maxload;
     
-    std::cerr<<param.nbstate<<" Computing "<<b<<" "<<nbparts<<" naive cost: "<<ret.maxload<<std::endl;
+    //    std::cerr<<param.nbstate<<" Computing "<<b<<" "<<nbparts<<" naive cost: "<<ret.maxload<<std::endl;
 
     auto considerbest = [&](dp_hier_val& left_cut, dp_hier_val& right_cut) {
 	double max_cost = std::max(left_cut.maxload, right_cut.maxload);
@@ -149,10 +149,15 @@ namespace stkde {
 	  ret.sumload = left_cut.sumload + right_cut.sumload;
 	}	
     };
+
+    auto potential = [&](dp_hier_val& left_cut) {
+      return left_cut.maxload < ret.maxload;
+    };
     
     for (int p=1; p<nbparts; ++p) {
       //how many parts on the left
 
+      //cutting x?
       for (index cut = b.voxXmin+1; cut <b.voxXmax-1; cut += param.xstep) {
 	//cut is the last
 
@@ -163,12 +168,56 @@ namespace stkde {
 	
 	auto left_cut = partition_hier_rec(param, inst, leftbox, p);
 
-	//TODO: maybe don't look for the next cut if you already have
-	//a better solution
+	if (!potential(left_cut))
+	  continue;
+
 	auto right_cut = partition_hier_rec(param, inst, rightbox, nbparts-p);
 
 	considerbest(left_cut, right_cut);	
       }      
+
+      //cutting y?
+      for (index cut = b.voxYmin+1; cut <b.voxYmax-1; cut += param.ystep) {
+	//cut is the last
+
+	voxelbox leftbox = b;
+	leftbox.voxYmax = cut;
+	voxelbox rightbox = b;
+	rightbox.voxYmin = cut;
+	
+	auto left_cut = partition_hier_rec(param, inst, leftbox, p);
+
+
+	if (!potential(left_cut))
+	  continue;
+	
+	auto right_cut = partition_hier_rec(param, inst, rightbox, nbparts-p);
+
+	considerbest(left_cut, right_cut);	
+      }      
+
+
+      //cutting t?
+      for (index cut = b.voxTmin+1; cut <b.voxTmax-1; cut += param.tstep) {
+	//cut is the last
+
+	voxelbox leftbox = b;
+	leftbox.voxTmax = cut;
+	voxelbox rightbox = b;
+	rightbox.voxTmin = cut;
+	
+	auto left_cut = partition_hier_rec(param, inst, leftbox, p);
+
+
+	if (!potential(left_cut))
+	  continue;
+	
+	auto right_cut = partition_hier_rec(param, inst, rightbox, nbparts-p);
+
+	considerbest(left_cut, right_cut);	
+      }      
+
+
     }
     
 
@@ -192,9 +241,9 @@ namespace stkde {
     param.gamma = 1;
 
     param.nbstate = 0;
-    param.xstep = 4;
-    param.ystep = 16;
-    param.tstep = 16;
+    param.xstep = 128;
+    param.ystep = 128;
+    param.tstep = 128;
     
     stkde::voxelbox vb(0, c.voxX,
 		       0, c.voxY,
