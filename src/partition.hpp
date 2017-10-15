@@ -243,23 +243,35 @@ namespace stkde {
     computation c (bb,inst, pa);
 
     dp_hier_parameters param (c);
-    param.alpha = 1;
-    param.beta = 1;
-    param.gamma = 1;
+    param.alpha = 1.2e-08;
+    param.beta = 5.3e-09;
+    param.gamma = 2.2e-09;
 
     param.nbstate = 0;
-    param.xstep = 4;
-    param.ystep = 4;
-    param.tstep = 4;
+    param.xstep = 32;
+    param.ystep = 32;
+    param.tstep = 32;
     
     stkde::voxelbox vb(0, c.voxX,
 		       0, c.voxY,
 		       0, c.voxT);
 
+    
 
     std::cerr<<"box size: "<<c.voxX<<" x "<<c.voxY<<" x "<<c.voxT<<std::endl;
     std::cerr<<"nbparts: "<<nbparts<<std::endl;
 
+    double max_state = c.voxX/param.xstep * c.voxX/param.xstep
+      * c.voxY/param.ystep * c.voxY/param.ystep
+      * c.voxT/param.tstep * c.voxT/param.tstep
+      * nbparts;
+    
+    std::cerr<<"max states: "<<max_state<<std::endl;
+
+    double size_state = sizeof(dp_hier_key)+sizeof(dp_hier_val);//actually bigged than that, there is a vector
+
+    std::cerr<<"mem: "<<max_state*size_state/1024./1024./1024.<<" GB (this is an order of magnitude)"<<std::endl;
+    
     
     auto sol = partition_hier_rec(param, inst, vb, nbparts);
     
