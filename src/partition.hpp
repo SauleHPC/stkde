@@ -43,6 +43,7 @@ namespace stkde {
   struct dp_hier_val {
     std::vector<stkde::voxelbox> sol;
     double maxload;
+    double sumload;
   };
   
   struct dp_hier_parameters {
@@ -129,9 +130,25 @@ namespace stkde {
 
     ret.sol.push_back(b);
     ret.maxload = cost_of_box(param, b, inst);
-
+    ret.sumload = ret.maxload;
+    
     std::cerr<<param.nbstate<<" Computing "<<b<<" "<<nbparts<<" naive cost: "<<ret.maxload<<std::endl;
 
+    auto considerbest = [&](dp_hier_val& left_cut, dp_hier_val& right_cut) {
+	double max_cost = std::max(left_cut.maxload, right_cut.maxload);
+	
+	if (max_cost < ret.maxload) {
+	  ret.sol.clear();
+	  std::copy(left_cut.sol.begin(),
+		    left_cut.sol.end(),
+		    ret.sol.end());
+	  std::copy(right_cut.sol.begin(),
+		    right_cut.sol.end(),
+		    ret.sol.end());
+	  ret.maxload = max_cost;
+	  ret.sumload = left_cut.sumload + right_cut.sumload;
+	}	
+    };
     
     for (int p=1; p<nbparts; ++p) {
       //how many parts on the left
@@ -149,19 +166,8 @@ namespace stkde {
 	//TODO: maybe don't look for the next cut if you already have
 	//a better solution
 	auto right_cut = partition_hier_rec(param, inst, rightbox, nbparts-p);
-	
-	double max_cost = std::max(left_cut.maxload, right_cut.maxload);
-	
-	if (max_cost < ret.maxload) {
-	  ret.sol.clear();
-	  std::copy(left_cut.sol.begin(),
-		    left_cut.sol.end(),
-		    ret.sol.end());
-	  std::copy(right_cut.sol.begin(),
-		    right_cut.sol.end(),
-		    ret.sol.end());
-	  ret.maxload = max_cost;
-	}	
+
+	considerbest(left_cut, right_cut);	
       }      
     }
     
@@ -186,7 +192,7 @@ namespace stkde {
     param.gamma = 1;
 
     param.nbstate = 0;
-    param.xstep = 16;
+    param.xstep = 4;
     param.ystep = 16;
     param.tstep = 16;
     
@@ -201,8 +207,9 @@ namespace stkde {
     
     auto sol = partition_hier_rec(param, inst, vb, nbparts);
     
-
-    std::cerr<<"solution of "<<sol.maxload<<std::endl;
+    double naive = cost_of_box(param, vb, inst);
+    
+    std::cerr<<"solution: "<<sol.maxload<<" naive: "<<naive<<" speedup:"<<naive/sol.maxload <<" sumload:"<<sol.sumload<<std::endl;
     
     return sol.sol;    
   }
