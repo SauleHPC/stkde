@@ -68,7 +68,8 @@ std::shared_ptr<util::Compact3D<stkde::values>> stkde_pointbased_sym(const stkde
 
     //std::cerr<<"obsv: "<<obsvx<<" "<<obsvy<<" "<<obsvt<<std::endl;
 
-
+#ifndef BENCH_BETA
+#ifndef BENCH_GAMMA
     for (stkde::index i = std::max(obsvx - voxsbw, (stkde::index)0); i< std::min(obsvx + voxsbw+1, voxX); ++i) {
       for (stkde::index j = std::max(obsvy - voxsbw, (stkde::index)0); j< std::min(obsvy + voxsbw+1, voxY); ++j) {
 	stkde::coordinate vox_x = bb.xl + i*pa.xres;
@@ -83,7 +84,11 @@ std::shared_ptr<util::Compact3D<stkde::values>> stkde_pointbased_sym(const stkde
 	}
       }
     }
-
+#endif
+#endif
+    
+#ifndef BENCH_ALPHA
+#ifndef BENCH_GAMMA
     for (stkde::index k = std::max(obsvt - voxtbw, (stkde::index)0); k< std::min(obsvt + voxtbw+1, voxT); ++k) {
       stkde::coordinate vox_t = bb.tl + k*pa.tres;
       
@@ -94,8 +99,11 @@ std::shared_ptr<util::Compact3D<stkde::values>> stkde_pointbased_sym(const stkde
 			      inst.obsx.size(), pa.xbw, pa.tbw);
       }
     }
+#endif    
+#endif
     
-    
+#ifndef BENCH_ALPHA
+#ifndef BENCH_BETA
     //BW around observation
     for (stkde::index i = std::max(obsvx - voxsbw, (stkde::index)0); i< std::min(obsvx + voxsbw+1, voxX); ++i) {
       for (stkde::index j = std::max(obsvy - voxsbw, (stkde::index)0); j< std::min(obsvy + voxsbw+1, voxY); ++j) {
@@ -111,10 +119,36 @@ std::shared_ptr<util::Compact3D<stkde::values>> stkde_pointbased_sym(const stkde
 	
       }
     }
-  }
+#endif
+#endif
+    
+  } //end for all observations
+  
   util::timestamp computeend;
   std::cerr<<"compute: "<<computeend-computebeg<<" seconds"<<std::endl;
 
+#ifdef BENCH_ALPHA
+  double timespent = computeend-computebeg;
+  double area = inst.obsx.size() * (voxsbw+voxsbw+1) * (voxsbw+voxsbw+1);
+
+  std::cerr << "alpha="<<timespent/area<<std::endl;
+#endif
+
+#ifdef BENCH_BETA
+  double timespent = computeend-computebeg;
+  double linear = inst.obsx.size() * (voxtbw+voxtbw+1);
+
+  std::cerr << "beta="<<timespent/linear<<std::endl;
+#endif
+
+  
+#ifdef BENCH_GAMMA
+  double timespent = computeend-computebeg;
+  double volume = inst.obsx.size() * (voxsbw+voxsbw+1) * (voxsbw+voxsbw+1) * (voxtbw+voxtbw+1);
+
+  std::cerr << "gamma="<<timespent/volume<<std::endl;
+#endif
+  
   std::cerr<<"evaluations: "<<eval<<std::endl;
   
   return p;

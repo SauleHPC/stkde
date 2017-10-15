@@ -248,9 +248,9 @@ namespace stkde {
     param.gamma = 1;
 
     param.nbstate = 0;
-    param.xstep = 16;
-    param.ystep = 64;
-    param.tstep = 64;
+    param.xstep = 4;
+    param.ystep = 4;
+    param.tstep = 4;
     
     stkde::voxelbox vb(0, c.voxX,
 		       0, c.voxY,
@@ -269,7 +269,7 @@ namespace stkde {
     
     std::cerr<<"solution: "<<sol.maxload<<" in "<<sol.sol.size()<<" boxes."<<std::endl
 	     <<"naive: "<<naive<<" speedup:"<<naive/sol.maxload<<std::endl
-	     <<" sumload:"<<sol.sumload<<" overhead:"<<sol.sumload/naive<<std::endl;
+	     <<"sumload:"<<sol.sumload<<" overhead:"<<sol.sumload/naive<<std::endl;
 
     
     for (auto b : sol.sol) {
