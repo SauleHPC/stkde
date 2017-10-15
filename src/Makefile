@@ -38,6 +38,9 @@ OBJS = point-based.o
 point-based: point-based.o #voxel-based-gpu.o
 	$(LD) $(LDFLAGS) -o point-based point-based.o #voxel-based-gpu.o
 
+partition: partition.o #voxel-based-gpu.o
+	$(LD) $(LDFLAGS) -o partition partition.o #voxel-based-gpu.o
+
 voxel-based-gpu.o: voxel-based-gpu.cu
 	$(CXX) voxel-based-gpu.cu -c -o voxel-based-gpu.o $(CXXFLAGS)
 
