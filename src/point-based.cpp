@@ -186,7 +186,7 @@ int main (int argc, char* argv[]) {
     dens = stkde::stkde_pointbased_sym (bb, inst, param);
 
   if (method.compare("PARTITION-HIER") == 0)
-    stkde::partition_hier (bb, inst, param);
+    stkde::partition_hier (bb, inst, param, 16);
   
 #ifndef NO_OMP
   if (method.compare("POINTBASED-SYMOMP") == 0)
