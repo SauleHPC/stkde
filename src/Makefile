@@ -76,7 +76,7 @@ depend:
 graphanalysis.o: graphanalysis.hpp compact.hpp compact_impl.hpp timestamp.hpp
 point-based.o: types.hpp compact.hpp compact_impl.hpp io.hpp timestamp.hpp
 point-based.o: density.hpp point-based.hpp point-based-symdisk.hpp
-point-based.o: point-based-symbar.hpp point-based-sym.hpp
+point-based.o: point-based-symbar.hpp point-based-sym.hpp partition.hpp
 point-based.o: point-based-symomp.hpp decompositions.hpp computation.hpp
 point-based.o: point-based-symomp-boxdecomposition.hpp
 point-based.o: point-based-symomp-pointdecomp.hpp

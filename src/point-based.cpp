@@ -15,6 +15,8 @@
 #include "point-based-symbar.hpp"
 #include "point-based-sym.hpp"
 
+#include "partition.hpp"
+
 #ifndef NO_OMP
 #include "point-based-symomp.hpp"
 #include "point-based-symomp-boxdecomposition.hpp"
@@ -183,6 +185,9 @@ int main (int argc, char* argv[]) {
   if (method.compare("POINTBASED-SYM") == 0)
     dens = stkde::stkde_pointbased_sym (bb, inst, param);
 
+  if (method.compare("PARTITION-HIER") == 0)
+    stkde::partition_hier (bb, inst, param);
+  
 #ifndef NO_OMP
   if (method.compare("POINTBASED-SYMOMP") == 0)
     dens = stkde::stkde_pointbased_symomp (bb, inst, param, decompX, decompY, decompT);
