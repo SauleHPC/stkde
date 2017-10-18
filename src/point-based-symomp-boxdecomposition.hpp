@@ -82,10 +82,10 @@ namespace stkde {
 
       std::vector<values> bar(c.voxT);
 
-      //
-  
+      //  
 #pragma omp for schedule(dynamic,1)
-      for (auto& b : decomp) {
+      for (int i=0; i<decomp.size(); ++i) {
+	auto& b = decomp[i];
 	index ret =  process_observation_boxed_sym (c, //comp
 						    b.voxXmin, b.voxXmax, b.voxYmin, b.voxYmax, b.voxTmin, b.voxTmax, //box
 						    inst.obsx, inst.obsy, inst.obst, //observations

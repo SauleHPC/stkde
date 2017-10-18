@@ -14,7 +14,7 @@
 #include "point-based-symdisk.hpp"
 #include "point-based-symbar.hpp"
 #include "point-based-sym.hpp"
-
+ 
 #include "partition.hpp"
 
 #ifndef NO_OMP
@@ -99,8 +99,7 @@ int main (int argc, char* argv[]) {
       || method.compare("POINTBASED-SYMOMP-OBSDECOMP-COLORSCHED-REP") == 0
       || method.compare("VOXELBASED-OBSDECOMP") == 0
       || method.compare("VOXELBASED-OMP-OBSDECOMP") == 0
-      || method.compare("POINTBASED-SYMOMP-OBSDECOMP-SCHED") == 0
-      || method.compare("POINTBASED-SYMOMP-BOXDECOMP") == 0 ) {
+      || method.compare("POINTBASED-SYMOMP-OBSDECOMP-SCHED") == 0) {
     decompX = atoi(argv[5]);
     decompY = atoi(argv[6]);
     decompT = atoi(argv[7]);
@@ -184,9 +183,6 @@ int main (int argc, char* argv[]) {
     dens = stkde::stkde_pointbased_symbar (bb, inst, param);
   if (method.compare("POINTBASED-SYM") == 0)
     dens = stkde::stkde_pointbased_sym (bb, inst, param);
-
-  if (method.compare("PARTITION-HIER") == 0)
-    stkde::partition_hier (bb, inst, param, 16);
   
 #ifndef NO_OMP
   if (method.compare("POINTBASED-SYMOMP") == 0)
@@ -204,47 +200,38 @@ int main (int argc, char* argv[]) {
     dens = stkde::stkde_pointbased_symomp_point (bb, inst, param);
 
   if (method.compare("POINTBASED-SYMOMP-BOXDECOMP") == 0) {
+    if (argc<6) {
+      std::cerr<<"POINTBASED-SYMOMP-BOXDECOMP requires the partition file as argv[5]"<<std::endl;
+      return -1;
+    }
+    
     std::vector<stkde::voxelbox> decomp;
 
-    stkde::computation c (bb,inst, param, false);
+    {
+      std::string filename = argv[5];
+      std::ifstream partin (filename);
+      if (partin.fail()) {
+	std::cerr<<"can not open partition file \""<<argv[5]<<"\""<<std::endl;
+	return -1;
+      }
 
-    int decompsizeX=decompX, decompsizeY=decompY, decompsizeT=decompT;
-    for (int dx = 0; dx<decompsizeX; ++dx) {
-      for (int dy = 0; dy<decompsizeY; ++dy) {
-	for (int dt = 0; dt<decompsizeT; ++dt) {
-
-	  stkde::coordinate decxmin = bb.xl + ( dx   *(bb.xh-bb.xl)/decompsizeX );
-	  stkde::index voxXmin = std::lround(std::ceil((decxmin-bb.xl)/param.xres));
-	  stkde::coordinate decxmax = bb.xl + ((dx+1)*(bb.xh-bb.xl)/decompsizeX );
-	  stkde::index voxXmax;
-	  if (dx != decompsizeX-1)
-	    voxXmax = std::lround(std::floor((decxmax-bb.xl)/param.xres))+1;
-	  else
-	    voxXmax = c.voxX;
-	  
-	  stkde::coordinate decymin = bb.yl + ( dy   *(bb.yh-bb.yl)/decompsizeY );
-	  stkde::index voxYmin = std::lround(std::ceil((decymin-bb.yl)/param.yres));
-	  stkde::coordinate decymax = bb.yl + ((dy+1)*(bb.yh-bb.yl)/decompsizeY );
-	  stkde::index voxYmax;
-	  if (dy != decompsizeY-1)
-	    voxYmax = std::lround(std::floor((decymax-bb.yl)/param.yres))+1;
-	  else
-	    voxYmax = c.voxY;
-	  
-	  
-	  stkde::coordinate dectmin = bb.tl + ( dt   *(bb.th-bb.tl)/decompsizeT );
-	  stkde::index voxTmin = std::lround(std::ceil((dectmin-bb.tl)/param.tres));
-	  stkde::coordinate dectmax = bb.tl + ((dt+1)*(bb.th-bb.tl)/decompsizeT );
-	  stkde::index voxTmax;
-	  if (dt != decompsizeT-1)
-	    voxTmax = std::lround(std::floor((dectmax-bb.tl)/param.tres))+1;
-	  else
-	    voxTmax = c.voxT;
-
-
-	  stkde::voxelbox vb(voxXmin, voxXmax,voxYmin, voxYmax,voxTmin, voxTmax);
+      stkde::index nbbox;
+      
+      partin>>nbbox;
+      decomp.reserve(nbbox);
+      if (partin) {
+	for (int i=0; i<nbbox; ++i) {
+	  stkde::voxelbox vb;
+	  partin >> vb;
 	  decomp.push_back(vb);
 	}
+      }
+      if (!partin) {
+	std::cerr<<"Partition file malformed"<<std::endl;
+	return -1;
+      }
+      for (int i=0; i<nbbox; ++i) {
+	std::cerr<<decomp[i]<<std::endl;
       }
     }
     

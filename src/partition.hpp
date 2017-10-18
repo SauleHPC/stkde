@@ -297,6 +297,54 @@ namespace stkde {
 
     return sol.sol;    
   }
+
+  std::vector<stkde::voxelbox> grid_partition (const stkde::bounding_box& bb,
+					       const stkde::instance& inst,
+					       const stkde::parameters& pa,
+					       index decompsizeX, index decompsizeY, index decompsizeT) {
+    std::vector<stkde::voxelbox> decomp;
+
+    stkde::computation c (bb, inst, pa, false);
+
+    for (int dx = 0; dx<decompsizeX; ++dx) {
+      for (int dy = 0; dy<decompsizeY; ++dy) {
+	for (int dt = 0; dt<decompsizeT; ++dt) {
+
+	  stkde::coordinate decxmin = bb.xl + ( dx   *(bb.xh-bb.xl)/decompsizeX );
+	  stkde::index voxXmin = std::lround(std::ceil((decxmin-bb.xl)/pa.xres));
+	  stkde::coordinate decxmax = bb.xl + ((dx+1)*(bb.xh-bb.xl)/decompsizeX );
+	  stkde::index voxXmax;
+	  if (dx != decompsizeX-1)
+	    voxXmax = std::lround(std::floor((decxmax-bb.xl)/pa.xres))+1;
+	  else
+	    voxXmax = c.voxX;
+	  
+	  stkde::coordinate decymin = bb.yl + ( dy   *(bb.yh-bb.yl)/decompsizeY );
+	  stkde::index voxYmin = std::lround(std::ceil((decymin-bb.yl)/pa.yres));
+	  stkde::coordinate decymax = bb.yl + ((dy+1)*(bb.yh-bb.yl)/decompsizeY );
+	  stkde::index voxYmax;
+	  if (dy != decompsizeY-1)
+	    voxYmax = std::lround(std::floor((decymax-bb.yl)/pa.yres))+1;
+	  else
+	    voxYmax = c.voxY;
+	  
+	  
+	  stkde::coordinate dectmin = bb.tl + ( dt   *(bb.th-bb.tl)/decompsizeT );
+	  stkde::index voxTmin = std::lround(std::ceil((dectmin-bb.tl)/pa.tres));
+	  stkde::coordinate dectmax = bb.tl + ((dt+1)*(bb.th-bb.tl)/decompsizeT );
+	  stkde::index voxTmax;
+	  if (dt != decompsizeT-1)
+	    voxTmax = std::lround(std::floor((dectmax-bb.tl)/pa.tres))+1;
+	  else
+	    voxTmax = c.voxT;
+
+
+	  stkde::voxelbox vb(voxXmin, voxXmax,voxYmin, voxYmax,voxTmin, voxTmax);
+	  decomp.push_back(vb);
+	}
+      }
+    }
+}
 }
 
 #endif
