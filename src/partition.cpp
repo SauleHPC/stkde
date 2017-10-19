@@ -12,6 +12,7 @@
 #include "density.hpp"
 
 #include "partition.hpp"
+#include "partition-over.hpp"
 
 
 int main (int argc, char* argv[]) {
@@ -75,6 +76,17 @@ int main (int argc, char* argv[]) {
     parts = stkde::partition_hier (bb, inst, param, nbparts, xstep, ystep, tstep);
   }
 
+  if (method.compare("PARTITION-HIER-OVERDECOMPOSE") == 0) {
+    int nbparts = atoi(argv[6]);
+    stkde::index xstep = atoi(argv[7]);
+    stkde::index ystep = atoi(argv[8]);
+    stkde::index tstep = atoi(argv[9]);
+    double loadratio=atof(argv[10]); // max imbalance ratio allowed
+    
+    parts = stkde::partition_hier_overdecompose (bb, inst, param, nbparts, xstep, ystep, tstep, loadratio);
+  }
+
+  
 
   util::timestamp end;
 

@@ -35,9 +35,9 @@ namespace stkde{
     //    std::cerr<<param.nbstate<<" Computing "<<b<<" "<<nbparts<<" naive cost: "<<ret.maxload<<std::endl;
 
     auto considerbest = [&](dp_hier_val& left_cut, dp_hier_val& right_cut) {
-	double max_cost = std::max(left_cut.maxload, right_cut.maxload);
+	double sum_cost = left_cut.sumload + right_cut.sumload;
 
-	if (max_cost < ret.maxload) {
+	if (sum_cost < ret.sumload) {
 	  ret.sol.clear();
 	  std::copy(left_cut.sol.begin(),
 		    left_cut.sol.end(),
@@ -45,13 +45,13 @@ namespace stkde{
 	  std::copy(right_cut.sol.begin(),
 		    right_cut.sol.end(),
 		    std::back_inserter(ret.sol));
-	  ret.maxload = max_cost;
+	  ret.maxload = std::max(left_cut.maxload, right_cut.maxload);
 	  ret.sumload = left_cut.sumload + right_cut.sumload;
 	}	
     };
 
     auto potential = [&](dp_hier_val& left_cut) {
-      return left_cut.maxload < ret.maxload;
+      return left_cut.sumload < ret.sumload;
     };
     
     for (int p=1; p<nbparts; ++p) {
