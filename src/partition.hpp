@@ -57,7 +57,7 @@ namespace stkde {
     index xstep;
     index ystep;
     index tstep;
-    
+
     dp_hier_parameters (const computation& co)
       :c(co)
     {}
@@ -344,7 +344,11 @@ namespace stkde {
 	}
       }
     }
-}
+  }
+
+
+  
+
 }
 
 #endif
