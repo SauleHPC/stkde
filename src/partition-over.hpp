@@ -196,6 +196,11 @@ namespace stkde{
       std::cerr<<b<<" cost "<<cost_of_box(param, b, inst)<<std::endl;
     }
 
+    if (sol.sumload == std::numeric_limits<double>::infinity()) {
+      sol.sol.clear();
+      std::cerr<<"no good partition"<<std::endl;
+    }
+
     return sol.sol;    
   }
 }
