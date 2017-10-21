@@ -196,7 +196,71 @@ namespace stkde{
       ret.sumload = ((ret.maxload <= maxloadallowed)?ret.maxload : std::numeric_limits<double>::infinity());
     }
 
+    //helper function in the DP
+    auto considerbest = [&](dp_hier_val& left_cut, dp_hier_val& right_cut) {
+	double sum_cost = left_cut.sumload + right_cut.sumload;
 
+	if (sum_cost < ret.sumload) {
+	  //	  std::cout<<"new sol"<<std::endl;
+
+	  ret.sol.clear();
+	  std::copy(left_cut.sol.begin(),
+		    left_cut.sol.end(),
+		    std::back_inserter(ret.sol));
+	  std::copy(right_cut.sol.begin(),
+		    right_cut.sol.end(),
+		    std::back_inserter(ret.sol));
+	  ret.maxload = std::max(left_cut.maxload, right_cut.maxload);
+	  ret.sumload = left_cut.sumload + right_cut.sumload;
+	}	
+    };
+
+    auto potential = [&](const dp_hier_val& left_cut) {
+      return left_cut.sumload < ret.sumload;
+    };
+
+    auto remain_is_small = [&](const voxelbox& vb, int nbparts) {
+      double remain_cost = cost_of_box(param, vb, inst)/nbparts;
+      return remain_cost < maxloadallowed;
+    };
+    
+
+    if (nbparts > 1) {
+      //all tcut
+      for (index cut = 0+param.tstep; cut <Tmax-1; cut += param.tstep) {
+	//cut is the last
+	
+
+	dp_hier_val right_cut;
+	//base case is one box
+	{
+	  stkde::voxelbox vb(Xmin, Xmax,
+			     Ymin, Ymax,
+			     cut, Tmax);
+          
+	  right_cut.sol.push_back(vb);
+	  right_cut.maxload = cost_of_box(param, vb, inst);
+	  right_cut.sumload = ((ret.maxload <= maxloadallowed)?ret.maxload : std::numeric_limits<double>::infinity());
+	}
+	
+	if (!potential(right_cut))
+	  continue;
+
+	if (!remain_is_small(voxelbox(Xmin,Xmax,Ymin,Ymax,0,cut), nbparts))
+	  continue;
+	
+	auto left_cut = partition_jaggedZ_over_rec (param, inst,
+						    Xmin, Xmax, Ymin, Ymax, cut,
+						    nbparts-1, maxloadallowed); //left is a recursive jagged cut
+	
+	
+
+	considerbest(left_cut, right_cut);	
+      }
+    }
+
+    
+    
     //save solution and return it
     param.memo_l5[k] = ret;
     
@@ -299,6 +363,12 @@ namespace stkde{
       return left_cut.sumload < ret.sumload;
     };
     
+    auto remain_is_small = [&](const voxelbox& vb, int nbparts) {
+      double remain_cost = cost_of_box(param, vb, inst)/nbparts;
+      return remain_cost < maxloadallowed;
+    };
+
+
     //all ycut
     for (int p=1; p<nbparts; ++p) {
       //how many parts on the left
@@ -314,6 +384,9 @@ namespace stkde{
 	if (!potential(left_cut))
 	  continue;
 
+	// if (!remain_is_small(voxelbox(Xmin,Xmax, 0,cut, 0,c.voxT), nbparts))
+	//   continue;
+	
 	auto right_cut = partition_jaggedZ(param, inst, Xmin, Xmax, cut, Ymax, nbparts-p, maxloadallowed);
 
 	considerbest(left_cut, right_cut);	
@@ -426,6 +499,11 @@ namespace stkde{
       return left_cut.sumload < ret.sumload;
     };
     
+    auto remain_is_small = [&](const voxelbox& vb, int nbparts) {
+      double remain_cost = cost_of_box(param, vb, inst)/nbparts;
+      return remain_cost < maxloadallowed;
+    };
+
     //all solutions with an X cut
     for (int p=1; p<nbparts; ++p) {
       //how many parts on the left
@@ -434,16 +512,15 @@ namespace stkde{
       for (index cut = 0+param.xstep; cut <X-1; cut += param.xstep) {
 	//cut is the last
 
-	//	voxelbox leftbox(, ;
-	//leftbox.voxXmax = cut;
-	//voxelbox rightbox = b;
-	//rightbox.voxXmin = cut;
 	
 	auto left_cut = partition_jaggedX_over_rec (param, inst, cut, p, maxloadallowed); //left is a recursive jagged cut
 
 	if (!potential(left_cut))
 	  continue;
 
+	if (!remain_is_small(voxelbox(0,X,0,c.voxY,0,c.voxT), nbparts))
+	  continue;
+	
 	auto right_cut = partition_jaggedY(param, inst, cut, X, nbparts-p, maxloadallowed);
 
 	considerbest(left_cut, right_cut);	
