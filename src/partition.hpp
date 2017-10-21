@@ -47,26 +47,34 @@ namespace stkde {
     double sumload;
   };
   
-  struct dp_hier_parameters {
+  struct dp_parameters {
     double alpha; //cost of each entry of the 2d spatial grid
     double beta; //cost of each entry of the 1d spatial grid
     double gamma; //cost of each entry of the 3d volume
 
     const computation& c;
 
+    dp_parameters (const computation& co)
+      :c(co)
+    {}
+  };
+
+  struct dp_hier_parameters: public dp_parameters {
+    
     index xstep;
     index ystep;
     index tstep;
 
     dp_hier_parameters (const computation& co)
-      :c(co)
+      :dp_parameters(co)
     {}
+    
 
     std::map<dp_hier_key, dp_hier_val> memo;
     size_t nbstate;
   };
   
-  double cost_of_box (const dp_hier_parameters& param, const stkde::voxelbox& b,  const instance& inst) {
+  double cost_of_box (const dp_parameters& param, const stkde::voxelbox& b,  const instance& inst) {
 
     double total_cost = 0.;
 
