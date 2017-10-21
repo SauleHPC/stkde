@@ -34,6 +34,7 @@ endif
 
 OBJS = point-based.o
 
+all: point-based partition
 
 point-based: point-based.o #voxel-based-gpu.o
 	$(LD) $(LDFLAGS) -o point-based point-based.o #voxel-based-gpu.o
@@ -71,6 +72,8 @@ test-voxel-gpu: point-based
 clean:
 	-rm $(OBJS)
 	-rm point-based
+	-rm partition
+	-rm partition.o
 
 depend:
 	makedepend -Y -I . *.cpp 
@@ -79,6 +82,7 @@ depend:
 graphanalysis.o: graphanalysis.hpp compact.hpp compact_impl.hpp timestamp.hpp
 partition.o: types.hpp compact.hpp compact_impl.hpp io.hpp timestamp.hpp
 partition.o: density.hpp partition.hpp partition-over.hpp
+partition.o: partition-jagged.hpp
 point-based.o: types.hpp compact.hpp compact_impl.hpp io.hpp timestamp.hpp
 point-based.o: density.hpp point-based.hpp point-based-symdisk.hpp
 point-based.o: point-based-symbar.hpp point-based-sym.hpp partition.hpp

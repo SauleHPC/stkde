@@ -1,5 +1,5 @@
 #ifndef PART_OVER_HPP_
-#define PART_OVER_HPP
+#define PART_OVER_HPP_
 
 #include <limits>
 
