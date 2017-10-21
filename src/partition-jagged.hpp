@@ -98,6 +98,44 @@ namespace stkde{
     }
 
   };
+  
+  struct jagged_level_five_key {
+    index xmin, xmax;
+    index ymin, ymax;
+    index tmax;
+    int nbpart;    
+
+    bool operator<(const jagged_level_five_key& k2) const {
+      if (this->xmax < k2.xmax)
+	return true;
+      if (this->xmax > k2.xmax)
+	return false;
+      
+      if (this->xmin < k2.xmin)
+	return true;
+      if (this->xmin > k2.xmin)
+	return false;
+
+      if (this->ymax < k2.ymax)
+	return true;
+      if (this->ymax > k2.ymax)
+	return false;
+
+      if (this->ymin < k2.ymin)
+	return true;
+      if (this->ymin > k2.ymin)
+	return false;
+
+      if (this->tmax < k2.tmax)
+	return true;
+      if (this->tmax > k2.tmax)
+	return false;
+
+      
+      return this->nbpart < k2.nbpart;
+    }
+
+  };
 
   
   
@@ -115,10 +153,58 @@ namespace stkde{
     std::map<jagged_level_two_key, dp_hier_val> memo_l2; //a full X slice
     std::map<jagged_level_three_key, dp_hier_val> memo_l3; //an xslice ycut
     std::map<jagged_level_four_key, dp_hier_val> memo_l4; //a full XY cut
+    std::map<jagged_level_five_key, dp_hier_val> memo_l5; //a z cut of an XY box
     size_t nbstate;
   };
 
 
+  dp_hier_val partition_jaggedZ_over_rec(dp_jagged_parameters& param,
+					 const stkde::instance& inst,
+					 index Xmin,
+					 index Xmax,
+					 index Ymin,
+					 index Ymax,
+					 index Tmax,
+					 int nbparts,
+					 double maxloadallowed) {
+    const computation& c = param.c;
+    
+    jagged_level_five_key k;
+    k.xmin = Xmin;
+    k.xmax = Xmax;
+    k.ymax = Ymax;
+    k.ymin = Ymin;
+    k.tmax = Tmax;
+    k.nbpart = nbparts;
+    
+    auto it = param.memo_l5.find(k);
+
+    if (it != param.memo_l5.end()) {
+      return it->second;
+    }
+
+    dp_hier_val ret;
+    
+    //naive solution: one box
+    {
+      stkde::voxelbox vb(Xmin, Xmax,
+			 Ymin, Ymax,
+			 0, Tmax);
+          
+      ret.sol.push_back(vb);
+      ret.maxload = cost_of_box(param, vb, inst);
+      ret.sumload = ((ret.maxload <= maxloadallowed)?ret.maxload : std::numeric_limits<double>::infinity());
+    }
+
+
+    //save solution and return it
+    param.memo_l5[k] = ret;
+    
+    return ret;    
+
+    
+  }
+	     
   dp_hier_val partition_jaggedZ(dp_jagged_parameters& param,
 				const stkde::instance& inst,
 				index Xmin,
@@ -142,19 +228,10 @@ namespace stkde{
       return it->second;
     }
 
-    dp_hier_val ret;
+    dp_hier_val ret = partition_jaggedZ_over_rec  (param, inst,
+						   Xmin, Xmax, Ymin, Ymax, c.voxT,
+						   nbparts, maxloadallowed);
     
-    //naive solution: one box
-    {
-      stkde::voxelbox vb(Xmin, Xmax,
-			 Ymin, Ymax,
-			 0, c.voxT);
-          
-      ret.sol.push_back(vb);
-      ret.maxload = cost_of_box(param, vb, inst);
-      ret.sumload = ((ret.maxload <= maxloadallowed)?ret.maxload : std::numeric_limits<double>::infinity());
-    }
-
     
     //save solution and return it
     param.memo_l4[k] = ret;
