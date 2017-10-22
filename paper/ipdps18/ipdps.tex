@@ -29,11 +29,11 @@
 \title{Work Inefficient Partitioning: The space time kernel density case.}
 
 
-\author{\IEEEauthorblockN{Erik  Saule$^\dag$, Alexander Hohl$^\ddag$, Wenwu Tang$^\ddag$, Eric Delmelle$^\ddag$}
-\IEEEauthorblockA{$^\dag$ Dept. of Computer Science, $^\ddag$Dept. of Geography and Earth Sciences\\
+\author{\IEEEauthorblockN{Erik  Saule}
+\IEEEauthorblockA{ Dept. of Computer Science\\
 UNC Charlotte\\
 Charlotte, NC, USA\\
-Email: \{esaule,ahohl,wtang4,eric.delmelle\}@uncc.edu}
+Email: esaule@uncc.edu}
 }
 
 \maketitle
@@ -70,24 +70,98 @@ Email: \{esaule,ahohl,wtang4,eric.delmelle\}@uncc.edu}
 
 \IEEEpeerreviewmaketitle
 
-
-
-
-
 \section{Introduction}
 
+When computation is located in a spatial domain, a common technique to
+make these computation parallel is to decompose the spatial domain
+into subdomains so that the computation of each subdomain can be done
+in parallel. Applications following that model appear in all realms of
+applications of parallel computing, including physics with n-body
+computation, mecanical simulations, chemistry, geography, and many others.
+
+Algorithms for decomposing spatial located computation have attracted
+a constant number of attention over the years. Some methods are
+designed to be fast heuristics~\cite{RB}, while some other attempt to
+at finding optimal decompositions~\cite{erdeniz}. Some deal with
+heterogeneous processors~\cite{pinar}. Also fast and generic
+implementation of these types of decomposition for distributed memory
+machines have been provided~\cite{deveci_ipdps}.
+
+Yet, all methods usually assume that the decomposition is work
+efficient. It is not uncommon that these methods overdecompose the
+spatial domain; that is to say they decompose the space in many more
+domains than there are processors on the system, and rely on giving
+multiple domains to each processor to achieve load balance.
+
+Some application do not admit work efficient spatial
+decomposition. That is to say, when a domain $D$ is decomposed in two
+subdomains $D_1$ and $D_2$, it is possible that the sum of the work to
+process $D_1$ and $D_2$ is larger than the work necessary to process
+domain $D$.
+
+As a representative of this class of application, we present here
+a common geography problem. Visualizing the distibution of some events
+requires to compute a Space Time Kernel Density
+Estimation(STKDE)~\cite{delmelle}. Decomposing the spatial domain
+(space-time domain in STKDE terminology) to process each subdomain
+independently is not a work-efficient decomposition~\cite{icpp17}. As
+such traditional overdecomposition techniques lead to an increase in
+work which limits the usefulness of parallelism.
+
+We present in this paper spatial decomposition techniques suitable for
+problem which do not have work-efficient decomposition. By modeling
+the amount of work in the different parts of a decomposition, one can
+seek to find the decomposition with minimal maximum work. Because
+finding an optimal decomposition for arbitrary decomposition patterns
+is usually NP-hard, we focus on classes of decomposition that can be
+optimized optimally in polynomial time by dynamic programing for a
+given number of parts, namely jagged decomposition and recursive
+decompositions in blocks.
+
+However these decompositions only allocate a single block per
+processor, which may lead to an imbalanced decomposition. We propose
+an algorithm aware of work inefficience which overdecomposes the
+domain for better load balance. The algorithm works by exploring a
+bi-objective tradeoff between the most loaded part and the total
+amount of overhead induced by the decomposition.
+
+The remaining of the document is organized has follows.
+Section~\ref{sec:relworks} presents common strategies for spatial
+decomposition. Section \ref{sec:stkde} describes the Space-Time Kernel
+Density Estimation problem and explain why it is
+work-inefficient. Methods for decomposing the work for execution on
+$P$ processors are presented in Section~\ref{sec:exactdecomposition};
+while work-inefficiency aware methods are presented in
+Section~\ref{sec:overdecomposition}. Practical results obtained on
+real instances of STKDE are shown in
+Section~\ref{sec:experiments}. Final remarks and future works are
+discussed in Section~\ref{sec:ccl}.
 
 \section{Related Works}
+\label{sec:relworks}
 
 Mostly on work efficient partition.
 
-\section{Space time Kernel Density}
+\section{Space time Kernel Density Estimation}
+\label{sec:stkde}
 
-
-\section{One part per core}
+\section{Exact Decomposition}
+\label{sec:exactdecomposition}
 
 
 \section{Overdecomposition}
+\label{sec:overdecomposition}
+
+
+\section{Experiments}
+\label{sec:experiments}
+
+\section{Conclusion}
+\label{sec:ccl}
+
+\section*{Acknowledgment}
+
+\bibliographystyle{alpha}
 
 
 \end{document}

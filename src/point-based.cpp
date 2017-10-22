@@ -233,6 +233,11 @@ int main (int argc, char* argv[]) {
       for (int i=0; i<nbbox; ++i) {
 	std::cerr<<decomp[i]<<std::endl;
       }
+      if (nbbox < 2) {
+	std::cerr<<"not enough parallelism. Aborting..."<<std::endl;
+	return -1;
+      }
+	
     }
     
     dens = stkde::stkde_pointbased_symomp_boxdecomp (bb, inst, param, decomp);

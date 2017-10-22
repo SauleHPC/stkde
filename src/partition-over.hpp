@@ -69,7 +69,7 @@ namespace stkde{
 	auto left_cut = partition_hier_over_rec(param, inst, leftbox, p, maxloadallowed);
 
 	if (!potential(left_cut))
-	  continue;
+	  break; //left_cut will only grow
 
 	auto right_cut = partition_hier_over_rec(param, inst, rightbox, nbparts-p, maxloadallowed);
 
@@ -89,7 +89,7 @@ namespace stkde{
 
 
 	if (!potential(left_cut))
-	  continue;
+	  break; //left_cut will only grow
 	
 	auto right_cut = partition_hier_over_rec(param, inst, rightbox, nbparts-p, maxloadallowed);
 
@@ -110,7 +110,7 @@ namespace stkde{
 
 
 	if (!potential(left_cut))
-	  continue;
+	  break; //left_cut will only grow
 	
 	auto right_cut = partition_hier_over_rec(param, inst, rightbox, nbparts-p, maxloadallowed);
 
