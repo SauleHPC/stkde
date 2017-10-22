@@ -96,6 +96,19 @@ namespace stkde {
   };
 
   
+  bool intersect (const voxelbox& a, const voxelbox& b) {
+    if (b.voxXmax <= a.voxXmin) return false;
+    if (a.voxXmax <= b.voxXmin) return false;
+
+    if (b.voxYmax <= a.voxYmin) return false;
+    if (a.voxYmax <= b.voxYmin) return false;
+    
+    if (b.voxTmax <= a.voxTmin) return false;
+    if (a.voxTmax <= b.voxTmin) return false;
+
+    return true;
+  }
+  
   template<typename ostream>
   ostream& operator<< (ostream& out, const voxelbox& b){
     out<<b.voxXmin<<" "<<b.voxXmax

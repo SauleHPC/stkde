@@ -14,6 +14,7 @@
 #include "partition.hpp"
 #include "partition-over.hpp"
 #include "partition-jagged.hpp"
+#include "partition-jagged-over.hpp"
 
 
 int main (int argc, char* argv[]) {
@@ -21,6 +22,9 @@ int main (int argc, char* argv[]) {
   if (argc < 6 ) {
     std::cerr<<"usage: "<<argv[0]<<" boundary observations param outfile  method [methodparams]"<<std::endl;
     std::cerr<<"Methods: PARTITION-HIER nbparts xstep ystep tstep"<<std::endl;
+    std::cerr<<"Methods: PARTITION-JAGGED nbparts xstep ystep tstep"<<std::endl;
+    std::cerr<<"Methods: PARTITION-HIER-OVERDECOMPOSE nbparts xstep ystep tstep loadratio"<<std::endl;
+    std::cerr<<"Methods: PARTITION-JAGGED-OVERDECOMPOSE nbparts xstep ystep tstep loadratio"<<std::endl;
      
     return -1;	
   }
@@ -87,6 +91,16 @@ int main (int argc, char* argv[]) {
     parts = stkde::partition_hier_overdecompose (bb, inst, param, nbparts, xstep, ystep, tstep, loadratio);
   }
 
+  if (method.compare("PARTITION-JAGGED") == 0) {
+    int nbparts = atoi(argv[6]);
+    stkde::index xstep = atoi(argv[7]);
+    stkde::index ystep = atoi(argv[8]);
+    stkde::index tstep = atoi(argv[9]);
+    
+    parts = stkde::partition_jagged (bb, inst, param, nbparts, xstep, ystep, tstep);
+  }
+
+  
   if (method.compare("PARTITION-JAGGED-OVERDECOMPOSE") == 0) {
     int nbparts = atoi(argv[6]);
     stkde::index xstep = atoi(argv[7]);

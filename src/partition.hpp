@@ -287,7 +287,7 @@ namespace stkde {
     
     double naive = cost_of_box(param, vb, inst);
 
-    std::cerr<<param.nbstate<<" states processed"<<std::endl;
+    std::cerr<<param.memo.size()<<" states processed"<<std::endl;
     
     std::cerr<<"solution: "<<sol.maxload<<" in "<<sol.sol.size()<<" boxes."<<std::endl
 	     <<"naive: "<<naive<<" speedup:"<<naive/sol.maxload<<std::endl

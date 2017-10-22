@@ -1,5 +1,5 @@
-#ifndef PART_JAGGED_OVER_HPP_
-#define PART_JAGGED_OVER_HPP_
+#ifndef PART_JAGGED_HPP_
+#define PART_JAGGED_HPP_
 
 #include <limits>
 
@@ -63,10 +63,8 @@ namespace stkde{
       
       return this->nbpart < k2.nbpart;
     }
-
   };
 
-  
   struct jagged_level_four_key {
     index xmin, xmax;
     index ymin, ymax;
@@ -158,15 +156,14 @@ namespace stkde{
   };
 
 
-  dp_hier_val partition_jaggedZ_over_rec(dp_jagged_parameters& param,
-					 const stkde::instance& inst,
-					 index Xmin,
-					 index Xmax,
-					 index Ymin,
-					 index Ymax,
-					 index Tmax,
-					 int nbparts,
-					 double maxloadallowed) {
+  dp_hier_val partition_jaggedZ_rec(dp_jagged_parameters& param,
+				    const stkde::instance& inst,
+				    index Xmin,
+				    index Xmax,
+				    index Ymin,
+				    index Ymax,
+				    index Tmax,
+				    int nbparts) {
     const computation& c = param.c;
     
     jagged_level_five_key k;
@@ -183,7 +180,14 @@ namespace stkde{
       return it->second;
     }
 
+    static long skip = 0;
+    
     dp_hier_val ret;
+
+    // std::cerr<<"computing jagged Z "
+    // 	     <<Xmin<<" "<<Xmax<<" "
+    // 	     <<Ymin<<" "<<Ymax<<" "
+    //   	     <<Tmax<<" "<<nbparts<<std::endl;
     
     //naive solution: one box
     {
@@ -193,14 +197,16 @@ namespace stkde{
           
       ret.sol.push_back(vb);
       ret.maxload = cost_of_box(param, vb, inst);
-      ret.sumload = ((ret.maxload <= maxloadallowed)?ret.maxload : std::numeric_limits<double>::infinity());
+      //      ret.sumload = ((ret.maxload <= maxloadallowed)?ret.maxload : std::numeric_limits<double>::infinity());
+      ret.sumload = ret.maxload;
     }
 
     //helper function in the DP
     auto considerbest = [&](dp_hier_val& left_cut, dp_hier_val& right_cut) {
 	double sum_cost = left_cut.sumload + right_cut.sumload;
-
-	if (sum_cost < ret.sumload) {
+	double max_l = std::max(left_cut.maxload, right_cut.maxload);
+	
+	if (max_l < ret.maxload) {
 	  //	  std::cout<<"new sol"<<std::endl;
 
 	  ret.sol.clear();
@@ -216,12 +222,12 @@ namespace stkde{
     };
 
     auto potential = [&](const dp_hier_val& left_cut) {
-      return left_cut.sumload < ret.sumload;
+      return left_cut.maxload < ret.maxload;
     };
 
     auto remain_is_small = [&](const voxelbox& vb, int nbparts) {
       double remain_cost = cost_of_box(param, vb, inst)/nbparts;
-      return remain_cost < maxloadallowed;
+      return remain_cost < ret.maxload;
     };
     
 
@@ -240,43 +246,84 @@ namespace stkde{
           
 	  right_cut.sol.push_back(vb);
 	  right_cut.maxload = cost_of_box(param, vb, inst);
-	  right_cut.sumload = ((ret.maxload <= maxloadallowed)?ret.maxload : std::numeric_limits<double>::infinity());
+	  right_cut.sumload = right_cut.maxload;
 	}
 	
-	if (!potential(right_cut))
+	if (!potential(right_cut)) {
+	  skip++;
+	  continue; 
+	}
+	
+	if (!remain_is_small(voxelbox(Xmin,Xmax,Ymin,Ymax,0,cut), nbparts-1)) {
+	  skip++;
 	  continue;
-
-	if (!remain_is_small(voxelbox(Xmin,Xmax,Ymin,Ymax,0,cut), nbparts))
-	  continue;
+	}
 	
-	auto left_cut = partition_jaggedZ_over_rec (param, inst,
-						    Xmin, Xmax, Ymin, Ymax, cut,
-						    nbparts-1, maxloadallowed); //left is a recursive jagged cut
-	
+	auto left_cut = partition_jaggedZ_rec (param, inst,
+					       Xmin, Xmax, Ymin, Ymax, cut,
+					       nbparts-1); //left is a recursive jagged cut
 	
 
+	if (!potential(left_cut)) {
+	  break;//left_cut will only grow 
+	}
+	
 	considerbest(left_cut, right_cut);	
       }
     }
 
     
-    
+    //std::cout<<"skip: "<<skip<<std::endl;
+
     //save solution and return it
     param.memo_l5[k] = ret;
     
     return ret;    
-
-    
   }
-	     
+
+  stkde::instance filter_instance(const stkde::instance& inst, const voxelbox& vb, const dp_parameters& dpp) {
+    stkde::instance ret;
+
+    for (size_t ob=0; ob<inst.obsx.size(); ++ob) {
+            //observation
+      stkde::coordinate ox = inst.obsx[ob];
+      stkde::coordinate oy = inst.obsy[ob];
+      stkde::coordinate ot = inst.obst[ob];
+      
+      //voxel containing the observation
+      index obsvx = (ox - dpp.c.bb.xl)/dpp.c.pa.xres;
+      index obsvy = (oy - dpp.c.bb.yl)/dpp.c.pa.yres;
+      index obsvt = (ot - dpp.c.bb.tl)/dpp.c.pa.tres;
+
+      //
+      index cyl_xmin = obsvx - dpp.c.voxsbw;
+      index cyl_xmax = obsvx + dpp.c.voxsbw+1;
+
+      index cyl_ymin = obsvy - dpp.c.voxsbw;
+      index cyl_ymax = obsvy + dpp.c.voxsbw+1;
+
+      index cyl_tmin = obsvt - dpp.c.voxtbw;
+      index cyl_tmax = obsvt + dpp.c.voxtbw+1;
+
+      voxelbox cyl(cyl_xmin, cyl_xmax, cyl_ymin, cyl_ymax, cyl_tmin, cyl_tmax);
+
+      if (intersect (cyl, vb)) {
+	ret.obsx.push_back(ox);
+	ret.obsy.push_back(oy);
+	ret.obst.push_back(ot);
+      }
+	
+    }
+    return ret;
+  }
+  
   dp_hier_val partition_jaggedZ(dp_jagged_parameters& param,
 				const stkde::instance& inst,
 				index Xmin,
 				index Xmax,
 				index Ymin,
 				index Ymax,
-				int nbparts,
-				double maxloadallowed) {
+				int nbparts) {
     const computation& c = param.c;
 
     jagged_level_four_key k;
@@ -292,9 +339,15 @@ namespace stkde{
       return it->second;
     }
 
-    dp_hier_val ret = partition_jaggedZ_over_rec  (param, inst,
-						   Xmin, Xmax, Ymin, Ymax, c.voxT,
-						   nbparts, maxloadallowed);
+
+    voxelbox vb (Xmin,Xmax,Ymin,Ymax,0,c.voxT);
+    
+    auto filteredinstance = filter_instance(inst, vb, param);
+    //auto filteredinstance = inst;
+    
+    dp_hier_val ret = partition_jaggedZ_rec  (param, filteredinstance,
+					      Xmin, Xmax, Ymin, Ymax, c.voxT,
+					      nbparts);
     
     
     //save solution and return it
@@ -306,13 +359,12 @@ namespace stkde{
   
   
 
-  dp_hier_val partition_jaggedY_over_rec(dp_jagged_parameters& param,
-					 const stkde::instance& inst,
-					 index Xmin,
-					 index Xmax,
-					 index Ymax,
-					 int nbparts,
-					 double maxloadallowed) {
+  dp_hier_val partition_jaggedY_rec(dp_jagged_parameters& param,
+				     const stkde::instance& inst,
+				     index Xmin,
+				     index Xmax,
+				     index Ymax,
+				     int nbparts) {
     const computation& c = param.c;
 
     jagged_level_three_key k;
@@ -328,6 +380,12 @@ namespace stkde{
     }
 
     dp_hier_val ret;
+
+
+    // std::cerr<<"computing jagged Y "
+    // 	     <<Xmin<<" "<<Xmax<<" "
+    // 	     <<Ymax<<" "
+    //   	     <<nbparts<<std::endl;
     
     //naive solution: one box
     {
@@ -337,14 +395,16 @@ namespace stkde{
           
       ret.sol.push_back(vb);
       ret.maxload = cost_of_box(param, vb, inst);
-      ret.sumload = ((ret.maxload <= maxloadallowed)?ret.maxload : std::numeric_limits<double>::infinity());
+      ret.sumload = ret.maxload;
     }
 
     //helper function in the DP
+    //helper function in the DP
     auto considerbest = [&](dp_hier_val& left_cut, dp_hier_val& right_cut) {
 	double sum_cost = left_cut.sumload + right_cut.sumload;
-
-	if (sum_cost < ret.sumload) {
+	double max_l = std::max(left_cut.maxload, right_cut.maxload);
+	
+	if (max_l < ret.maxload) {
 	  //	  std::cout<<"new sol"<<std::endl;
 
 	  ret.sol.clear();
@@ -359,13 +419,13 @@ namespace stkde{
 	}	
     };
 
-    auto potential = [&](dp_hier_val& left_cut) {
-      return left_cut.sumload < ret.sumload;
+    auto potential = [&](const dp_hier_val& left_cut) {
+      return left_cut.maxload < ret.maxload;
     };
-    
+
     auto remain_is_small = [&](const voxelbox& vb, int nbparts) {
       double remain_cost = cost_of_box(param, vb, inst)/nbparts;
-      return remain_cost < maxloadallowed;
+      return remain_cost < ret.maxload;
     };
 
 
@@ -377,25 +437,31 @@ namespace stkde{
       for (index cut = 0+param.ystep; cut <Ymax-1; cut += param.ystep) {
 	//cut is the last
 	
-	auto left_cut = partition_jaggedY_over_rec (param, inst,
-						    Xmin, Xmax, cut,
-						    p, maxloadallowed); //left is a recursive jagged cut
+	auto right_cut = partition_jaggedZ(param, inst, Xmin, Xmax, cut, Ymax, nbparts-p);
 
-	if (!potential(left_cut))
+	if (!potential(right_cut)) {
 	  continue;
+	}
 
-	// if (!remain_is_small(voxelbox(Xmin,Xmax, 0,cut, 0,c.voxT), nbparts))
-	//   continue;
+	if (!remain_is_small(voxelbox(Xmin,Xmax, 0, cut, 0, c.voxT), p)) {
+	  continue;
+	}
 	
-	auto right_cut = partition_jaggedZ(param, inst, Xmin, Xmax, cut, Ymax, nbparts-p, maxloadallowed);
+	auto left_cut = partition_jaggedY_rec (param, inst,
+					       Xmin, Xmax, cut,
+					       p); //left is a recursive jagged cut
 
+	if (!potential(left_cut)) {
+	  break; //left cut will only grow more
+	}
+	
 	considerbest(left_cut, right_cut);	
       }      
     }
 
     //no ycut solution
     {
-      auto right_cut = partition_jaggedZ(param, inst, Xmin, Xmax, 0, Ymax, nbparts, maxloadallowed);
+      auto right_cut = partition_jaggedZ(param, inst, Xmin, Xmax, 0, Ymax, nbparts);
 
 	//fake to reuse considerbest
 	dp_hier_val left_cut;
@@ -416,8 +482,7 @@ namespace stkde{
 				const stkde::instance& inst,
 				index Xmin,
 				index Xmax,
-				int nbparts,
-				double maxloadallowed) {
+				int nbparts) {
     const computation& c = param.c;
 
     jagged_level_two_key k;
@@ -431,9 +496,9 @@ namespace stkde{
       return it->second;
     }
 
-    auto ret = partition_jaggedY_over_rec (param, inst,
-					   Xmin, Xmax, c.voxY,
-					   nbparts, maxloadallowed);
+    auto ret = partition_jaggedY_rec (param, inst,
+				      Xmin, Xmax, c.voxY,
+				      nbparts);
         
     //save solution and return it
     param.memo_l2[k] = ret;
@@ -442,11 +507,10 @@ namespace stkde{
   }
 
   
-  dp_hier_val partition_jaggedX_over_rec(dp_jagged_parameters& param,
-					 const stkde::instance& inst,
-					 index X,
-					 int nbparts,
-					 double maxloadallowed) {
+  dp_hier_val partition_jaggedX_rec(dp_jagged_parameters& param,
+				    const stkde::instance& inst,
+				    index X,
+				    int nbparts) {
 
     const computation& c = param.c;
 
@@ -460,7 +524,12 @@ namespace stkde{
       return it->second;
     }
 
-    param.nbstate ++;
+    
+    // std::cerr<<"computing jagged X "
+    // 	     <<X<<" "
+    //   	     <<nbparts<<std::endl;
+
+    
     
     dp_hier_val ret;
 
@@ -472,15 +541,17 @@ namespace stkde{
           
       ret.sol.push_back(vb);
       ret.maxload = cost_of_box(param, vb, inst);
-      ret.sumload = ((ret.maxload <= maxloadallowed)?ret.maxload : std::numeric_limits<double>::infinity());
+      ret.sumload = ret.maxload;
     }
     
     //    std::cerr<<param.nbstate<<" Computing "<<b<<" "<<nbparts<<" naive cost: "<<ret.maxload<<std::endl;
 
+    //helper function in the DP
     auto considerbest = [&](dp_hier_val& left_cut, dp_hier_val& right_cut) {
 	double sum_cost = left_cut.sumload + right_cut.sumload;
-
-	if (sum_cost < ret.sumload) {
+	double max_l = std::max(left_cut.maxload, right_cut.maxload);
+	
+	if (max_l < ret.maxload) {
 	  //	  std::cout<<"new sol"<<std::endl;
 
 	  ret.sol.clear();
@@ -495,13 +566,13 @@ namespace stkde{
 	}	
     };
 
-    auto potential = [&](dp_hier_val& left_cut) {
-      return left_cut.sumload < ret.sumload;
+    auto potential = [&](const dp_hier_val& left_cut) {
+      return left_cut.maxload < ret.maxload;
     };
-    
+
     auto remain_is_small = [&](const voxelbox& vb, int nbparts) {
       double remain_cost = cost_of_box(param, vb, inst)/nbparts;
-      return remain_cost < maxloadallowed;
+      return remain_cost < ret.maxload;
     };
 
     //all solutions with an X cut
@@ -513,15 +584,19 @@ namespace stkde{
 	//cut is the last
 
 	
-	auto left_cut = partition_jaggedX_over_rec (param, inst, cut, p, maxloadallowed); //left is a recursive jagged cut
+	auto right_cut = partition_jaggedY(param, inst, cut, X, nbparts-p);
 
-	if (!potential(left_cut))
+	if (!potential(right_cut))
 	  continue;
 
-	if (!remain_is_small(voxelbox(0,X,0,c.voxY,0,c.voxT), nbparts))
+	if (!remain_is_small(voxelbox(0,cut,0,c.voxY,0,c.voxT), p))
 	  continue;
 	
-	auto right_cut = partition_jaggedY(param, inst, cut, X, nbparts-p, maxloadallowed);
+	
+	auto left_cut = partition_jaggedX_rec (param, inst, cut, p); //left is a recursive jagged cut
+
+	if (!potential(left_cut))
+	  break;
 
 	considerbest(left_cut, right_cut);	
       }      
@@ -529,7 +604,7 @@ namespace stkde{
 
     //no xcut solution
     {
-	auto right_cut = partition_jaggedY(param, inst, 0, X, nbparts, maxloadallowed);
+	auto right_cut = partition_jaggedY(param, inst, 0, X, nbparts);
 
 	//fake to reuse considerbest
 	dp_hier_val left_cut;
@@ -551,12 +626,11 @@ namespace stkde{
 
   
 
-  std::vector<stkde::voxelbox> partition_jagged_overdecompose(const stkde::bounding_box& bb,
-							      const stkde::instance& inst,
-							      const stkde::parameters& pa,
-							      int nbparts, //nbparts to make
-							      index xs, index ys, index ts, //stepping
-							      double loadratio) {
+  std::vector<stkde::voxelbox> partition_jagged(const stkde::bounding_box& bb,
+						const stkde::instance& inst,
+						const stkde::parameters& pa,
+						int nbparts, //nbparts to make
+						index xs, index ys, index ts) {//stepping
 
     computation c (bb,inst, pa, false);
 
@@ -565,7 +639,6 @@ namespace stkde{
     param.beta = 5.3e-09;
     param.gamma = 2.2e-09;
 
-    param.nbstate = 0;
     param.xstep = xs;
     param.ystep = ys;
     param.tstep = ts;
@@ -577,27 +650,25 @@ namespace stkde{
 
     std::cerr<<"box size: "<<c.voxX<<" x "<<c.voxY<<" x "<<c.voxT<<std::endl;
     std::cerr<<"nbparts: "<<nbparts<<std::endl;
-
+    
     double naive = cost_of_box(param, vb, inst);
 
-    double maxloadallowed = naive/nbparts*loadratio;
-    
     double max_state = c.voxX/param.xstep * c.voxX/param.xstep
       * c.voxY/param.ystep * c.voxY/param.ystep
       * c.voxT/param.tstep * c.voxT/param.tstep
       * nbparts;
     
-    std::cerr<<"max states: "<<max_state<<std::endl;
 
     double size_state = sizeof(dp_hier_key)+sizeof(dp_hier_val);//actually bigged than that, there is a vector
 
     std::cerr<<"mem: "<<max_state*size_state/1024./1024./1024.<<" GB (this is an order of magnitude)"<<std::endl;
     
     
-    auto sol = partition_jaggedX_over_rec(param, inst, c.voxX, nbparts, maxloadallowed);
+    auto sol = partition_jaggedX_rec(param, inst, c.voxX, nbparts);
     
 
-    std::cerr<<param.nbstate<<" states processed"<<std::endl;
+    std::cerr<<param.memo_l1.size()+param.memo_l2.size()
+      +param.memo_l3.size()+param.memo_l4.size()+param.memo_l5.size()<<" states processed"<<std::endl;
     
     std::cerr<<"solution: "<<sol.maxload<<" in "<<sol.sol.size()<<" boxes."<<std::endl
 	     <<"naive: "<<naive<<" speedup:"<<naive/sol.maxload<<std::endl
