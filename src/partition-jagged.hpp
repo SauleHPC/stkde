@@ -152,7 +152,6 @@ namespace stkde{
     std::map<jagged_level_three_key, dp_hier_val> memo_l3; //an xslice ycut
     std::map<jagged_level_four_key, dp_hier_val> memo_l4; //a full XY cut
     std::map<jagged_level_five_key, dp_hier_val> memo_l5; //a z cut of an XY box
-    size_t nbstate;
   };
 
 
@@ -249,15 +248,12 @@ namespace stkde{
 	  right_cut.sumload = right_cut.maxload;
 	}
 	
-	if (!potential(right_cut)) {
-	  skip++;
+	if (!potential(right_cut))
 	  continue; 
-	}
+
 	
-	if (!remain_is_small(voxelbox(Xmin,Xmax,Ymin,Ymax,0,cut), nbparts-1)) {
-	  skip++;
+	if (!remain_is_small(voxelbox(Xmin,Xmax,Ymin,Ymax,0,cut), nbparts-1)) 
 	  continue;
-	}
 	
 	auto left_cut = partition_jaggedZ_rec (param, inst,
 					       Xmin, Xmax, Ymin, Ymax, cut,
@@ -273,8 +269,6 @@ namespace stkde{
     }
 
     
-    //std::cout<<"skip: "<<skip<<std::endl;
-
     //save solution and return it
     param.memo_l5[k] = ret;
     
@@ -439,21 +433,18 @@ namespace stkde{
 	
 	auto right_cut = partition_jaggedZ(param, inst, Xmin, Xmax, cut, Ymax, nbparts-p);
 
-	if (!potential(right_cut)) {
+	if (!potential(right_cut))
 	  continue;
-	}
 
-	if (!remain_is_small(voxelbox(Xmin,Xmax, 0, cut, 0, c.voxT), p)) {
-	  continue;
-	}
+	if (!remain_is_small(voxelbox(Xmin,Xmax, 0, cut, 0, c.voxT), p))
+	  break; //left cut will only grow more
 	
 	auto left_cut = partition_jaggedY_rec (param, inst,
 					       Xmin, Xmax, cut,
 					       p); //left is a recursive jagged cut
 
-	if (!potential(left_cut)) {
+	if (!potential(left_cut))
 	  break; //left cut will only grow more
-	}
 	
 	considerbest(left_cut, right_cut);	
       }      
@@ -544,8 +535,6 @@ namespace stkde{
       ret.sumload = ret.maxload;
     }
     
-    //    std::cerr<<param.nbstate<<" Computing "<<b<<" "<<nbparts<<" naive cost: "<<ret.maxload<<std::endl;
-
     //helper function in the DP
     auto considerbest = [&](dp_hier_val& left_cut, dp_hier_val& right_cut) {
 	double sum_cost = left_cut.sumload + right_cut.sumload;
@@ -590,13 +579,12 @@ namespace stkde{
 	  continue;
 
 	if (!remain_is_small(voxelbox(0,cut,0,c.voxY,0,c.voxT), p))
-	  continue;
-	
+	  break; //left cut will only grow	
 	
 	auto left_cut = partition_jaggedX_rec (param, inst, cut, p); //left is a recursive jagged cut
 
 	if (!potential(left_cut))
-	  break;
+	  break; //left cut will only grow
 
 	considerbest(left_cut, right_cut);	
       }      
