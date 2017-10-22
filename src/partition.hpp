@@ -181,7 +181,7 @@ namespace stkde {
 	auto left_cut = partition_hier_rec(param, inst, leftbox, p);
 
 	if (!potential(left_cut))
-	  continue;
+	  break; //left will only get larger
 
 	auto right_cut = partition_hier_rec(param, inst, rightbox, nbparts-p);
 
@@ -201,7 +201,7 @@ namespace stkde {
 
 
 	if (!potential(left_cut))
-	  continue;
+	  break; //left will only get larger from now onx
 	
 	auto right_cut = partition_hier_rec(param, inst, rightbox, nbparts-p);
 
@@ -222,7 +222,7 @@ namespace stkde {
 
 
 	if (!potential(left_cut))
-	  continue;
+	  break; //left will only get larger
 	
 	auto right_cut = partition_hier_rec(param, inst, rightbox, nbparts-p);
 
