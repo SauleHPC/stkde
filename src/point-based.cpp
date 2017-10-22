@@ -15,7 +15,7 @@
 #include "point-based-symbar.hpp"
 #include "point-based-sym.hpp"
  
-#include "partition.hpp"
+//#include "partition.hpp"
 
 #ifndef NO_OMP
 #include "point-based-symomp.hpp"

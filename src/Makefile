@@ -82,7 +82,7 @@ depend:
 graphanalysis.o: graphanalysis.hpp compact.hpp compact_impl.hpp timestamp.hpp
 partition.o: types.hpp compact.hpp compact_impl.hpp io.hpp timestamp.hpp
 partition.o: density.hpp partition.hpp partition-over.hpp
-partition.o: partition-jagged.hpp
+partition.o: partition-jagged.hpp partition-jagged-over.hpp
 point-based.o: types.hpp compact.hpp compact_impl.hpp io.hpp timestamp.hpp
 point-based.o: density.hpp point-based.hpp point-based-symdisk.hpp
 point-based.o: point-based-symbar.hpp point-based-sym.hpp partition.hpp
