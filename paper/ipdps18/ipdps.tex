@@ -126,8 +126,9 @@ bi-objective trade-off between the most loaded part and the total
 amount of overhead induced by the decomposition.
 
 The remaining of the document is organized has follows.
-Section~\ref{sec:relworks} presents common strategies for spatial
-decomposition. Section \ref{sec:stkde} describes the Space-Time Kernel
+%Section~\ref{sec:relworks} presents common strategies for spatial
+%decomposition.
+Section \ref{sec:stkde} describes the Space-Time Kernel
 Density Estimation problem and explain why it is
 work-inefficient. Methods for decomposing the work for execution on
 $P$ processors are presented in Section~\ref{sec:exactdecomposition};
@@ -137,10 +138,10 @@ real instances of STKDE are shown in
 Section~\ref{sec:experiments}. Final remarks and future works are
 discussed in Section~\ref{sec:ccl}.
 
-\section{Related Works}
-\label{sec:relworks}
+%% \section{Related Works}
+%% \label{sec:relworks}
 
-Mostly on work efficient partition.
+%% Mostly on work efficient partition.
 
 \section{Space time Kernel Density Estimation}
 \label{sec:stkde}
@@ -239,16 +240,15 @@ lowercase notations denote quantities in domain space.
 
 \subsection{Point-based Algorithm and Symmetries}
 
-The point-based algorithm PB~\cite{Saule17-ICPP}, given in
-Algorithm~\ref{alg:pb}, leverages that fact that each point only
-radiate kernel density around it. The algorithm for each point
-consider the impact directly in the cylinder induced by the spatial
-and temporal bandwidth. As such, the algorithm PB incurs mostly two
-costs. Initializing the memory which costs $\Theta(G_x G_y G_t)$ and
-computing the impact of each point $\Theta(n H_s^2 H_t)$. Note that it
-is possible that either of these two terms is significantly larger
-than the other. Therefore the complexity of the algorithm is
-$\Theta(G_x G_y G_t + n H_s^2 H_t)$.
+The point-based algorithm, PB~\cite{Saule17-ICPP}, leverages that fact
+that each point only radiate kernel density around it. The algorithm
+for each point consider the impact directly in the cylinder induced by
+the spatial and temporal bandwidth. As such, the algorithm PB incurs
+mostly two costs. Initializing the memory which costs $\Theta(G_x G_y
+G_t)$ and computing the impact of each point $\Theta(n H_s^2
+H_t)$. Note that it is possible that either of these two terms is
+significantly larger than the other. Therefore the complexity of the
+algorithm is $\Theta(G_x G_y G_t + n H_s^2 H_t)$.
 
 When the bandwidth is large, computing the density contribution of each
 point each for voxel in the bandwidth is the most expensive
@@ -405,8 +405,8 @@ optimizing PB-SYM-DD is of practical relevance.
 
 We model simply the work introduced by an observation $obs$ on a voxel
 box $vb$ as $Load(obs, vb)$. This function has three component, one
-represents the computation of $K_s$, one represents the computation of
-$K_t$, and the third represents the computation of the stkde
+represents the computation of $k_s$, one represents the computation of
+$k_t$, and the third represents the computation of the stkde
 array. $Load(obs, vb) = \alpha * ((Proj_{XY}(Cyl(obs)) \bigcap vb) +
 \beta * ((Proj_{T}(Cyl(obs)) \bigcap vb) + \gamma * (Cyl(obs) \bigcap vb)$.
 
@@ -825,7 +825,7 @@ such application, namely the calculation of a Space Time Kernel
 Density Estimation (STKDE).
 
 Using STKDE as a motivating example we present two exact decomposition
-algorithm based on dynamic programming which return the optimal
+algorithms based on dynamic programming which return the optimal
 decomposition for particular structures of the decomposition, namely
 hierarchical decomposition and jagged decomposition. However, to
 minimize the overhead induced by the decomposition, we have to
