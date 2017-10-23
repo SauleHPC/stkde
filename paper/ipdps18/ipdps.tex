@@ -455,7 +455,7 @@ grid aligned XY plane, or a grid aligned XT place, or a grid aligned
 XT plane.
 
 This structure makes the problem particularly suited for Dynamic
-Programming. Indeed, a particular subdomain can be decomposed
+Programming. Indeed, a particular sub-domain can be decomposed
 independently from any other boxes, as long as the number of
 processors used to decomposed a box is known in advanced. This leads
 to the dynamic programming presented in Figure~\ref{fig:hier-dp} for partitioning the box
@@ -488,12 +488,12 @@ Load(X_{min}, X_{min}+1, Y_{min}, Y_{min}+1, T_{min}, T_{min}+1)
 \label{fig:hier-dp}
 \end{figure*}
 
-This Dynamic Programming algorihtm computes the optimal solution by
+This Dynamic Programming algorithm computes the optimal solution by
 exploring $O(G_x^2 G_y^2 G_t^2 P)$ states; each intermediate state
 being computed in $O((G_x +G_y+G_t) P )$, and each final state being
 an evaluation of the $Load$ function. Clearly this complexity is too
-high for the decomposition to be computed in a reasonnable amount of
-time. In practice, one can obtain a reasonnable approxiamtion of the
+high for the decomposition to be computed in a reasonable amount of
+time. In practice, one can obtain a reasonable approximation of the
 optimal solution by only authorizing cuts on voxel which X coordinate
 is a multiple of a parameter $Xstep$. Doing so reduces the number of
 state by a factor of $Xstep^2$. Similar parameters $Ystep$ and $Tstep$
@@ -513,7 +513,7 @@ for the second term $Hier(x, X_{max}, Y_{min}, Y_{max}, T_{min},
 T_{max}, P-p)$.  Even better, the first term will only increase when
 $x$ increases and the second term will only decrease when $x$
 increases. So if a particular value of $x$ sees its first term leading
-to a subdecomposition worst that the currently best known
+to a sub-decomposition worst that the currently best known
 decomposition, then all subsequent values of $x$ which are all larger,
 will only lead to decomposition that won't be picked in practice. So
 the corresponding states of the dynamic programming do not need to be evaluated.
@@ -531,8 +531,8 @@ to hierarchical patterns.
 
 In a work-efficient decomposition and in the one dimensional case, one
 can easily build an index of of the load which allows to quickly
-evaluate the cost of a particular subdomain; and in particular, it is
-easy to chose the size of any subdomain to expand up to the predicted
+evaluate the cost of a particular sub-domain; and in particular, it is
+easy to chose the size of any sub-domain to expand up to the predicted
 optimal value of the decomposition. This was first used by
 Nicol~\cite{Nicol94} and the technique was refined by
 Pinar~\cite{pinar04}. This was extended to deal with heterogeneous processors
@@ -610,52 +610,52 @@ can be really difficult as estimating the parameters of models
 accurately is difficult; in particular because lots of interference
 can make the model inaccurate.
 Also it is possible to find the best partitioning in, say, 16
-subdomains. But it is possible that there is no good decomposition for
+sub-domains. But it is possible that there is no good decomposition for
 this particular number of processors.
 
-A simple solution to solve the overdecomposition problem would eb to
-run the previously mentionned algorithms using number of
-subdomains. However, in a work inefficient application, this could
+A simple solution to solve the over-decomposition problem would eb to
+run the previously mentioned algorithms using number of
+sub-domains. However, in a work inefficient application, this could
 lead to a significant overhead. Indeed, these dynamic programming
-method aim at minimizing the size of the largest subdomain. However,
+method aim at minimizing the size of the largest sub-domain. However,
 in an over decomposition this may not be the only concern.
 
 The concern when over decomposing is to achieve an execution that is
-fast, but the size of a particular subdomain may no longer be that
+fast, but the size of a particular sub-domain may no longer be that
 relevant. It is difficult to predict precisely how an execution with
-many subdomain will unfold. And even if we could, that formulation is
+many sub-domain will unfold. And even if we could, that formulation is
 unlikely to be easy to optimize.
 
-However, one can simply model the execution of subdomains as
+However, one can simply model the execution of sub-domains as
 independent tasks. Scheduling independent tasks has a wide
-litterature, but really early works of Graham~\cite{Graham66} are the
+literature~\cite{handbook}, but really early works of Graham~\cite{Graham66} are the
 most insightful for us. Graham showed that any greedy schedule of $n$
 tasks of processing time $p_i$ on $P$ processors will complete before
 $C_{max} \leq \frac{\sum p_i}{P} + \max p_i$. The two components of
 this formula are easily interpreted in terms of spatial decomposition,
-$p_{max} = \max p_i$ is the cost of the largest subdomain and $\sum p_i$ is the
+$p_{max} = \max p_i$ is the cost of the largest sub-domain and $\sum p_i$ is the
 total amount of work, including the overhead induced by the
 decomposition.
 
 The optimization problem of interest is then of minimizing the largest
-subdomain while minimizing the total amount of work (linearly related
-to the overhead). When optimizing for a multiobjective problem, all
-the best tradeoff solution, known as the Pareto Set, can be of
-interest. However that set can be exponetially large. Fortunately, it
+sub-domain while minimizing the total amount of work (linearly related
+to the overhead). When optimizing for a multi-objective problem, all
+the best trade-off solution, known as the Pareto Set, can be of
+interest. However that set can be exponentially large. Fortunately, it
 is possible to build a good approximation of this Pareto Set by
 solving a set of problems where one of the objective is constrained to
 be smaller than a parameter while the other parameter is
 optimized~\cite{papayanna2000:pareto}. Here we will chose to put a
-constrained on the largest subdomain $p_{max} = \max p_i$ and minimize
+constrained on the largest sub-domain $p_{max} = \max p_i$ and minimize
 the total amount of work $\sum p_i$.
 
 It turns out that doing this new optimization problem can be solved by
 adapting the dynamic programming algorithms of the previous
 section. The cost of the solution implied by a cut in a domain becomes
 the sum of the of the cost of each side (instead of being the
-max). And the cost of an undivided subdomain is still given by $Load$,
-except if that value is larger than the allowed cost of the subdomain,
-in which case, the cost of that subdomain is set to infinity.
+max). And the cost of an undivided sub-domain is still given by $Load$,
+except if that value is larger than the allowed cost of the sub-domain,
+in which case, the cost of that sub-domain is set to infinity.
 
 \section{Experiments}
 \label{sec:experiments}
@@ -712,24 +712,24 @@ low, high and very high bandwidth. See details in Table~\ref{tab:instance}.
 
 \subsection{Partitionings}
 
-We computed partitionings for 16, 32, and 64 subdomains. And using
+We computed partitionings for 16, 32, and 64 sub-domains. And using
 $Xstep$, $Ystep$, and $Tstep$ values of 4, 8, 16, 32, 64, 256, and
-512. For overdecomposition methods, we set the constraint by using the
+512. For over-decomposition methods, we set the constraint by using the
 ratio between the largest allowed box and a perfect partitioning. We
 used ratios of 1.1, 1.5, 2, 3 and 4. Unfeasible partitioning were
-discarded. We also discarded all partitionings which took more than 2
+discarded. We also discarded all partitioning which took more than 2
 hours to compute.
 
-We report the quality of the partitionings in
-Figure~\ref{fig:jagged_res} for Jagged partitionings and in
+We report the quality of the partitioning in
+Figure~\ref{fig:jagged_res} for Jagged partitioning and in
 Figure~\ref{fig:hier_res}. On each figure, we are also showing a
-simple grid based overdecomposition that decomposed the space along
+simple grid based over-decomposition that decomposed the space along
 the each axis in 4, 8, 16, 32, and 64 blocks. On the x-axis, each plot
 shows normalized values for $1/p_{max}$. In other words, if $1/p_{max}
 = 16$, one would expect to see a speedup of 16 if there was only the
-largest subdomain to process. On the y-axis, the plots show the
+largest sub-domain to process. On the y-axis, the plots show the
 normalized work overhead, a decomposition that introduces no
-additional work would have a work overhad of 0 (there are none of
+additional work would have a work overhead of 0 (there are none of
 those reported) while a decomposition that double the amount of work
 would have an work overhead of 1. As such, one wants to achieve a
 partitioning with a high $1/p_{max}$ value and a low work overhead,
@@ -749,7 +749,7 @@ and therefore wishes to be the most on the bottom right of the charts.
   \subfigure[PollenUS-VHr-Lb]{\includegraphics[width=.35\linewidth,page=2]{plots/part-PollenUS-vhrlb.pdf}}
   \subfigure[PollenUS-VHr-VLb]{\includegraphics[width=.35\linewidth,page=2]{plots/part-PollenUS-vhrvlb.pdf}}
 
-  \caption{Quality of Partitionings generated by Jagged decomposition}
+  \caption{Quality of partitioning generated by Jagged decomposition}
   \label{fig:jagged_res}
 \end{figure*}
 
@@ -772,19 +772,19 @@ and therefore wishes to be the most on the bottom right of the charts.
 \end{figure*}
 
 The first observation one can have is that a grid based partitioning
-consistently generates highly work-inefficient partitiongs with over
+consistently generates highly work-inefficient partitiong with over
 overheads often larger than 1. As a comparison most of the other
-methods tend to return partitionings with work overhead less than
-$.25$. The solutions computed by Jagged partitionings or Hierarchical
+methods tend to return partitioning with work overhead less than
+$.25$. The solutions computed by Jagged partitioning or Hierarchical
 decomposition that have a high work overhead and a low $1/p_{max}$ are
 derived from high $Xstep$, $Ystep$, and $Tstep$ values and therefore
-have lead to very inefficient partitionings.
+have lead to very inefficient partitioning.
 
-For Jagged partitionings, the over decomposition methods most of the
-time exposes more interesting tradeoff than the partitionings
+For Jagged partitioning, the over decomposition methods most of the
+time exposes more interesting trade-off than the partitioning
 generated by the exact decomposition methods; typically on
 Dengue-Hr-Hb. Few cases of the exact partitioning leading to more
-interesting tradeoffs than the over decomposition method can be seen,
+interesting trade-off than the over decomposition method can be seen,
 for instance on PollenUS-VHr-Lb. Upon analysis, these cases come from
 the exact method converging faster than the over decomposition method
 and returning a solution for smaller values of $Xstep$, $Ystep$, and
@@ -793,7 +793,7 @@ for the over decomposition timed out).
 
 The Hierarchical decomposition show a slightly different picture. In
 particular, more cases of the over decomposition timed out. This leads
-to fewer interesting cases of overdecomposition. Also, interestingly,
+to fewer interesting cases of over-decomposition. Also, interestingly,
 the over decomposition returned the same solution as the exact
 decomposition in many cases; which did not happen for the Jagged
 decomposition. This makes some intuitive sense as hierarchical
@@ -805,7 +805,7 @@ than the naive grid partitioning.
 
 \subsection{Real execution}
 
-Some of the partitionings generated by the different methods were
+Some of the partitioning generated by the different methods were
 plugged in a parallel code of STKDE to see how much speedup these
 improved partition would obtain. The results at this point are
 preliminary and therefore the details are excluded from the manuscript
@@ -818,30 +818,30 @@ do in practical speedup for the STKDE application.
 
 This paper considers a new form of partitioning problems, namely
 work-inefficient spatial partitioning. Such problems appear when the
-decompositoin of the domain of a problem can not be done in a way that
+decomposition of the domain of a problem can not be done in a way that
 conserve the amount of work. Applications that when partitioned see
-their amount of work increase are work-inefficient; we exhibitted one
+their amount of work increase are work-inefficient; we exhibited one
 such application, namely the calculation of a Space Time Kernel
 Density Estimation (STKDE).
 
 Using STKDE as a motivating example we present two exact decomposition
-algorithm based on dynamic programing which return the optimal
+algorithm based on dynamic programming which return the optimal
 decomposition for particular structures of the decomposition, namely
 hierarchical decomposition and jagged decomposition. However, to
 minimize the overhead induced by the decomposition, we have to
 formulate the problem as a bi-objective problem. We solve the problem
 by turning one of the objective into a constraint and optimizing the
-other one by dynamic programmming. Experimental results confirm that
+other one by dynamic programming. Experimental results confirm that
 the proposed partitioning algorithms can deal with work inefficient
 problems.
 
 In the future, we want to fully integrate the partitioning computed in
 this work in the STKDE application and investigate how accurate the
 model of the application is and the impact of a work-aware
-overdecomposition of the work has on the time necessary to compute
+over-decomposition of the work has on the time necessary to compute
 STKDE. We are also interested in reducing the runtime of the
 partitioning algorithms by employing more heuristics and by
-investigating more technqieus to reduce the number of states one has
+investigating more techniques to reduce the number of states one has
 to solve. Finally, we are looking for additional problem that do not
 support work inefficient domain decomposition.
 
