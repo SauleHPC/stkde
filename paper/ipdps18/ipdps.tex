@@ -444,9 +444,21 @@ decomposition of varying square size, are also NP-Hard to optimze~\cite{grigni96
 However, other decomposition, such as jagged partitioning or any
 recursive partitioning based on boxes can be found optimally when the
 decomposition is work efficient~\cite{saule12-jpdc-spart}. 2D variants of such
-decompositions can be seen on Figure~\ref{}. We show in this section
+decompositions can be seen on Figure~\ref{fig:decomposition}. We show in this section
 how to discover optimal hierarchical partitioning and jagged
 partitioning when the decomposition is work inefficient.
+
+\begin{figure}
+  \subfigure[Jagged Partitioning]{\includegraphics[width=.49\linewidth]{figures/jagged_part_mway.pdf}}
+  \subfigure[Hierarchical Decomposition]{\includegraphics[width=.49\linewidth]{figures/hierar_part.pdf}}
+
+  \caption{ 2D representation of the two types of decomposition
+    addressed in this paper. Jagged partitioning form vertical stripes
+    which are then partitioned horizontally. Hierarchical
+    decomposition are defined recursively by cutting the domain in a
+    grid aligned manner.}
+  \label{fig:decomposition}
+\end{figure}
 
 \subsection{Hierarchical Decomposition}
 
