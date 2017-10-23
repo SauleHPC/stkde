@@ -81,11 +81,11 @@ computation, mecanical simulations, chemistry, geography, and many others.
 
 Algorithms for decomposing spatial located computation have attracted
 a constant number of attention over the years. Some methods are
-designed to be fast heuristics~\cite{RB}, while some other attempt to
-at finding optimal decompositions~\cite{erdeniz}. Some deal with
-heterogeneous processors~\cite{pinar}. Also fast and generic
+designed to be fast heuristics~\cite{berger87}, while some other attempt to
+at finding optimal decompositions~\cite{saule12-jpdc-spart}. Some deal with
+heterogeneous processors~\cite{pinar08}. Also fast and generic
 implementation of these types of decomposition for distributed memory
-machines have been provided~\cite{deveci_ipdps}.
+machines have been provided~\cite{DeveciRDC16}.
 
 Yet, all methods usually assume that the decomposition is work
 efficient. It is not uncommon that these methods overdecompose the
@@ -102,9 +102,9 @@ domain $D$.
 As a representative of this class of application, we present here
 a common geography problem. Visualizing the distibution of some events
 requires to compute a Space Time Kernel Density
-Estimation(STKDE)~\cite{delmelle}. Decomposing the spatial domain
+Estimation(STKDE)~\cite{delmelle2013spatio}. Decomposing the spatial domain
 (space-time domain in STKDE terminology) to process each subdomain
-independently is not a work-efficient decomposition~\cite{icpp17}. As
+independently is not a work-efficient decomposition~\cite{Saule17-ICPP}. As
 such traditional overdecomposition techniques lead to an increase in
 work which limits the usefulness of parallelism.
 
@@ -438,12 +438,12 @@ that spatial decomposition have different complexities depending of
 the structure of decomposition one is looking for. Even for a problems
 were the load is work efficient, finding the optimal spatial
 decomposition of arbitrary structure is an NP-Hard
-problem~\cite{}. Rectilinear partitionings, which are checker board
-decomposition of varying square size, are also NP-Hard to optimze~\cite{}.
+problem~\cite{grigni96}. Rectilinear partitionings, which are checker board
+decomposition of varying square size, are also NP-Hard to optimze~\cite{grigni96,aspvall98}.
 
 However, other decomposition, such as jagged partitioning or any
 recursive partitioning based on boxes can be found optimally when the
-decomposition is work efficient~\cite{}. 2D variants of such
+decomposition is work efficient~\cite{saule12-jpdc-spart}. 2D variants of such
 decompositions can be seen on Figure~\ref{}. We show in this section
 how to discover optimal hierarchical partitioning and jagged
 partitioning when the decomposition is work inefficient.
@@ -451,7 +451,7 @@ partitioning when the decomposition is work inefficient.
 \subsection{Hierarchical Decomposition}
 
 By Hierarchical Decomposition, we actually mean generalized forms of
-Recursive Bisection~\cite{Bohkari}. That is to say, domains are
+Recursive Bisection~\cite{berger87}. That is to say, domains are
 recursively decomposed by applying a single grid aligned cut. Here we
 are looking at the 3D problem. So each box will be cut either by a
 grid aligned XY plane, or a grid aligned XT place, or a grid aligned
@@ -538,8 +538,8 @@ evaluate the cost of a particular subdomain; and in particular, it is
 easy to chose the size of any subdomain to expand up to the predicted
 optimal value of the decomposition. This was first used by
 Nicol~\cite{Nicol94} and the technique was refined by
-Pinar~\cite{}. This was extended to deal with heterogeneous processors
-in~\cite{} and to handle jagged 2D decompositions in~\cite{Saule}
+Pinar~\cite{pinar04}. This was extended to deal with heterogeneous processors
+in~\cite{pinar08} and to handle jagged 2D decompositions in~\cite{saule12-jpdc-spart}
 
 Unfortunately in a work inefficient problem, there is no easy indexing
 that can be built and target value for the solution of the problem can
@@ -648,7 +648,7 @@ interest. However that set can be exponetially large. Fortunately, it
 is possible to build a good approximation of this Pareto Set by
 solving a set of problems where one of the objective is constrained to
 be smaller than a parameter while the other parameter is
-optimized~\cite{Papadimitriou}. Here we will chose to put a
+optimized~\cite{papayanna2000:pareto}. Here we will chose to put a
 constrained on the largest subdomain $p_{max} = \max p_i$ and minimize
 the total amount of work $\sum p_i$.
 
