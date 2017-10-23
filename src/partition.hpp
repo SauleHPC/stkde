@@ -352,6 +352,23 @@ namespace stkde {
 	}
       }
     }
+
+    dp_hier_parameters param (c);
+    double naive = cost_of_box(param, voxelbox(0, c.voxX, 0, c.voxY, 0, c.voxT), inst);
+
+
+    double maxload = 0;
+    double sumload = 0;
+    for (auto& b : decomp) {
+      auto c = cost_of_box (param, b, inst);
+      maxload = std::max(maxload, c);
+      sumload += c;
+    }
+
+    std::cerr<<"naive: "<<naive<<" speedup:"<<naive/maxload<<std::endl
+	     <<"sumload:"<<sumload<<" overhead:"<<sumload/naive<<std::endl;
+
+
     return decomp;
   }
 
