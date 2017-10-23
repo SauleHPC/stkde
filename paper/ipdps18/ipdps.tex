@@ -491,17 +491,226 @@ Load(X_{min}, X_{min}+1, Y_{min}, Y_{min}+1, T_{min}, T_{min}+1)
 \label{fig:hier-dp}
 \end{figure*}
 
+This Dynamic Programming algorihtm computes the optimal solution by
+exploring $O(G_x^2 G_y^2 G_t^2 P)$ states; each intermediate state
+being computed in $O((G_x +G_y+G_t) P )$, and each final state being
+an evaluation of the $Load$ function. Clearly this complexity is too
+high for the decomposition to be computed in a reasonnable amount of
+time. In practice, one can obtain a reasonnable approxiamtion of the
+optimal solution by only authorizing cuts on voxel which X coordinate
+is a multiple of a parameter $Xstep$. Doing so reduces the number of
+state by a factor of $Xstep^2$. Similar parameters $Ystep$ and $Tstep$
+can be introduced.
+
+Implementing this Dynamic Programming algorithm is fairly straight
+forward. Not all the state will be reached in practice so it is better
+to implement the function the dynamic programming top down
+(recursively) with memoization; rather than bottom-up. This
+implementation becomes faster when realizing a few properties of the
+formulation. For instance, when evaluation the best $x$ position to
+cut the domain, if one already has a valid decomposition of the box
+and if the first term $Hier(X_{min}, x, Y_{min}, Y_{max}, T_{min},
+T_{max}, p)$ is higher than the value of the currently best known
+decomposition, one does not need to evaluate the best decomposition
+for the second term $Hier(x, X_{max}, Y_{min}, Y_{max}, T_{min},
+T_{max}, P-p)$.  Even better, the first term will only increase when
+$x$ increases and the second term will only decrease when $x$
+increases. So if a particular value of $x$ sees its first term leading
+to a subdecomposition worst that the currently best known
+decomposition, then all subsequent values of $x$ which are all larger,
+will only lead to decomposition that won't be picked in practice. So
+the corresponding states of the dynamic programming do not need to be evaluated.
 
 \subsection{Jagged Decomposition}
 
+Jagged decompositions are a simpler pattern than hierarchical
+recursive decomposition. As such, they are expected to lead to simpler
+structures, but they should be faster to compute. A jagged
+decomposition first stripes the domain along the X dimension. Then
+each stripe is individually striped along the y axis. The remaining
+space is striped along the T axis. This simpler pattern still allows
+many decompositions, but limits the combinatorial explosion compared
+to hierarchical patterns.
 
+In a work-efficient decomposition and in the one dimensional case, one
+can easily build an index of of the load which allows to quickly
+evaluate the cost of a particular subdomain; and in particular, it is
+easy to chose the size of any subdomain to expand up to the predicted
+optimal value of the decomposition. This was first used by
+Nicol~\cite{Nicol94} and the technique was refined by
+Pinar~\cite{}. This was extended to deal with heterogeneous processors
+in~\cite{} and to handle jagged 2D decompositions in~\cite{Saule}
+
+Unfortunately in a work inefficient problem, there is no easy indexing
+that can be built and target value for the solution of the problem can
+not easily be leveraged to make similar types of optimization. This
+force us to use a more complex form of the problem which relies on a
+recursive dynamic programming formulation. At the highest level, the
+domain will be split along the X dimension at a particular
+location. The right part will processed with a jagged partitioning
+along the Y and Z axes. The left part will recursively be processed
+with a jagged partitioning along the X, Y, and Z axes. For each cut
+distributing the processors on either sides is necessary. The second
+level has a similar structure except the cuts will be along the Y axis
+and deeper partitioning will be along the Z axis. At the level of the
+Z cuts, the only difference is that there i no need to distribute the
+processors on either side of teh cut, since one side will always take
+one processor. 
+
+\begin{figure*}
+  \begin{equation}
+    \begin{split}
+    JaggedX(X_{max}, P)= \min JaggedY(0,X_{max}, G_y, P), & \\
+                        \min_{0 < p < P} \min_{0<x<X_{max}} \max & JaggedX(x,p),\\
+                                                     & JaggedY(x,X_{max}, G_y, P-p)\\
+    \end{split}
+  \end{equation}
+  \begin{equation}
+    \begin{split}
+    JaggedY(X_{min}, X_{max}, Y_{max}, P)= \min JaggedT(X_{min},X_{max}, 0, & Y_{max}, G_t, P),  \\
+                        \min_{0 < p < P} \min_{0<y<Y_{max}} \max & JaggedY(X_{min}, X_{max}, y, p),\\
+                                                      & JaggedT(X_{min}, X_{max}, y,Y_{max}, G_t , P-p)\\
+    \end{split}
+  \end{equation}
+  \begin{equation}
+      \begin{split}
+    JaggedT(X_{min}, X_{max}, Y_{min}, Y_{max}, T_{max}, P)= \min_{0<t<T_{max}} \max & JaggedT(X_{min}, X_{max}, Y_{min}, Y_{max}, t, P-1),\\
+                                                                       & Load(X_{min}, X_{max}, Y_{min}, Y_{max}, t, T_{max})\\
+      \end{split}
+  \end{equation}
+
+  \begin{equation}
+    \begin{split}
+      JaggedT(X_{min}, X_{max}, Y_{min}, Y_{max}, T_{max}, 1) = Load (X_{min}, X_{max}, Y_{min}, Y_{max}, 0, T_{max})
+    \end{split}
+  \end{equation}
+      
+  \caption{Dynamic programming formulation of the Jagged Partitioning}
+  \label{fig:dp:jagged}
+\end{figure*}
+
+The complete formulation of the dynamic programming is provided in
+Figure~\ref{fig:dp:jagged}. Most of the cost of the formulation comes
+from the evaluation of all the possible $JaggedT$ states: there are
+$O(G_x^2 G_y^2 G_t P)$ of them and each cost $O(G_t)$ calls to $Load$
+to evaluate.
+
+This dynamic programming formulation also has similar optimization as
+the hierarchical dynamic programming allowing not to evaluate all the
+state based on current knowledge of what the best local solution
+is. It can also be made faster by limiting the decomposition to values
+of $x$, $y$, and $t$ which are multiples of parameters $Xstep$,
+$Ystep$, and $Tstep$.
 
 \section{Overdecomposition}
 \label{sec:overdecomposition}
 
+Despite having optimal exact decomposition, this may not lead to the
+best parallel performance in many practical cases. First obtaining the
+optimal decomposition assumed that one can have a perfect model of the
+execution of an application on a parallel platform. In practice, this
+can be really difficult as estimating the parameters of models
+accurately is difficult; in particular because lots of interference
+can make the model inaccurate.
+Also it is possible to find the best partitioning in, say, 16
+subdomains. But it is possible that there is no good decomposition for
+this particular number of processors.
+
+A simple solution to solve the overdecomposition problem would eb to
+run the previously mentionned algorithms using number of
+subdomains. However, in a work inefficient application, this could
+lead to a significant overhead. Indeed, these dynamic programming
+method aim at minimizing the size of the largest subdomain. However,
+in an over decomposition this may not be the only concern.
+
+The concern when over decomposing is to achieve an execution that is
+fast, but the size of a particular subdomain may no longer be that
+relevant. It is difficult to predict precisely how an execution with
+many subdomain will unfold. And even if we could, that formulation is
+unlikely to be easy to optimize.
+
+However, one can simply model the execution of subdomains as
+independent tasks. Scheduling independent tasks has a wide
+litterature, but really early works of Graham~\cite{Graham66} are the
+most insightful for us. Graham showed that any greedy schedule of $n$
+tasks of processing time $p_i$ on $P$ processors will complete before
+$C_{max} \leq \frac{\sum p_i}{P} + \max p_i$. The two components of
+this formula are easily interpreted in terms of spatial decomposition,
+$p_{max} = \max p_i$ is the cost of the largest subdomain and $\sum p_i$ is the
+total amount of work, including the overhead induced by the
+decomposition.
+
+The optimization problem of interest is then of minimizing the largest
+subdomain while minimizing the total amount of work (linearly related
+to the overhead). When optimizing for a multiobjective problem, all
+the best tradeoff solution, known as the Pareto Set, can be of
+interest. However that set can be exponetially large. Fortunately, it
+is possible to build a good approximation of this Pareto Set by
+solving a set of problems where one of the objective is constrained to
+be smaller than a parameter while the other parameter is
+optimized~\cite{Papadimitriou}. Here we will chose to put a
+constrained on the largest subdomain $p_{max} = \max p_i$ and minimize
+the total amount of work $\sum p_i$.
+
+It turns out that doing this new optimization problem can be solved by
+adapting the dynamic programming algorithms of the previous
+section. The cost of the solution implied by a cut in a domain becomes
+the sum of the of the cost of each side (instead of being the
+max). And the cost of an undivided subdomain is still given by $Load$,
+except if that value is larger than the allowed cost of the subdomain,
+in which case, the cost of that subdomain is set to infinity.
 
 \section{Experiments}
 \label{sec:experiments}
+
+\subsection{Experimental Setting}
+
+\paragraph{Dataset} Four datasets are used in our experiments. Their
+key attributes are summarized in Table~\ref{tab:instance}. 
+The Dengue dataset is of epidemiological nature and consists of the space-time
+locations of dengue fever cases reported to the “Sistema de Vigilancia
+en Salud P\'{u}blica” for the city of Cali, Colombia during 2010 and 2011. The
+system is updated on a daily basis with records of individuals that
+have been diagnosed with dengue fever, including patient address and
+the date of diagnosis. Addresses are standardized to a common 
+format, and spelling and other syntactical errors are manually
+corrected~\cite{delmelle2013spatio}; they are then geocoded and masked
+to the nearest street intersection level to maintain
+privacy~\cite{Kwan04}. In 2010, 9606 were successfully geocoded
+(11,760 reported cases, or 81.7\%), whereas in 2011, 1562 cases were
+successfully geocoded (1822 reported cases, or 85.7\%).\looseness=-1
+
+The PollenUS dataset is composed of 588K tweets of US users from
+February 2016 to April 2016 related to Pollen (i.e., that mention
+keywords such as ``pollen'' and ``allergy''). Tweets that did not
+contain a precise localization were approximated by picking a random
+location in the approximated region provided by
+Gnip\footnote{\texttt{http://www.gnip.com/}}. Tweets are mostly located
+in the contiguous continental US. Therefore, this is the region we
+modeled with a spatial resolution ranging from $.2^\circ$ to $1^\circ$
+and a temporal resolution of 1 day.
+
+For all datasets, we created multiple instances of the problem coded
+Lr, Mr, Hr for low, medium, and high resolution and Lb, Hb, VHb for
+low, high and very high bandwidth. See details in Table~\ref{tab:instance}. 
+
+\begin{table}
+  \centering
+    \resizebox{.9\linewidth}{!}{\input{analysis/instance_table.tex}}
+  \caption{Properties of the datasets. The domain is expressed in voxels
+    and in MB. Bandwidth are expressed in voxels.}
+  \label{tab:instance}
+\end{table}
+
+\subsection{Partitionings}
+
+\begin{figure*}
+  \subfigure[Dengue-Lr-Lb]{\includegraphics[width=.24\linewidth,page=2]{plots/part-Dengue-lrlb.pdf}}
+  \subfigure[Dengue-Lr-Hb]{\includegraphics[width=.24\linewidth,page=2]{plots/part-Dengue-lrhb.pdf}}
+  \subfigure[Dengue-Lr-Hb]{\includegraphics[width=.24\linewidth,page=2]{plots/part-Dengue-hrlb.pdf}}
+  \subfigure[Dengue-Hr-Hb]{\includegraphics[width=.24\linewidth,page=2]{plots/part-Dengue-hrhb.pdf}}
+  \subfigure[Dengue-Hr-VHb]{\includegraphics[width=.24\linewidth,page=2]{plots/part-Dengue-hrvhb.pdf}}
+\end{figure*}
 
 \section{Conclusion}
 \label{sec:ccl}
