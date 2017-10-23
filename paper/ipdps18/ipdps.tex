@@ -427,9 +427,72 @@ the gain in load balance.\looseness=-1
 
 \todo{intoduce model}
 
+\todo{refocus on work inefficiency}
+
 \section{Exact Decomposition}
 \label{sec:exactdecomposition}
 
+Once we have a model of the load of a particular set of voxels,
+decomposing the load becomes a combinatorial problem. It turns out
+that spatial decomposition have different complexities depending of
+the structure of decomposition one is looking for. Even for a problems
+were the load is work efficient, finding the optimal spatial
+decomposition of arbitrary structure is an NP-Hard
+problem~\cite{}. Rectilinear partitionings, which are checker board
+decomposition of varying square size, are also NP-Hard to optimze~\cite{}.
+
+However, other decomposition, such as jagged partitioning or any
+recursive partitioning based on boxes can be found optimally when the
+decomposition is work efficient~\cite{}. 2D variants of such
+decompositions can be seen on Figure~\ref{}. We show in this section
+how to discover optimal hierarchical partitioning and jagged
+partitioning when the decomposition is work inefficient.
+
+\subsection{Hierarchical Decomposition}
+
+By Hierarchical Decomposition, we actually mean generalized forms of
+Recursive Bisection~\cite{Bohkari}. That is to say, domains are
+recursively decomposed by applying a single grid aligned cut. Here we
+are looking at the 3D problem. So each box will be cut either by a
+grid aligned XY plane, or a grid aligned XT place, or a grid aligned
+XT plane.
+
+This structure makes the problem particularly suited for Dynamic
+Programming. Indeed, a particular subdomain can be decomposed
+independently from any other boxes, as long as the number of
+processors used to decomposed a box is known in advanced. This leads
+to the dynamic programming presented in Figure~\ref{fig:hier-dp} for partitioning the box
+$X_{min}, X_{max}, Y_{min}, Y_{max}, T_{min}, T_{max}$ for $P$
+processors.
+
+\begin{figure*}
+  \begin{equation}
+    \begin{split}
+  Hier(X_{min}, X_{max}, Y_{min}, Y_{max}, T_{min}, T_{max}, P) = \min_{1 \leq p <P} (\\
+\min_{X_{min}<x<X_{max}}  ( \max& Hier(X_{min}, x, Y_{min}, Y_{max}, T_{min}, T_{max}, p),\\
+                         & Hier(x, X_{max}, Y_{min}, Y_{max}, T_{min}, T_{max}, P-p) ),\\
+\min_{Y_{min}<y<Y_{max}}  ( \max & Hier(X_{min}, X_{max}, Y_{min}, y, T_{min}, T_{max}, p),\\
+                          & Hier(X_{min}, X_{max}, y, Y_{max}, T_{min}, T_{max}, P-p) ),\\
+\min_{T_{min}<t<T_{max}}  ( \max &Hier(X_{min}, X_{max}, Y_{min}, Y_{max}, T_{min}, t, p),\\
+                    & Hier(X_{min}, X_{max}, Y_{min}, Y_{max}, t, T_{max}, P-p) ) )\\
+    \end{split}
+\end{equation}
+\begin{equation}
+Hier(X_{min}, X_{max}, Y_{min}, Y_{max}, T_{min}, T_{max}, 1 ) =\\
+Load(X_{min}, X_{max}, Y_{min}, Y_{max}, T_{min}, T_{max})
+\end{equation}
+\begin{equation}
+Hier(X_{min}, X_{min}+1, Y_{min}, Y_{min}+1, T_{min}, T_{min}+1, P ) =\\
+Load(X_{min}, X_{min}+1, Y_{min}, Y_{min}+1, T_{min}, T_{min}+1)
+\end{equation}
+
+\caption{Dynamic Programming formulation of the Hierarchical Partitioning method.}
+
+\label{fig:hier-dp}
+\end{figure*}
+
+
+\subsection{Jagged Decomposition}
 
 
 
