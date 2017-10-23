@@ -81,6 +81,17 @@ int main (int argc, char* argv[]) {
     parts = stkde::partition_hier (bb, inst, param, nbparts, xstep, ystep, tstep);
   }
 
+  if (method.compare("GRID") == 0) {
+
+    stkde::index xstep = atoi(argv[6]);
+    stkde::index ystep = atoi(argv[7]);
+    stkde::index tstep = atoi(argv[8]);
+
+    std::cerr<<"Decomp: "<<xstep<<" "<<ystep<<" "<<tstep<<std::endl;
+    
+    parts = stkde::grid_partition (bb, inst, param, xstep, ystep, tstep);
+  }
+
   if (method.compare("PARTITION-HIER-OVERDECOMPOSE") == 0) {
     int nbparts = atoi(argv[6]);
     stkde::index xstep = atoi(argv[7]);
