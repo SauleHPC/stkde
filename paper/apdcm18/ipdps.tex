@@ -26,7 +26,7 @@
 \newcommand{\floor}[1]{\left\lfloor #1 \right\rfloor}
 
 \begin{document}
-\title{Work Inefficient Partitioning: The space time kernel density case.}
+\title{Work Inefficient Partitioning: The Space-Time Kernel Density Case.}
 
 
 \author{\IEEEauthorblockN{Erik  Saule}
@@ -50,7 +50,7 @@ Email: esaule@uncc.edu}
   assumption does not hold.
 
   Space-Time Kernel Density Estimation is a problem that does not
-  support work efficient partitioning. We use that problem has a
+  support work efficient partitioning. We use that problem as an
   applications to motivate our work, but we believe that our
   conclusions generalize to other problem that do not support work
   efficient partitioning.
@@ -65,6 +65,7 @@ Email: esaule@uncc.edu}
 \end{abstract}
 
 \begin{IEEEkeywords}
+multi-objective optimization; domain decomposition; work inefficient partitioning;
 \end{IEEEkeywords}
 
 
@@ -80,9 +81,9 @@ applications of parallel computing, including physics with n-body
 computation, mechanical simulations, chemistry, geography, and many others.
 
 Algorithms for decomposing spatial located computation have attracted
-a constant number of attention over the years. Some methods are
-designed to be fast heuristics~\cite{berger87}, while some other attempt to
-at finding an optimal decomposition~\cite{saule12-jpdc-spart}. Some deal with
+constant attention over the years. Some methods are
+designed to be fast heuristics~\cite{berger87}, while some others attempt to
+find an optimal decomposition~\cite{saule12-jpdc-spart}. Some deal with
 heterogeneous processors~\cite{pinar08}. Also fast and generic
 implementation of these types of decomposition for distributed memory
 machines have been provided~\cite{DeveciRDC16}.
@@ -94,7 +95,7 @@ domains than there are processors on the system, and rely on giving
 multiple domains to each processor to achieve load balance.
 
 Some application do not admit work efficient spatial
-decomposition. That is to say, when a domain $D$ is decomposed in two
+decomposition. That is to say, when a domain $D$ is decomposed into two
 sub-domains $D_1$ and $D_2$, it is possible that the sum of the work to
 process $D_1$ and $D_2$ is larger than the work necessary to process
 domain $D$.
@@ -109,7 +110,7 @@ such traditional over-decomposition techniques lead to an increase in
 work which limits the usefulness of parallelism.
 
 We present in this paper spatial decomposition techniques suitable for
-problem which do not have work-efficient decomposition. By modeling
+problems which do not have work-efficient decomposition. By modeling
 the amount of work in the different parts of a decomposition, one can
 seek to find the decomposition with minimal maximum work. Because
 finding an optimal decomposition for arbitrary decomposition patterns
@@ -125,11 +126,11 @@ domain for better load balance. The algorithm works by exploring a
 bi-objective trade-off between the most loaded part and the total
 amount of overhead induced by the decomposition.
 
-The remaining of the document is organized has follows.
+The remainder of the document is organized as follows.
 %Section~\ref{sec:relworks} presents common strategies for spatial
 %decomposition.
 Section \ref{sec:stkde} describes the Space-Time Kernel
-Density Estimation problem and explain why it is
+Density Estimation problem and explains why it is
 work-inefficient. Methods for decomposing the work for execution on
 $P$ processors are presented in Section~\ref{sec:exactdecomposition};
 while work-inefficiency aware methods are presented in
@@ -151,7 +152,7 @@ discussed in Section~\ref{sec:ccl}.
 Space-time kernel density (STKDE) is used for identifying
 spatiotemporal patterns in datasets. It is a temporal
 extension of the traditional 2D kernel density
-estimation~\cite{Silverman86} which generates density surface
+estimation~\cite{Silverman86} which generates the density surface
 (``heatmap'') from a set of $n$ points located in a geographic space. The resulting density
 estimates are visualized within the space-time cube framework using two spatial $(x,
 y)$ and a temporal dimension $(t)$~\cite{Nakaya10}. STKDE creates a discretized 3D
@@ -241,7 +242,7 @@ lowercase notations denote quantities in domain space.
 \subsection{Point-based Algorithm and Symmetries}
 
 The point-based algorithm, PB~\cite{Saule17-ICPP}, leverages that fact
-that each point only radiate kernel density around it. The algorithm
+that each point spreads  kernel density only in its immediate vicinity. The algorithm
 for each point consider the impact directly in the cylinder induced by
 the spatial and temporal bandwidth. As such, the algorithm PB incurs
 mostly two costs. Initializing the memory which costs $\Theta(G_x G_y
@@ -333,7 +334,7 @@ decompositions.
 The strategy to avoid the data race is to compute voxel intensity
 independently for different subdomains. This method is called
 PB-SYM-DD in~\cite{Saule17-ICPP} (See Algorithm~\ref{alg:pb-sym-dd}).
-It splits the domain in AxBxC subdomains and each subdomain is
+It splits the domain in $A \times B \times C$ subdomains and each subdomain is
 associated the points which cylinder intersects with a voxel of the
 subdomain. Then the algorithm proceeds with handling each subdomain
 independently by only considering the impact of the data-point on
@@ -404,7 +405,7 @@ optimizing PB-SYM-DD is of practical relevance.
 \subsection{Work Inefficient model}
 
 We model simply the work introduced by an observation $obs$ on a voxel
-box $vb$ as $Load(obs, vb)$. This function has three component, one
+box $vb$ as $Load(obs, vb)$. This function has three components, one
 represents the computation of $k_s$, one represents the computation of
 $k_t$, and the third represents the computation of the stkde
 array. $Load(obs, vb) = \alpha * ((Proj_{XY}(Cyl(obs)) \bigcap vb) +
@@ -421,7 +422,7 @@ Once we have a model of the load of a particular set of voxels,
 decomposing the load becomes a combinatorial problem. It turns out
 that spatial decomposition have different complexities depending of
 the structure of decomposition one is looking for. Even for a problems
-were the load is work efficient, finding the optimal spatial
+where the load is work efficient, finding the optimal spatial
 decomposition of arbitrary structure is an NP-Hard
 problem~\cite{grigni96}. Rectilinear partitionings, which are checker board
 decomposition of varying square size, are also NP-Hard to optimize~\cite{grigni96,aspvall98}.
@@ -451,13 +452,13 @@ By Hierarchical Decomposition, we actually mean generalized forms of
 Recursive Bisection~\cite{berger87}. That is to say, domains are
 recursively decomposed by applying a single grid aligned cut. Here we
 are looking at the 3D problem. So each box will be cut either by a
-grid aligned XY plane, or a grid aligned XT place, or a grid aligned
-XT plane.
+grid aligned XY plane, or a grid aligned XT plane, or a grid aligned
+YT plane.
 
 This structure makes the problem particularly suited for Dynamic
 Programming. Indeed, a particular sub-domain can be decomposed
 independently from any other boxes, as long as the number of
-processors used to decomposed a box is known in advanced. This leads
+processors used to decomposed a box is known in advance. This leads
 to the dynamic programming presented in Figure~\ref{fig:hier-dp} for partitioning the box
 $X_{min}, X_{max}, Y_{min}, Y_{max}, T_{min}, T_{max}$ for $P$
 processors.
@@ -499,8 +500,8 @@ is a multiple of a parameter $Xstep$. Doing so reduces the number of
 state by a factor of $Xstep^2$. Similar parameters $Ystep$ and $Tstep$
 can be introduced.
 
-Implementing this Dynamic Programming algorithm is fairly straight
-forward. Not all the state will be reached in practice so it is better
+Implementing this Dynamic Programming algorithm is fairly straightforward.
+Not all the state will be reached in practice so it is better
 to implement the function the dynamic programming top down
 (recursively) with memoization; rather than bottom-up. This
 implementation becomes faster when realizing a few properties of the
@@ -524,8 +525,8 @@ Jagged decompositions are a simpler pattern than hierarchical
 recursive decomposition. As such, they are expected to lead to simpler
 structures, but they should be faster to compute. A jagged
 decomposition first stripes the domain along the X dimension. Then
-each stripe is individually striped along the y axis. The remaining
-space is striped along the T axis. This simpler pattern still allows
+each stripe is individually striped along the Y dimension. The remaining
+space is striped along the T dimension. This simpler pattern still allows
 many decompositions, but limits the combinatorial explosion compared
 to hierarchical patterns.
 
@@ -550,8 +551,8 @@ with a jagged partitioning along the X, Y, and Z axes. For each cut
 distributing the processors on either sides is necessary. The second
 level has a similar structure except the cuts will be along the Y axis
 and deeper partitioning will be along the Z axis. At the level of the
-Z cuts, the only difference is that there i no need to distribute the
-processors on either side of teh cut, since one side will always take
+Z cuts, the only difference is that there is no need to distribute the
+processors on either side of the cut, since one side will always take
 one processor. 
 
 \begin{figure*}
@@ -617,13 +618,13 @@ A simple solution to solve the over-decomposition problem would eb to
 run the previously mentioned algorithms using number of
 sub-domains. However, in a work inefficient application, this could
 lead to a significant overhead. Indeed, these dynamic programming
-method aim at minimizing the size of the largest sub-domain. However,
+methods aim at minimizing the size of the largest sub-domain. However,
 in an over decomposition this may not be the only concern.
 
 The concern when over decomposing is to achieve an execution that is
 fast, but the size of a particular sub-domain may no longer be that
 relevant. It is difficult to predict precisely how an execution with
-many sub-domain will unfold. And even if we could, that formulation is
+many sub-domains will unfold. And even if we could, that formulation is
 unlikely to be easy to optimize.
 
 However, one can simply model the execution of sub-domains as
@@ -646,7 +647,7 @@ is possible to build a good approximation of this Pareto Set by
 solving a set of problems where one of the objective is constrained to
 be smaller than a parameter while the other parameter is
 optimized~\cite{papayanna2000:pareto}. Here we will chose to put a
-constrained on the largest sub-domain $p_{max} = \max p_i$ and minimize
+constraint on the largest sub-domain $p_{max} = \max p_i$ and minimize
 the total amount of work $\sum p_i$.
 
 It turns out that doing this new optimization problem can be solved by
@@ -724,7 +725,7 @@ We report the quality of the partitioning in
 Figure~\ref{fig:jagged_res} for Jagged partitioning and in
 Figure~\ref{fig:hier_res}. On each figure, we are also showing a
 simple grid based over-decomposition that decomposed the space along
-the each axis in 4, 8, 16, 32, and 64 blocks. On the x-axis, each plot
+each axis in 4, 8, 16, 32, and 64 blocks. On the x-axis, each plot
 shows normalized values for $1/p_{max}$. In other words, if $1/p_{max}
 = 16$, one would expect to see a speedup of 16 if there was only the
 largest sub-domain to process. On the y-axis, the plots show the
@@ -811,7 +812,7 @@ improved partition would obtain. The results at this point are
 preliminary and therefore the details are excluded from the manuscript
 as only few of the configuration have actually been run. However, the
 author can confirm that the gains in the quality of the partitioning
-do in practical speedup for the STKDE application.
+do in practice accelerate for the STKDE application.
 
 \section{Conclusion}
 \label{sec:ccl}
