@@ -122,10 +122,33 @@ int main (int argc, char* argv[]) {
     parts = stkde::partition_jagged_overdecompose (bb, inst, param, nbparts, xstep, ystep, tstep, loadratio);
   }
 
-  
-
+ 
   util::timestamp end;
 
+  bool testing = true;
+  if (testing) {
+    stkde::computation c (bb,inst, param, false);
+
+    stkde::voxelbox total(0, c.voxX,
+			  0, c.voxY,
+			  0, c.voxT);
+
+
+    auto total_volume = total.volume();
+
+    stkde::index part_volume = 0;
+    for (auto vb : parts) {
+      part_volume += vb.volume();
+    }
+
+    if (total_volume != part_volume) {
+      std::cerr << "volumes do not match: "
+		<< total_volume<<" != "<< part_volume
+		<<std::endl;
+    }
+
+  }
+  
   std::cerr.precision(2);
   std::cerr<<"partitioning time: "<<end-begin<<" seconds"<<std::endl;
 

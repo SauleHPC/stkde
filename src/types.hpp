@@ -93,6 +93,12 @@ namespace stkde {
        voxTmin(tmi), voxTmax(tma)
     {}
     
+
+    index volume() const {
+      return (voxXmax - voxXmin) *
+	(voxYmax - voxYmin)*
+	(voxTmax - voxTmin);
+    }
   };
 
   
