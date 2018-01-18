@@ -135,6 +135,46 @@ namespace stkde {
 
   
 
+
+  stkde::instance filter_instance(const stkde::instance& inst, const voxelbox& vb, const computation& c) {
+    stkde::instance ret;
+
+    for (size_t ob=0; ob<inst.obsx.size(); ++ob) {
+            //observation
+      stkde::coordinate ox = inst.obsx[ob];
+      stkde::coordinate oy = inst.obsy[ob];
+      stkde::coordinate ot = inst.obst[ob];
+      
+      //voxel containing the observation
+      index obsvx = (ox - c.bb.xl)/c.pa.xres;
+      index obsvy = (oy - c.bb.yl)/c.pa.yres;
+      index obsvt = (ot - c.bb.tl)/c.pa.tres;
+
+      //
+      index cyl_xmin = obsvx - c.voxsbw;
+      index cyl_xmax = obsvx + c.voxsbw+1;
+
+      index cyl_ymin = obsvy - c.voxsbw;
+      index cyl_ymax = obsvy + c.voxsbw+1;
+
+      index cyl_tmin = obsvt - c.voxtbw;
+      index cyl_tmax = obsvt + c.voxtbw+1;
+
+      voxelbox cyl(cyl_xmin, cyl_xmax,
+		   cyl_ymin, cyl_ymax,
+		   cyl_tmin, cyl_tmax);
+
+      if (intersect (cyl, vb)) {
+	ret.obsx.push_back(ox);
+	ret.obsy.push_back(oy);
+	ret.obst.push_back(ot);
+      }
+      // else
+      // 	std::cerr<<cyl<<" does not intersect "<<vb<<std::endl;
+      
+    }
+    return ret;
+  }
 }
   
 #endif

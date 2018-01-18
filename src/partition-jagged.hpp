@@ -274,42 +274,6 @@ namespace stkde{
     
     return ret;    
   }
-
-  stkde::instance filter_instance(const stkde::instance& inst, const voxelbox& vb, const dp_parameters& dpp) {
-    stkde::instance ret;
-
-    for (size_t ob=0; ob<inst.obsx.size(); ++ob) {
-            //observation
-      stkde::coordinate ox = inst.obsx[ob];
-      stkde::coordinate oy = inst.obsy[ob];
-      stkde::coordinate ot = inst.obst[ob];
-      
-      //voxel containing the observation
-      index obsvx = (ox - dpp.c.bb.xl)/dpp.c.pa.xres;
-      index obsvy = (oy - dpp.c.bb.yl)/dpp.c.pa.yres;
-      index obsvt = (ot - dpp.c.bb.tl)/dpp.c.pa.tres;
-
-      //
-      index cyl_xmin = obsvx - dpp.c.voxsbw;
-      index cyl_xmax = obsvx + dpp.c.voxsbw+1;
-
-      index cyl_ymin = obsvy - dpp.c.voxsbw;
-      index cyl_ymax = obsvy + dpp.c.voxsbw+1;
-
-      index cyl_tmin = obsvt - dpp.c.voxtbw;
-      index cyl_tmax = obsvt + dpp.c.voxtbw+1;
-
-      voxelbox cyl(cyl_xmin, cyl_xmax, cyl_ymin, cyl_ymax, cyl_tmin, cyl_tmax);
-
-      if (intersect (cyl, vb)) {
-	ret.obsx.push_back(ox);
-	ret.obsy.push_back(oy);
-	ret.obst.push_back(ot);
-      }
-	
-    }
-    return ret;
-  }
   
   dp_hier_val partition_jaggedZ(dp_jagged_parameters& param,
 				const stkde::instance& inst,
@@ -336,7 +300,7 @@ namespace stkde{
 
     voxelbox vb (Xmin,Xmax,Ymin,Ymax,0,c.voxT);
     
-    auto filteredinstance = filter_instance(inst, vb, param);
+    auto filteredinstance = filter_instance(inst, vb, c);
     //auto filteredinstance = inst;
     
     dp_hier_val ret = partition_jaggedZ_rec  (param, filteredinstance,

@@ -114,6 +114,8 @@ namespace stkde {
 	+ param.gamma*cyl_tsize*cyl_xsize*cyl_ysize;
       
     }
+
+    std::cerr<<b<<" "<<inst.obsx.size()<<" "<<total_cost<<std::endl;
     
     return total_cost;
   }

@@ -66,7 +66,16 @@ int main (int argc, char* argv[]) {
 
   std::vector<stkde::voxelbox> parts;
 
+  //some observation could be out of bounding box region
+  {
+    stkde::computation c (bb,inst, param, false);
 
+    stkde::voxelbox total(0, c.voxX,
+			  0, c.voxY,
+			  0, c.voxT);
+
+    inst = stkde::filter_instance (inst, total, c);
+  }
   
   util::timestamp begin;
 
