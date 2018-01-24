@@ -109,9 +109,10 @@ namespace stkde {
       index cyl_tsize = std::max(cyl_tmax-cyl_tmin, (stkde::index)0);
 
       //
-      total_cost += param.alpha*cyl_xsize*cyl_ysize
-	+ param.beta*cyl_tsize
-	+ param.gamma*cyl_tsize*cyl_xsize*cyl_ysize;
+      if (cyl_xsize != 0 && cyl_ysize!=0 && cyl_tsize !=0)
+	total_cost += param.alpha*cyl_xsize*cyl_ysize
+	  + param.beta*cyl_tsize
+	  + param.gamma*cyl_tsize*cyl_xsize*cyl_ysize;
       
     }
 
