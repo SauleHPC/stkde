@@ -115,7 +115,7 @@ namespace stkde {
       
     }
 
-    std::cerr<<b<<" "<<inst.obsx.size()<<" "<<total_cost<<std::endl;
+    //    std::cerr<<b<<" "<<inst.obsx.size()<<" "<<total_cost<<std::endl;
     
     return total_cost;
   }
