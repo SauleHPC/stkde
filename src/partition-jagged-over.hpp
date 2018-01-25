@@ -430,6 +430,8 @@ namespace stkde{
     double naive = cost_of_box(param, vb, inst);
 
     double maxloadallowed = naive/nbparts*loadratio;
+
+    std::cerr<<"max load allowed: "<<maxloadallowed<<std::endl;
     
     double max_state = c.voxX/param.xstep * c.voxX/param.xstep
       * c.voxY/param.ystep * c.voxY/param.ystep
