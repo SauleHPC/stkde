@@ -54,9 +54,10 @@ namespace stkde {
 
     const computation& c;
 
-    dp_parameters (const computation& co)
-      :c(co)
-    {}
+    dp_parameters (const computation& co, double a = 1.2e-08, double b = 5.3e-09, double g = 2.2e-09)
+      :alpha(a), beta(b), gamma(g), c(co)
+    {
+    }
   };
 
   struct dp_hier_parameters: public dp_parameters {
@@ -256,9 +257,6 @@ namespace stkde {
     computation c (bb,inst, pa, false);
 
     dp_hier_parameters param (c);
-    param.alpha = 1.2e-08;
-    param.beta = 5.3e-09;
-    param.gamma = 2.2e-09;
 
     param.nbstate = 0;
     param.xstep = xs;
