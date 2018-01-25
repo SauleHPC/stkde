@@ -21,6 +21,7 @@ int main (int argc, char* argv[]) {
 
   if (argc < 6 ) {
     std::cerr<<"usage: "<<argv[0]<<" boundary observations param outfile  method [methodparams]"<<std::endl;
+    std::cerr<<"Methods: GRID decompX decompY decompT"<<std::endl;
     std::cerr<<"Methods: PARTITION-HIER nbparts xstep ystep tstep"<<std::endl;
     std::cerr<<"Methods: PARTITION-JAGGED nbparts xstep ystep tstep"<<std::endl;
     std::cerr<<"Methods: PARTITION-HIER-OVERDECOMPOSE nbparts xstep ystep tstep loadratio"<<std::endl;
@@ -92,13 +93,13 @@ int main (int argc, char* argv[]) {
 
   if (method.compare("GRID") == 0) {
 
-    stkde::index xstep = atoi(argv[6]);
-    stkde::index ystep = atoi(argv[7]);
-    stkde::index tstep = atoi(argv[8]);
+    stkde::index decompx = atoi(argv[6]);
+    stkde::index decompy = atoi(argv[7]);
+    stkde::index decompt = atoi(argv[8]);
 
-    std::cerr<<"Decomp: "<<xstep<<" "<<ystep<<" "<<tstep<<std::endl;
+    std::cerr<<"Decomp: "<<decompx<<" "<<decompy<<" "<<decompt<<std::endl;
     
-    parts = stkde::grid_partition (bb, inst, param, xstep, ystep, tstep);
+    parts = stkde::grid_partition (bb, inst, param, decompx, decompy, decompt);
   }
 
   if (method.compare("PARTITION-HIER-OVERDECOMPOSE") == 0) {
