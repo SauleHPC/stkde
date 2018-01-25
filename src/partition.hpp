@@ -324,7 +324,7 @@ namespace stkde {
 	  stkde::coordinate decxmax = bb.xl + ((dx+1)*(bb.xh-bb.xl)/decompsizeX );
 	  stkde::index voxXmax;
 	  if (dx != decompsizeX-1)
-	    voxXmax = std::lround(std::floor((decxmax-bb.xl)/pa.xres))+1;
+	    voxXmax = std::lround(std::ceil((decxmax-bb.xl)/pa.xres));
 	  else
 	    voxXmax = c.voxX;
 	  
@@ -333,7 +333,7 @@ namespace stkde {
 	  stkde::coordinate decymax = bb.yl + ((dy+1)*(bb.yh-bb.yl)/decompsizeY );
 	  stkde::index voxYmax;
 	  if (dy != decompsizeY-1)
-	    voxYmax = std::lround(std::floor((decymax-bb.yl)/pa.yres))+1;
+	    voxYmax = std::lround(std::ceil((decymax-bb.yl)/pa.yres));
 	  else
 	    voxYmax = c.voxY;
 	  
@@ -343,12 +343,14 @@ namespace stkde {
 	  stkde::coordinate dectmax = bb.tl + ((dt+1)*(bb.th-bb.tl)/decompsizeT );
 	  stkde::index voxTmax;
 	  if (dt != decompsizeT-1)
-	    voxTmax = std::lround(std::floor((dectmax-bb.tl)/pa.tres))+1;
+	    voxTmax = std::lround(std::ceil((dectmax-bb.tl)/pa.tres));
 	  else
 	    voxTmax = c.voxT;
 
 
-	  stkde::voxelbox vb(voxXmin, voxXmax,voxYmin, voxYmax,voxTmin, voxTmax);
+	  stkde::voxelbox vb(voxXmin, voxXmax,
+			     voxYmin, voxYmax,
+			     voxTmin, voxTmax);
 	  decomp.push_back(vb);
 	}
       }
