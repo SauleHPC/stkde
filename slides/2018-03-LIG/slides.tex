@@ -441,17 +441,23 @@
   \begin{center}
     \includegraphics[width=.6\linewidth]{../../paper/icpp17/analysis/PB-SYM-PD-imbalance.pdf}
   \end{center}
-    
-  How hard is the coloring/edge-orientation problem to minimize critical path?
+    \end{frame}
+
+\begin{frame}
+  \frametitle{How hard is the coloring/edge-orientation problem to minimize critical path?}
   \begin{itemize}
   \item NP-hard in general graph (harder than coloring)
   \item Trivial on chains
-  \item Other?
-  \end{itemize}
-
-  How good is the heuristic?
-
-  I need to think more about this...
+  \item Polynomial if Bipartite (Julien Hermann made that observation)
+  \item 2D mesh with 5-pt stencil and 3D mesh with 7-pt stencil are bipartite
+  \item On 2D mesh with 9-pt stencil and 3D mesh with 27-pt
+    stencil, one easily builds a $2^{d-1}$ approximation
+    algorithm. (Based on a 5point stencil, 7point stencil
+    approximation of the graph.)
+  \item On 2D mesh with 9-pt stencil and 3D mesh with 27-pt
+    stencil, NP-Complete? I don't know.
+  \item How good is the heuristic? I don't know  
+  \end{itemize}  
 \end{frame}
 
 \begin{frame}
@@ -461,7 +467,7 @@
   the expense of some memory initialization and reduction.)
 
   
-  Heuristic: for all path longer than $\frac{n}{2P}$, add one copy to all tasks on the path
+  Heuristic: for all paths longer than $\frac{n}{2P}$, add one copy to all tasks on the path
 
   \includegraphics[width=\linewidth]{../../paper/icpp17/analysis/SYM-PD-COLOR-REP-speedup16.pdf}  
 
