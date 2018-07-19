@@ -1,0 +1,60 @@
+../dataset/Dengue-allcases-2010-2011/highres-highbw
+hostname : RegWood02-89
+bounding: [1053872.965;1068485.726]x[860186.8419;879395.9741]x[3;730]
+read 11056 observations
+res: 50 50 1 bw: 2500 2500 1
+voxsize: 294x386x728 size:315.2MB
+voxBW: 50 1
+Initialization time: 0.09943
+compute: 0.5171 seconds
+gamma=1.528e-09
+evaluations: 328636729
+time: 0.616664 seconds
+../dataset/Dengue-allcases-2010-2011/highres-lowbw
+hostname : RegWood02-89
+bounding: [1053872.965;1068485.726]x[860186.8419;879395.9741]x[3;730]
+read 11056 observations
+res: 50 50 1 bw: 100 100 1
+voxsize: 294x386x728 size:315.2MB
+voxBW: 2 1
+Initialization time: 0.05987
+compute: 0.004149 seconds
+gamma=5.004e-09
+evaluations: 828825
+time: 0.064126 seconds
+../dataset/Dengue-allcases-2010-2011/highres-veryhighbandwidth
+hostname : RegWood02-89
+bounding: [1053872.965;1068485.726]x[860186.8419;879395.9741]x[3;730]
+read 11056 observations
+res: 50 50 1 bw: 2500 2500 14
+voxsize: 294x386x728 size:315.2MB
+voxBW: 50 14
+Initialization time: 0.05997
+compute: 7.405 seconds
+gamma=2.264e-09
+evaluations: 3159635318
+time: 7.465236 seconds
+../dataset/Dengue-allcases-2010-2011/lowres-highbw
+hostname : RegWood02-89
+bounding: [1053872.965;1068485.726]x[860186.8419;879395.9741]x[3;730]
+read 11056 observations
+res: 100 100 1 bw: 2500 2500 1
+voxsize: 148x194x728 size:79.74MB
+voxBW: 25 1
+Initialization time: 0.0159
+compute: 0.1057 seconds
+gamma=1.226e-09
+evaluations: 83992257
+time: 0.121740 seconds
+../dataset/Dengue-allcases-2010-2011/lowres-lowbw
+hostname : RegWood02-89
+bounding: [1053872.965;1068485.726]x[860186.8419;879395.9741]x[3;730]
+read 11056 observations
+res: 100 100 1 bw: 250 250 1
+voxsize: 148x194x728 size:79.74MB
+voxBW: 3 1
+Initialization time: 0.01578
+compute: 0.004659 seconds
+gamma=2.867e-09
+evaluations: 1624413
+time: 0.020528 seconds
