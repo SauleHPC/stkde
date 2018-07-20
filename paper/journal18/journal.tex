@@ -27,6 +27,8 @@
 \newcommand{\ceil}[1]{\left\lceil #1 \right\rceil}
 \newcommand{\floor}[1]{\left\lfloor #1 \right\rfloor}
 
+\newtheorem{theorem}{Theorem}[section]
+
 \begin{document}
 \title{Parallel Space-Time Kernel Density Estimation}
 
@@ -818,6 +820,8 @@ $8$ OpenMP parallel-for constructs.\looseness=-1
 
 \section{Coloring and Scheduling based Method}
 
+\subsection{Modeling as a Graph Coloring Problem}
+
 Note that such an implementation overconstrains the execution of the
 algorithm. Indeed, despite they are not in the same set, subdomain $(1,
 0, 0)$ and $(64, 64, 64)$ can be computed at the same time. The real
@@ -864,10 +868,106 @@ $$T_P \leq \frac{T_1 - T_\infty}{P} + T_{\infty},$$
 where $T_1$ is the total amount of work to perform and $T_\infty$ is
 the length of the longest chain in the dependency graph.
 
+\subsection{Interval Coloring of a 27-point Stencil Graph}
+
 We propose to reduce the critical path by using a load-aware coloring
-of the subdomains. We use a greedy coloring algorithm which 
+of the subdomains. Let us consider this problem formally. This is a
+special case of the problem of coloring the vertices of a graph with
+intervals. Formally, we have an undirected graph $G=(V,E)$ with a
+weight function on the vertices $w: V \rightarrow \mathbb{N}$. The problem is
+to find a coloring of each vertex $v$ with $w(v)$ consecutive colors
+such that for each neighbor $(u,v) \in E$ the colors of $u$ and $v$
+are disjoint and such that the number of colors used is minimal. This
+general problem is NP-Complete since it is a generalization of the
+classic graph coloring problem~\cite{GareyJohnson79} and it appears in
+channel allocation in networking problems. This interval coloring
+problem is the dual of the edge orientation problem to extract an
+acyclic graph of minimal length; this result is known as the
+Gallai-Hasse-Roy-Vitaver theorem for unweighted
+graph~\cite{Nesetril12}.
+
+While the general problem is NP-Hard, the problem we have is a special case where the graph $G$ is
+a 3D mesh connected by a 27-point stencil. This could change the
+complexity of the problem. For instance, the traditional coloring
+problem (i.e., $\forall v, w(v)=1$) on such a 3D mesh is polynomial.
+The complexity of interval coloring on a 3D mesh with 27-point stencil
+is currently unknown to the authors of this paper. We show two
+results on this problem. If the graph was a 3D mesh with a 7-point stencil then the problem
+would be polynomial. Also, the naive coloring described above is a
+$4$-approximation of the optimal solution of the problem.
+
+\begin{theorem}
+  If $G$ is a bipartite graph, an optimal coloring can be found in
+  polynomial time.
+\end{theorem}
+
+\begin{proof}
+  A graph is bipartite if the vertices can be partitioned in two
+  groups $A$ and $B$ such that all edges $(u,v)$ of the graph have $u
+  \in A$ and $v \in B$ (or vice versa).
+
+  Consider the following coloring algorithm. All vertices $u \in A$
+  are colored $[1; w(u)]$. For each vertex of $v \in B$, will be
+  colored $[m(v) + 1; m(v) + w(u)]$ where $m(v)$ is the largest color
+  used by any of the neighbor of $v$.
+  
+  If the highest color used comes from vertex $a \in A$, then the
+  number of colors used is $w(a)$ which is a trivial lower bound on
+  the minimum number of colors. If the highest color used comes from
+  vertex $b \in B$, then it uses $w(a) + w(b)$ color which is caused
+  by an edge $(a,b)$ of the graph which is also a lower bound of the
+  minimum number of colors.
+\end{proof}
+
+Many structures are bipartite graphs, in particular 1D chains are
+bipartite, but also 2D 5-point stencils, and 3D 7-point stencils are
+also bipartite. Unfortunately 2D 9-point stencils and 3D 27-point
+stencils are not bipartite.
+
+\begin{theorem}
+  For a $d$-dimensional graph connected with a $3^d$-point stencil,
+  there exist an approximation algorithm of ratio $2^{d-1}$.
+\end{theorem}
+
+\begin{proof}
+  An algorithm is a $\rho$ approximation algorithm if it is guaranteed
+  to use a number of colors lesser than $\rho$ times the number of
+  colors used by the optimal solution~\cite{ApproxAlg}.
+  
+  The one dimensional case is bipartite, so obviously the algorithm
+  described in the previous theorem applies. For higher dimension the
+  proof is constructed by seeing a $d$-dimensional mesh as a chain of
+  $d-1$ dimensional meshes and applying the bipartite algorithm.
+
+  Let us present the rational in the 2D case. In the 2D case, for each
+  row of the instance, solve the 1D problem using the bipartite
+  algorithm. Each row $r$ uses a number of colors $c(r)$. See the 2D
+  problem has a 1D problem where each vertex is a row $r$ of weight
+  $w(r) = c(r)$ and solve it with the bipartite algorithm. The number
+  of colors used by this algorithm is $w(r) + w(r+1)$ for a particular
+  row $r$. The coloring of each row being optimal, both $w(r)$ and
+  $w(r+1)$ are lower bounds of the original coloring problem; which
+  proves that the derived coloring uses a number of color lesser than
+  $2$ times the optimal number of colors.
+  
+  A proof by induction on higher number of dimensions is easy derived
+  from this structure: a solution at dimension $d$ is constructed from
+  a chain where the weight of each vertex is a solution of the problem
+  of dimension $d-1$ for which a $2^{d-2}$ approximated solution is
+  known.
+\end{proof}
+
+Note that we proved the existence of a $2^{d-1}$ algorithm but the
+problem may still be polynomial.
+
+The naive coloring algorithm presented in the previous section that
+performs an unweighted coloring generate the same solution as the
+algorithm described in the proof once one shifts the coloring
+intervals of each vertex to be as soon as possible.
+
+In practice, we can use a greedy coloring algorithm which 
 considers the subdomains in a particular order and for each subdomain
-will color it with the smallest color that does not conflict with the
+will color it with the smallest colors that does not conflict with the
 already colored neighbors. Such greedy coloring algorithm are commonly
 used in parallel computing applications~\cite{GMP05,Boman05-EuroPar,Deveci2016}. However, we will use
 an ordering that color the vertices in non-increasing order of the
@@ -876,23 +976,20 @@ heuristic, it is likely to obtain a coloring that minimizes the
 critical path. We call this algorithm to compute STKDE:
 PB-SYM-PD-SCHED.
 
-\subsection{The Coloring Problem}
-
-Let us take a minute to investigate formally this coloring problem.
-
-The complexity of this problem is currently unknown to the
-authors. The general case of an arbitrary graph is NP-Hard by
-reduction to graph coloring. But the case of a 1D stencil is clearly
-polynomial.
-
-\todo{write 4 approximation algorithm}
+Remark that while we expect this greedy algorithm to perform well, it
+is not optimal even on a 1D chain. Consider the graph composed of four
+vertices of weight $w(1)=10$, $w(2)=9$, $w(3)=8$, and $w(4)=10$. The
+greedy algorithm colors first vertices $1$ and $4$ with colors
+$[1;10]$; then it colors vertex $2$ with colors $[11;19]$; finally it
+colors vertex $3$ with colors $[20;27]$. Meanwhile, the optimal
+coloring only uses $18$ colors.
 
 
 \subsection{Hybrid algorithms}
 
 To decrease the critical path further, we propose an other algorithm
 PB-SYM-PD-REP which replicates the subdomains that are on the critical
-path (and its neighbors) of the graph so that the points of a
+path (and its neighbors) of the task graph so that the points of a
 subdomain can be performed in parallel. As long as the critical path
 is longer than $\frac{n}{2P}$, the tasks on the path are replicated an
 additional time and the critical path is recomputed. Replication of
