@@ -428,6 +428,8 @@ initializing the memory, processing the points, and reducing the partial results
 \section{Domain Decomposition}
 \label{sec:pb-sym-dd}
 
+\subsection{Principles}
+
 Another strategy to avoid the data race is to compute 
 voxel intensity  independently for different subdomains. We call this method PB-SYM-DD (Algorithm~\ref{alg:pb-sym-dd}).
 It splits the domain in AxBxC subdomains and each subdomain is
@@ -543,7 +545,7 @@ partitioning when the decomposition is work inefficient.
   \label{fig:decomposition}
 \end{figure}
 
-\subsection{Hierarchical Decomposition}
+\subsubsection{Hierarchical Decomposition}
 
 By Hierarchical Decomposition, we actually mean generalized forms of
 Recursive Bisection~\cite{berger87}. That is to say, domains are
@@ -616,7 +618,7 @@ decomposition, then all subsequent values of $x$ which are all larger,
 will only lead to decomposition that won't be picked in practice. So
 the corresponding states of the dynamic programming do not need to be evaluated.
 
-\subsection{Jagged Decomposition}
+\subsubsection{Jagged Decomposition}
 
 Jagged decompositions are a simpler pattern than hierarchical
 recursive decomposition. As such, they are expected to lead to simpler
@@ -697,7 +699,7 @@ is. It can also be made faster by limiting the decomposition to values
 of $x$, $y$, and $t$ which are multiples of parameters $Xstep$,
 $Ystep$, and $Tstep$.
 
-\subsection{Overdecomposition}
+\subsubsection{Overdecomposition}
 \label{sec:overdecomposition}
 
 Despite having optimal exact decomposition, this may not lead to the
@@ -755,8 +757,14 @@ max). And the cost of an undivided sub-domain is still given by $Load$,
 except if that value is larger than the allowed cost of the sub-domain,
 in which case, the cost of that sub-domain is set to infinity.
 
+\subsection{Heuristic Decompositions}
+
+\todo{write something}
+
 \section{Point Decomposition}
 \label{sec:pb-sym-pd}
+
+\subsection{Principles}
 
 Both of the previous strategies increase the amount of work
 significantly. We want to achieve parallelism without cutting a
@@ -818,9 +826,9 @@ $8$ OpenMP parallel-for constructs.\looseness=-1
 \end{algorithm}
 
 
-\section{Coloring and Scheduling based Method}
+\subsection{Coloring and Scheduling based Method}
 
-\subsection{Modeling as a Graph Coloring Problem}
+\subsubsection{Modeling as a Graph Coloring Problem}
 
 Note that such an implementation overconstrains the execution of the
 algorithm. Indeed, despite they are not in the same set, subdomain $(1,
@@ -868,7 +876,7 @@ $$T_P \leq \frac{T_1 - T_\infty}{P} + T_{\infty},$$
 where $T_1$ is the total amount of work to perform and $T_\infty$ is
 the length of the longest chain in the dependency graph.
 
-\subsection{Interval Coloring of a 27-point Stencil Graph}
+\subsubsection{Interval Coloring of a 27-point Stencil Graph}
 
 We propose to reduce the critical path by using a load-aware coloring
 of the subdomains. Let us consider this problem formally. This is a
