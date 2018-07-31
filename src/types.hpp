@@ -94,10 +94,19 @@ namespace stkde {
     {}
     
 
+    /// this assumes that the box is not malformed
     index volume() const {
       return (voxXmax - voxXmin) *
 	(voxYmax - voxYmin)*
 	(voxTmax - voxTmin);
+    }
+
+    bool empty() const {
+      if (voxXmax <= voxXmin) return true;
+      if (voxYmax <= voxYmin) return true;
+      if (voxTmax <= voxTmin) return true;
+
+      return false;
     }
   };
 
