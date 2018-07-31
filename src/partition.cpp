@@ -78,6 +78,9 @@ int main (int argc, char* argv[]) {
     inst = stkde::filter_instance (inst, total, c);
   }
   
+
+  std::ofstream out (outfile); // Opening the outfile now to prevent recomputing if in case of timeout.
+
   util::timestamp begin;
 
   //
@@ -163,12 +166,10 @@ int main (int argc, char* argv[]) {
   std::cerr<<"partitioning time: "<<end-begin<<" seconds"<<std::endl;
 
   
-  {
-    std::ofstream out (outfile);
-    out<<parts.size()<<std::endl;
-    for (auto vb : parts)
-      out<<vb<<std::endl;				   
-  }
+
+  out<<parts.size()<<std::endl;
+  for (auto vb : parts)
+    out<<vb<<std::endl;				   
     
   
   return 0;
