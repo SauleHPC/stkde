@@ -79,6 +79,7 @@ int main (int argc, char* argv[]) {
 	     <<"         POINTBASED-SYMOMP, POINTBASED-SYMOMP-OBSDECOMP, POINTBASED-SYMOMP-OBSDECOMP-SCHED"<<std::endl
 	     <<"         POINTBASED-SYMOMP-OBSDECOMP-COLORSCHED, POINTBASED-SYMOMP-OBSDECOMP-COLORSCHED-REP"<<std::endl
 	     <<"         POINTBASED-SYMOMP-POINTDECOMP"<<std::endl<<std::endl
+	     <<"         POINTBASED-SYMOMP-BOXDECOMP"<<std::endl<<std::endl
 	     <<"         VOXELBASED, VOXELBASED-OMP"<<std::endl
 	     <<"         VOXELBASED-OBSDECOMP, VOXELBASED-OMP-OBSDECOMP"<<std::endl;
      
