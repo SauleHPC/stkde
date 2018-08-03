@@ -218,8 +218,8 @@ int main (int argc, char* argv[]) {
       stkde::index nbbox;
       
       partin>>nbbox;
-      decomp.reserve(nbbox);
       if (partin) {
+	decomp.reserve(nbbox);
 	for (int i=0; i<nbbox; ++i) {
 	  stkde::voxelbox vb;
 	  partin >> vb;
