@@ -67,8 +67,8 @@ Email: {\it \{esaule,dpanchan,ahohl,wtang4,eric.delmelle\}@uncc.edu}
 
 \section{Introduction}
 
-The rapid propagation of infectious diseases (e.g. zika, Ebola, H1N1,
-dengue fever) is conducive to serious, epidemic outbreaks, posing a
+The rapid propagation of infectious diseases (e.g. Zika, Ebola, H1N1,
+Dengue fever) is conducive to serious, epidemic outbreaks, posing a
 threat to vulnerable populations. Such diseases have complex
 transmission cycles, and effective public health responses require the
 ability to monitor outbreaks in a timely
@@ -104,37 +104,65 @@ algorithms for this problem that reduced the complexity by orders of
 magnitude. And to bring the runtime in the realm of near real-time, we
 designed parallel strategies for shared memory machines.
 
-\todo{cite icpp paper}
-
-\todo{change contribution to include partitioning and coloring problems}
-
 Section~\ref{sec:stkde} presents the STKDE application along with a
 reference implementation that uses a voxel-based algorithm VB to
-compute STKDE. In Section~\ref{sec:algo-seq}, we investigate the
+compute STKDE.
+
+In Section~\ref{sec:algo-seq}, we investigate the
 sequential problem and develop a point-based algorithm PB that
 significantly reduce the complexity compared to VB. We also identify
 invariants linked to the structure of the kernel density estimate
 function that allows to reduce the computational cost by an additional
-factor and build the PB-SYM algorithm based on that observation. We
-develop two parallelization strategies (PB-SYM-DR and PB-SYM-DD) in
-Section~\ref{sec:pb-sym-domain} that are designed to make the
-computation pleasingly parallel. However both strategies are not work-efficient
-and can cause significant work overhead in some cases. That
-is why we introduce PB-SYM-PD in Section~\ref{sec:pb-sym-point} that
-provide a work-efficient decomposition of the points. However that
-algorithm has internal dependencies which can induce a long critical path
-and cause load imbalance; and we develop PB-SYM-PD-SCHED to leverage
-alternative ordering of the work to reduce the critical path. To
-reduce the critical path further, we propose the PB-SYM-PD-REP algorithm which
-introduces some work
-overhead only where is needed to achieve a short critical path.
-Section~\ref{sec:experiments} presents experimental
-results on 4 different datasets and 21 instances extracted from
-these datasets. The experiments highlights that the sequential
-strategies are efficient. The parallel strategies have their pros and
-cons and different strategies appear to be best in different
-scenarios. Section~\ref{sec:soa} discusses the applicability of related problems and
-techniques.
+factor and build the PB-SYM algorithm based on that observation.
+
+We develop a simple parallel strategy PB-SYM-DR in
+Section~\ref{sec:algo-pb-dr} which replicates the state of the
+problem, enables pleasingly parallel computation, and avoids a race
+conditions at the cost of performing a reduction at the end.
+
+To reduce the cost of this reduction, we then investigate decomposing
+the space in blocks that can be independently processed. The PB-SYM-DD
+is built on that principle and is described in
+Section~\ref{sec:pb-sym-dd}. It makes the the computation pleasingly
+parallel however it introduces overhead when the boundary of a block
+is too close to many events. We propose different methods to a space
+decomposition based on optimal hierarchical (Section~\ref{sec:hier})
+and jagged partitioning (Section~\ref{sec:jagged}), overdecomposition
+(Section~\ref{sec:overdecomposition}) and heuristic partitioning based
+on block and octree decompositions (Section~\ref{sec:heuristics}).
+
+
+Since both previous strategies may introduce a significant work
+overhead (due to the reduction and the overhead of the decomposition),
+we propose PB-SYM-PD in Section~\ref{sec:pb-sym-pd} that provide a
+work-efficient decomposition of the points. However that algorithm has
+internal dependencies which can induce a long critical path and cause
+load imbalance. Alternative ordering of the work can reduce the length
+of the critical path. However finding the optimal ordering is
+difficult problem for which we present complexity, approximation
+results, and a heuristic using to build PB-SYM-PD-SCHED in
+Section~\ref{sec:coloring}.  To reduce the critical path further, we
+propose the PB-SYM-PD-REP algorithm in Section~\ref{sec:pb-sym-pd-rep}
+which introduces some work overhead only where is needed to achieve a
+shorter critical path.
+
+Section~\ref{sec:experiments} presents experimental results on 4
+different datasets and 21 instances extracted from these datasets. The
+experiments highlights that the sequential strategies are
+efficient. The parallel strategies have their pros and cons and
+different strategies appear to be best in different
+scenarios.
+
+Section~\ref{sec:soa} discusses the applicability of related problems
+and techniques.
+
+A preliminary version of this paper has appeared
+in~\cite{Saule17-ICPP}. This paper extends the previous results by
+presenting a discussion of complex partitioning strategies for
+PB-SYM-DD (Sections~\ref{sec:workmodel},~\ref{sec:exactdecomposition},
+and~\ref{sec:heuristics}), the complexity and approximation result of
+work ordering for PB-SYM-PD (Section~\ref{sec:coloring}). This paper also presents
+more experimental results in Section~\ref{sec:experiments}.
 
 \section{Space-Time Kernel Density Estimation}
 \label{sec:stkde}
@@ -379,10 +407,12 @@ G_y  G_t + n  H_s^2  H_t)$) but reduces the number of flops.
 Notice that this exploitation of symmetries is not possible in a
 voxel-based algorithm.
 
-\label{sec:algo-pb-sym}
 
 
 \section{Domain Replication}
+
+\label{sec:algo-pb-dr}
+
 
 The simplest way to parallelize this kind of computation is to split
 the points equally among the $P$ different computational
@@ -496,6 +526,8 @@ We discuss now methods to find better decomposition. \todo{better segway}
 
 \subsection{Work Inefficient model}
 
+\label{sec:workmodel}
+
 The first thing needed for obtaining better decomposition is a model
 of the load for regions of the space so that we can evaluate the
 quality of the decomposition
@@ -546,6 +578,8 @@ partitioning when the decomposition is work inefficient.
 \end{figure}
 
 \subsubsection{Hierarchical Decomposition}
+
+\label{sec:hier}
 
 By Hierarchical Decomposition, we actually mean generalized forms of
 Recursive Bisection~\cite{berger87}. That is to say, domains are
@@ -619,6 +653,8 @@ will only lead to decomposition that won't be picked in practice. So
 the corresponding states of the dynamic programming do not need to be evaluated.
 
 \subsubsection{Jagged Decomposition}
+
+\label{sec:jagged}
 
 Jagged decompositions are a simpler pattern than hierarchical
 recursive decomposition. As such, they are expected to lead to simpler
@@ -759,6 +795,8 @@ in which case, the cost of that sub-domain is set to infinity.
 
 \subsection{Heuristic Decompositions}
 
+\label{sec:heuristics}
+
 \todo{write something}
 
 \section{Point Decomposition}
@@ -878,6 +916,8 @@ the length of the longest chain in the dependency graph.
 
 \subsubsection{Interval Coloring of a 27-point Stencil Graph}
 
+\label{sec:coloring}
+
 We propose to reduce the critical path by using a load-aware coloring
 of the subdomains. Let us consider this problem formally. This is a
 special case of the problem of coloring the vertices of a graph with
@@ -994,6 +1034,7 @@ coloring only uses $18$ colors.
 
 
 \subsection{Hybrid algorithms}
+\label{sec:pb-sym-pd-rep}
 
 To decrease the critical path further, we propose an other algorithm
 PB-SYM-PD-REP which replicates the subdomains that are on the critical
@@ -1317,6 +1358,25 @@ and therefore wishes to be the most on the bottom right of the charts.
   \subfigure[PollenUS-VHr-VLb]{\includegraphics[width=.35\linewidth,page=8]{plots/part-PollenUS-vhrvlb.pdf}}
 
   \caption{Quality of all Partitionings}
+  \label{fig:all_res}
+\end{figure*}
+
+
+\begin{figure*}
+  \subfigure[Dengue-Lr-Lb]{\includegraphics[width=.35\linewidth,page=1]{plots/res_part-Dengue-lrlb.pdf}}
+  \subfigure[Dengue-Lr-Hb]{\includegraphics[width=.35\linewidth,page=1]{plots/res_part-Dengue-lrhb.pdf}}
+  \subfigure[Dengue-Lr-Hb]{\includegraphics[width=.35\linewidth,page=1]{plots/res_part-Dengue-hrlb.pdf}}
+  \subfigure[Dengue-Hr-Hb]{\includegraphics[width=.35\linewidth,page=1]{plots/res_part-Dengue-hrhb.pdf}}
+  \subfigure[Dengue-Hr-VHb]{\includegraphics[width=.35\linewidth,page=1]{plots/res_part-Dengue-hrvhb.pdf}}
+
+  \subfigure[PollenUS-Lr-Lb]{\includegraphics[width=.35\linewidth,page=1]{plots/res_part-PollenUS-lrlb.pdf}}
+  \subfigure[PollenUS-Hr-Lb]{\includegraphics[width=.35\linewidth,page=1]{plots/res_part-PollenUS-hrlb.pdf}}
+  \subfigure[PollenUS-Hr-Mb]{\includegraphics[width=.35\linewidth,page=1]{plots/res_part-PollenUS-hrmb.pdf}}
+  \subfigure[PollenUS-Hr-Hb]{\includegraphics[width=.35\linewidth,page=1]{plots/res_part-PollenUS-hrhb.pdf}}
+  \subfigure[PollenUS-VHr-Lb]{\includegraphics[width=.35\linewidth,page=1]{plots/res_part-PollenUS-vhrlb.pdf}}
+  \subfigure[PollenUS-VHr-VLb]{\includegraphics[width=.35\linewidth,page=1]{plots/res_part-PollenUS-vhrvlb.pdf}}
+
+  \caption{actual run of all Partitionings}
   \label{fig:all_res}
 \end{figure*}
 
