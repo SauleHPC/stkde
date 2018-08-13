@@ -106,14 +106,17 @@ designed parallel strategies for shared memory machines.
 
 Section~\ref{sec:stkde} presents the STKDE application along with a
 reference implementation that uses a voxel-based algorithm VB to
-compute STKDE.
+compute STKDE. The problem resembles the spatial summation of radial
+basis function, however the functions we consider are not radially symmetric.
 
-In Section~\ref{sec:algo-seq}, we investigate the
-sequential problem and develop a point-based algorithm PB that
-significantly reduce the complexity compared to VB. We also identify
-invariants linked to the structure of the kernel density estimate
-function that allows to reduce the computational cost by an additional
-factor and build the PB-SYM algorithm based on that observation.
+In Section~\ref{sec:algo-seq}, we investigate the sequential problem
+and develop a point-based algorithm PB that significantly reduce the
+complexity compared to VB. We also identify invariants linked to the
+structure of the kernel density estimate function that allows to
+reduce the computational cost by an additional factor and build the
+PB-SYM algorithm based on that observation. These invariants do not
+exist in the problem of summing radial basis functions which makes the
+problem we address have different properties and optimizations.
 
 We develop a simple parallel strategy PB-SYM-DR in
 Section~\ref{sec:algo-pb-dr} which replicates the state of the
