@@ -523,9 +523,19 @@ a cluster will have a significantly higher work than other
 subdomains. And this work is not executed in parallel. One could
 decompose the domain more, but replicated point 
 will incur an even higher overhead which may end up nullifying
-the gain in load balance.\looseness=-1
+the gain in load balance.
 
-We discuss now methods to find better decomposition. \todo{better segway}
+There must exist decomposition that are provided better compromise
+between available parallelism and overhead. First to be able to find
+better decomposition, we need to have a model for the load of a box
+and we provide a model in Section~\ref{sec:workmodel}. Based on this
+model we investigate the problem of finding an optimal decomposition
+in Section~\label{sec:exactdecomposition} and because the problem is
+NP-Complete in general, we consider relatively general decomposition
+patterns for which we can find an optimal decomposition, namely
+Hierarchical decomposition in Section~\ref{sec:hier} and Jagged
+decomposition in Section~\ref{sec:jagged}. Finally we consider faster
+heuristic decomposition in Section~\ref{sec:heuristics}.
 
 \subsection{Work Inefficient model}
 
