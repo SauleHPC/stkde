@@ -109,7 +109,7 @@ namespace stkde{
     
 
     std::sort(sol.begin(), sol.end(),
-     	      [&] (const voxelbox& a, const voxelbox&b){
+     	      [&] (const voxelbox& a, const voxelbox& b){
     		return cost_of_box(param, a, inst) > cost_of_box(param, b, inst);
      	      });
 
