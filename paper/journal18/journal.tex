@@ -1490,13 +1490,29 @@ PollenUS-Hr-Mb).
 
 There is a strange effect linked to over-decomposition has performed
 by the octree and grid decompositions. If there is a lot of work, and
-a large domain, over-decomposition induces a gain of locality and
-super linear speedup are seen (PollenUS-Hr-Hb, PollenUS-VHr-Lb, and
+a large domain, over-decomposition induces a gain in locality and
+super linear speedup are observed (PollenUS-Hr-Hb, PollenUS-VHr-Lb, and
 PollenUS-VHr,VLb). Meanwhile, when the amount of work is not that
 large, over-decomposition causes the scheduling of many tiny tasks
 that induce overheads in the middleware and decreases the achieved
 speedup (Dengue-Lr,Hb, Dengue-Hr-Hb, PollenUS-Hr-Lb).
 
+\subsubsection{Which decomposition algorithm to choose?}
+
+Overall, we showed that complex decomposition algorithms can build
+better decompositions than heuristics like grid and octree
+decomposition. However the time it takes to generate such a
+decomposition is prohibitive: the runtime reduction obtained from
+having a better partitioning does not compensate the time cost of
+building the decomposition.
+
+Meanwhile it is not clear that an adaptive decomposition like the
+octree-based decomposition will outperform trivial regular blocking of
+the domain space. As such we will continue forward assuming a regular
+blocking decomposition.
+
+It could be worthwhile to investigate in the future decomposition
+techniques which are both heuristic but also workload aware.
 
 \subsection{Point-based parallelism}
 
