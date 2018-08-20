@@ -537,7 +537,7 @@ Hierarchical decomposition in Section~\ref{sec:hier} and Jagged
 decomposition in Section~\ref{sec:jagged}. Finally we consider faster
 heuristic decomposition in Section~\ref{sec:heuristics}.
 
-\subsection{Work Inefficient model}
+\subsection{Work Inefficient Model}
 
 \label{sec:workmodel}
 
@@ -806,11 +806,31 @@ max). And the cost of an undivided sub-domain is still given by $Load$,
 except if that value is larger than the allowed cost of the sub-domain,
 in which case, the cost of that sub-domain is set to infinity.
 
-\subsection{Heuristic Decompositions}
+\subsection{Octree Decompositions}
 
 \label{sec:heuristics}
 
-\todo{write something}
+The methods that we presented before are either trivial heuristics
+(such as regular block decompositions) or of high complexity (such as
+optimal recursive decompositions). These methods are likely to either
+lead to bad quality partitions or to be too expensive to compute in
+practical scenarios.
+
+We propose to use a classic idea to have an cheap yet adaptive
+decomposition inspired by octree decomposition of the space. The
+decomposition algorithm is initialized by having a single cuboid that
+covers the entire domain space. Then, iteratively, the cuboid of
+largest load (not necessarily of largest volume) is split in eight
+cuboid of identical volume. The process stops whenever the cuboid of
+largest load can not be divided, or a given number of cuboid is reached.
+
+These octree decompositions are inherently adaptive. They are unlikely
+to over decompose the parts of the domain that have low load. They are
+likely good at ensuring that the cuboid of highest load has a fairly
+low load. However this approach does not take the work inefficiency of
+the decomposition into account to make the decision. So, dense region
+of the domain could be naively partitioned, leading to a potential
+high work overhead.
 
 \section{Point Decomposition}
 \label{sec:pb-sym-pd}
@@ -1356,42 +1376,7 @@ and therefore wishes to be the most on the bottom right of the charts.
 \end{figure*}
 
 
-\begin{figure*}
-  \subfigure[Dengue-Lr-Lb]{\includegraphics[width=.35\linewidth,page=8]{plots/part-Dengue-lrlb.pdf}}
-  \subfigure[Dengue-Lr-Hb]{\includegraphics[width=.35\linewidth,page=8]{plots/part-Dengue-lrhb.pdf}}
-  \subfigure[Dengue-Lr-Hb]{\includegraphics[width=.35\linewidth,page=8]{plots/part-Dengue-hrlb.pdf}}
-  \subfigure[Dengue-Hr-Hb]{\includegraphics[width=.35\linewidth,page=8]{plots/part-Dengue-hrhb.pdf}}
-  \subfigure[Dengue-Hr-VHb]{\includegraphics[width=.35\linewidth,page=8]{plots/part-Dengue-hrvhb.pdf}}
 
-  \subfigure[PollenUS-Lr-Lb]{\includegraphics[width=.35\linewidth,page=8]{plots/part-PollenUS-lrlb.pdf}}
-  \subfigure[PollenUS-Hr-Lb]{\includegraphics[width=.35\linewidth,page=8]{plots/part-PollenUS-hrlb.pdf}}
-  \subfigure[PollenUS-Hr-Mb]{\includegraphics[width=.35\linewidth,page=8]{plots/part-PollenUS-hrmb.pdf}}
-  \subfigure[PollenUS-Hr-Hb]{\includegraphics[width=.35\linewidth,page=8]{plots/part-PollenUS-hrhb.pdf}}
-  \subfigure[PollenUS-VHr-Lb]{\includegraphics[width=.35\linewidth,page=8]{plots/part-PollenUS-vhrlb.pdf}}
-  \subfigure[PollenUS-VHr-VLb]{\includegraphics[width=.35\linewidth,page=8]{plots/part-PollenUS-vhrvlb.pdf}}
-
-  \caption{Quality of all Partitionings}
-  \label{fig:all_res}
-\end{figure*}
-
-
-\begin{figure*}
-  \subfigure[Dengue-Lr-Lb]{\includegraphics[width=.35\linewidth,page=1]{plots/res_part-Dengue-lrlb.pdf}}
-  \subfigure[Dengue-Lr-Hb]{\includegraphics[width=.35\linewidth,page=1]{plots/res_part-Dengue-lrhb.pdf}}
-  \subfigure[Dengue-Lr-Hb]{\includegraphics[width=.35\linewidth,page=1]{plots/res_part-Dengue-hrlb.pdf}}
-  \subfigure[Dengue-Hr-Hb]{\includegraphics[width=.35\linewidth,page=1]{plots/res_part-Dengue-hrhb.pdf}}
-  \subfigure[Dengue-Hr-VHb]{\includegraphics[width=.35\linewidth,page=1]{plots/res_part-Dengue-hrvhb.pdf}}
-
-  \subfigure[PollenUS-Lr-Lb]{\includegraphics[width=.35\linewidth,page=1]{plots/res_part-PollenUS-lrlb.pdf}}
-  \subfigure[PollenUS-Hr-Lb]{\includegraphics[width=.35\linewidth,page=1]{plots/res_part-PollenUS-hrlb.pdf}}
-  \subfigure[PollenUS-Hr-Mb]{\includegraphics[width=.35\linewidth,page=1]{plots/res_part-PollenUS-hrmb.pdf}}
-  \subfigure[PollenUS-Hr-Hb]{\includegraphics[width=.35\linewidth,page=1]{plots/res_part-PollenUS-hrhb.pdf}}
-  \subfigure[PollenUS-VHr-Lb]{\includegraphics[width=.35\linewidth,page=1]{plots/res_part-PollenUS-vhrlb.pdf}}
-  \subfigure[PollenUS-VHr-VLb]{\includegraphics[width=.35\linewidth,page=1]{plots/res_part-PollenUS-vhrvlb.pdf}}
-
-  \caption{actual run of all Partitionings}
-  \label{fig:all_res}
-\end{figure*}
 
 
 The first observation one can have is that a grid based partitioning
@@ -1426,6 +1411,32 @@ increase the amount of work significantly. In any cases, the work aware
 method presented in this manuscript lead to much better decomposition
 than the naive grid partitioning.
 
+Figure~\ref{fig:all_parts} introduces the octree-based decomposition
+presented in Section~\ref{sec:heuristics}. We removed the
+over-decomposed variants of Jagged and Hierarchical partitioning for
+clarity. On most instances, the octree decomposition is the
+decomposition that leads to the highest value of $1/p_{max}$. This
+make sense since this method greedily maximizes $1/p_{max}$. \todo{write more}
+
+\begin{figure*}
+  \subfigure[Dengue-Lr-Lb]{\includegraphics[width=.35\linewidth,page=9]{plots/part-Dengue-lrlb.pdf}}
+  \subfigure[Dengue-Lr-Hb]{\includegraphics[width=.35\linewidth,page=9]{plots/part-Dengue-lrhb.pdf}}
+  \subfigure[Dengue-Lr-Hb]{\includegraphics[width=.35\linewidth,page=9]{plots/part-Dengue-hrlb.pdf}}
+  \subfigure[Dengue-Hr-Hb]{\includegraphics[width=.35\linewidth,page=9]{plots/part-Dengue-hrhb.pdf}}
+  \subfigure[Dengue-Hr-VHb]{\includegraphics[width=.35\linewidth,page=9]{plots/part-Dengue-hrvhb.pdf}}
+
+  \subfigure[PollenUS-Lr-Lb]{\includegraphics[width=.35\linewidth,page=9]{plots/part-PollenUS-lrlb.pdf}}
+  \subfigure[PollenUS-Hr-Lb]{\includegraphics[width=.35\linewidth,page=9]{plots/part-PollenUS-hrlb.pdf}}
+  \subfigure[PollenUS-Hr-Mb]{\includegraphics[width=.35\linewidth,page=9]{plots/part-PollenUS-hrmb.pdf}}
+  \subfigure[PollenUS-Hr-Hb]{\includegraphics[width=.35\linewidth,page=9]{plots/part-PollenUS-hrhb.pdf}}
+  \subfigure[PollenUS-VHr-Lb]{\includegraphics[width=.35\linewidth,page=9]{plots/part-PollenUS-vhrlb.pdf}}
+  \subfigure[PollenUS-VHr-VLb]{\includegraphics[width=.35\linewidth,page=9]{plots/part-PollenUS-vhrvlb.pdf}}
+
+  \caption{Quality of all Octree-based decomposition}
+  \label{fig:all_parts}
+\end{figure*}
+
+
 
 \subsubsection{Real execution}
 
@@ -1436,6 +1447,27 @@ preliminary and therefore the details are excluded from the manuscript
 as only few of the configuration have actually been run. However, the
 author can confirm that the gains in the quality of the partitioning
 do in practice accelerate for the STKDE application.
+
+\todo{WRITING}
+
+\begin{figure*}
+  \subfigure[Dengue-Lr-Lb]{\includegraphics[width=.35\linewidth,page=2]{plots/res_part-Dengue-lrlb.pdf}}
+  \subfigure[Dengue-Lr-Hb]{\includegraphics[width=.35\linewidth,page=2]{plots/res_part-Dengue-lrhb.pdf}}
+  \subfigure[Dengue-Lr-Hb]{\includegraphics[width=.35\linewidth,page=2]{plots/res_part-Dengue-hrlb.pdf}}
+  \subfigure[Dengue-Hr-Hb]{\includegraphics[width=.35\linewidth,page=2]{plots/res_part-Dengue-hrhb.pdf}}
+  \subfigure[Dengue-Hr-VHb]{\includegraphics[width=.35\linewidth,page=2]{plots/res_part-Dengue-hrvhb.pdf}}
+
+  \subfigure[PollenUS-Lr-Lb]{\includegraphics[width=.35\linewidth,page=2]{plots/res_part-PollenUS-lrlb.pdf}}
+  \subfigure[PollenUS-Hr-Lb]{\includegraphics[width=.35\linewidth,page=2]{plots/res_part-PollenUS-hrlb.pdf}}
+  \subfigure[PollenUS-Hr-Mb]{\includegraphics[width=.35\linewidth,page=2]{plots/res_part-PollenUS-hrmb.pdf}}
+  \subfigure[PollenUS-Hr-Hb]{\includegraphics[width=.35\linewidth,page=2]{plots/res_part-PollenUS-hrhb.pdf}}
+  \subfigure[PollenUS-VHr-Lb]{\includegraphics[width=.35\linewidth,page=2]{plots/res_part-PollenUS-vhrlb.pdf}}
+  \subfigure[PollenUS-VHr-VLb]{\includegraphics[width=.35\linewidth,page=2]{plots/res_part-PollenUS-vhrvlb.pdf}}
+
+  \caption{actual run of all Partitionings}
+  \label{fig:all_res}
+\end{figure*}
+
 
 
 
