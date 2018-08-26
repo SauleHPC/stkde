@@ -1,0 +1,8 @@
+hostname : cph-gpu3.uncc.edu
+bounding: [-130;-65]x[20;50]x[5875;5958]
+read 588189 observations
+res: 0.1 0.1 1 bw: 2.5 2.5 7
+Decomp: 8 8 16
+naive: 67.21899211 speedup:52.49439394
+sumload:114.0603357 overhead:1.69684686
+partitioning time: 4.152551 seconds

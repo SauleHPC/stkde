@@ -1,0 +1,19 @@
+hostname : cph-c46.uncc.edu
+bounding: [1053872.965;1068485.726]x[860186.8419;879395.9741]x[3;730]
+read 11056 observations
+res: 50 50 1 bw: 100 100 1
+voxsize: 294x386x728 size:315.156372MB
+voxBW: 2 1
+decomposition time: 0.009045 seconds
+max load: 10 avgloadperbox: 0.042175293 avgloadpercore: 691 total load: 11056
+most loaded: 20 15 3
+load based longest path:40
+nb replication: 1
+total active blocks: 262144
+schedule time: 0.804819 seconds
+Initialization time: 0.034959
+mem: 287496
+compute: 0.072063 seconds
+reduction: 0.02085 seconds
+evaluations: 0
+time: 0.980357 seconds

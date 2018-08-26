@@ -1,0 +1,19 @@
+hostname : cph-c44.uncc.edu
+bounding: [-39;77]x[-159;148]x[0;5950]
+read 31478 observations
+res: 0.5 0.5 3 bw: 1 1 7
+voxsize: 233x615x1985 size:1085.05468MB
+voxBW: 2 3
+decomposition time: 0.00346 seconds
+max load: 17177 avgloadperbox: 3934.75 avgloadpercore: 1967.375 total load: 31478
+most loaded: 1 1 1
+load based longest path:31478
+nb replication: 32
+total active blocks: 256
+schedule time: 0.000992 seconds
+Initialization time: 22.77413
+mem: 64
+compute: 0.039791 seconds
+reduction: 27.927668 seconds
+evaluations: 0
+time: 50.748494 seconds

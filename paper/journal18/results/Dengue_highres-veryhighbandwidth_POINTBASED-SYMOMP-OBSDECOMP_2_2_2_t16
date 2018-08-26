@@ -1,0 +1,28 @@
+hostname : cph-c48.uncc.edu
+bounding: [1053872.965;1068485.726]x[860186.8419;879395.9741]x[3;730]
+read 11056 observations
+res: 50 50 1 bw: 2500 2500 14
+voxsize: 294x386x728 size:315.156372MB
+voxBW: 50 14
+Initialization time: 0.031988
+decomposition time: 0.000447 seconds
+0,0,0 : 2110
+1,0,0 : 1623
+0,1,0 : 1570
+1,1,0 : 4205
+0,0,1 : 256
+1,0,1 : 278
+0,1,1 : 220
+1,1,1 : 794
+max load: 4205 avgloadperbox: 1382 avgloadpercore: 691 total load: 11056
+maxin round:2110
+maxin round:256
+maxin round:1570
+maxin round:220
+maxin round:1623
+maxin round:278
+maxin round:4205
+maxin round:794
+compute: 7.405781 seconds
+evaluations: 3159635318
+time: 7.438408 seconds

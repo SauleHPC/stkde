@@ -1,0 +1,19 @@
+hostname : cph-c7.uncc.edu
+bounding: [-130;-65]x[20;50]x[5875;5958]
+read 588189 observations
+res: 0.1 0.1 1 bw: 2.5 2.5 7
+box size: 651 x 301 x 84
+nbparts: 16
+max load allowed: 16.80474803
+max states: 3840
+mem: 0.0003433227539 GB (this is an order of magnitude)
+21818 states processed
+solution: 15.18799411 in 5 boxes.
+naive: 67.21899211 speedup:4.42579788
+sumload:67.23744434 overhead:1.000274509
+448 512 0 301 0 84 cost 15.18799411
+0 256 0 301 0 84 cost 14.98891174
+512 651 0 301 0 84 cost 14.79248601
+256 384 0 301 0 84 cost 12.40168278
+384 448 0 301 0 84 cost 9.866369707
+partitioning time: 293.566901 seconds

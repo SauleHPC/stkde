@@ -1,0 +1,8 @@
+hostname : cph-bm1.uncc.edu
+bounding: [1053872.965;1068485.726]x[860186.8419;879395.9741]x[3;730]
+read 11056 observations
+res: 50 50 1 bw: 2500 2500 1
+Decomp: 4 4 32
+naive: 2.038316503 speedup:43.33782488
+sumload:2.153398057 overhead:1.056459119
+partitioning time: 0.071624 seconds

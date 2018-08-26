@@ -1,0 +1,21 @@
+hostname : cph-c47.uncc.edu
+bounding: [-180;180]x[7;72]x[5875;5958]
+read 588189 observations
+res: 0.1 0.1 1 bw: 2.5 2.5 7
+decomposition should allow blocks larger than bandwidth. Adjusting decomposition to 32x12x5
+voxsize: 3601x651x84 size:751.179062MB
+voxBW: 25 7
+Initialization time: 0.174831
+decomposition time: 0.021352 seconds
+max load: 25749 avgloadperbox: 306.348437 avgloadpercore: 588189 total load: 588189
+maxin round:19895
+maxin round:21288
+maxin round:16062
+maxin round:17566
+maxin round:25749
+maxin round:24473
+maxin round:11841
+maxin round:16702
+compute: 55.990561 seconds
+evaluations: 22446891885
+time: 56.187226 seconds

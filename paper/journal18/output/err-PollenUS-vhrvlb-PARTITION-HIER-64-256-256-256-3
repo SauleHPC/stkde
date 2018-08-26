@@ -1,0 +1,16 @@
+hostname : cph-c43.uncc.edu
+bounding: [-130;-65]x[20;50]x[5875;5958]
+read 588189 observations
+res: 0.01 0.01 1 bw: 0.5 0.5 3
+box size: 6501 x 3001 x 84
+nbparts: 64
+max states: 600256
+mem: 0.05366706848 GB (this is an order of magnitude)
+337523 states processed
+solution: 162.5264313 in 1 boxes.
+naive: 162.5264313 speedup:1
+sumload:inf overhead:inf
+0 6501 0 3001 0 84 cost 162.5264313
+no good partition
+volumes do not match: 1638798084 != 0
+partitioning time: 2371.274022 seconds

@@ -1,0 +1,8 @@
+hostname : cph-c45.uncc.edu
+bounding: [1053872.965;1068485.726]x[860186.8419;879395.9741]x[3;730]
+read 11056 observations
+res: 50 50 1 bw: 2500 2500 14
+Decomp: 32 32 16
+naive: 8.268027147 speedup:1082.766934
+sumload:9.239528995 overhead:1.117501047
+partitioning time: 2.113143 seconds

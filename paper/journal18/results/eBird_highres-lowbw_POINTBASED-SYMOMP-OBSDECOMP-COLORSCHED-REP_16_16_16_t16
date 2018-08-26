@@ -1,0 +1,14 @@
+hostname : cph-c45.uncc.edu
+bounding: [-89;89]x[-180;180]x[71836;79136]
+read 291990435 observations
+res: 0.1 0.1 3 bw: 1 1 7
+voxsize: 1781x3601x2435 size:59572.5355MB
+voxBW: 10 3
+decomposition time: 12.277232 seconds
+max load: 27302857 avgloadperbox: 71286.7273 avgloadpercore: 18249402.2 total load: 291990435
+most loaded: 11 4 15
+load based longest path:86519365
+nb replication: 14
+total active blocks: 5670
+schedule time: 0.021861 seconds
+not enough memory

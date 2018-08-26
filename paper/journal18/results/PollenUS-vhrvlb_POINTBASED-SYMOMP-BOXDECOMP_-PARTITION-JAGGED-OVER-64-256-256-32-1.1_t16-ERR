@@ -1,0 +1,6 @@
+hostname : cph-gpu4.uncc.edu
+bounding: [-130;-65]x[20;50]x[5875;5958]
+read 588189 observations
+res: 0.01 0.01 1 bw: 0.5 0.5 3
+0 6501 0 3001 0 84
+not enough parallelism. Aborting...
