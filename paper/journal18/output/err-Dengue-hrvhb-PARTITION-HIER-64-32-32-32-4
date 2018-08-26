@@ -1,0 +1,8 @@
+hostname : cph-c12.uncc.edu
+bounding: [1053872.965;1068485.726]x[860186.8419;879395.9741]x[3;730]
+read 11056 observations
+res: 50 50 1 bw: 2500 2500 14
+box size: 294 x 386 x 728
+nbparts: 64
+max states: 395135104
+mem: 35.32783127 GB (this is an order of magnitude)

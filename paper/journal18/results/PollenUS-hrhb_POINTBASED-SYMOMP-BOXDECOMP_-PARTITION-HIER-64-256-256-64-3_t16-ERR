@@ -1,0 +1,5 @@
+hostname : cph-c54.uncc.edu
+bounding: [-130;-65]x[20;50]x[5875;5958]
+read 588189 observations
+res: 0.1 0.1 1 bw: 5 5 14
+not enough parallelism. Aborting...

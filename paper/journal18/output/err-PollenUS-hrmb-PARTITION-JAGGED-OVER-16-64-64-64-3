@@ -1,0 +1,22 @@
+hostname : cph-c21.uncc.edu
+bounding: [-130;-65]x[20;50]x[5875;5958]
+read 588189 observations
+res: 0.1 0.1 1 bw: 2.5 2.5 7
+box size: 651 x 301 x 84
+nbparts: 16
+max load allowed: 12.60356102
+max states: 61520
+mem: 0.00550031662 GB (this is an order of magnitude)
+24504 states processed
+solution: 12.40168278 in 8 boxes.
+naive: 67.21899211 speedup:5.420150903
+sumload:67.24912911 overhead:1.000448341
+256 384 0 301 0 84 cost 12.40168278
+512 576 0 301 0 84 cost 12.26308116
+0 256 0 192 0 84 cost 10.79954765
+448 512 128 301 0 84 cost 9.955822916
+384 448 0 301 0 84 cost 9.866369707
+448 512 0 128 0 84 cost 5.23595486
+0 256 192 301 0 84 cost 4.192268522
+576 651 0 301 0 84 cost 2.534401511
+partitioning time: 347.875867 seconds

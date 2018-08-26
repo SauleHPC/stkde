@@ -1,0 +1,9 @@
+hostname : cph-gpu2.uncc.edu
+bounding: [-130;-65]x[20;50]x[5875;5958]
+read 588189 observations
+res: 0.1 0.1 1 bw: 5 5 14
+box size: 651 x 301 x 84
+nbparts: 32
+max load allowed: 40.33601476
+max states: 123712
+mem: 0.01106071472 GB (this is an order of magnitude)

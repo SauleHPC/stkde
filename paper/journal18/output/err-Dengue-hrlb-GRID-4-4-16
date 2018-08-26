@@ -1,0 +1,8 @@
+hostname : cph-gpu4.uncc.edu
+bounding: [1053872.965;1068485.726]x[860186.8419;879395.9741]x[3;730]
+read 11056 observations
+res: 50 50 1 bw: 100 100 1
+Decomp: 4 4 16
+naive: 0.0053159259 speedup:18.86723295
+sumload:0.0054583866 overhead:1.02679885
+partitioning time: 0.020370 seconds

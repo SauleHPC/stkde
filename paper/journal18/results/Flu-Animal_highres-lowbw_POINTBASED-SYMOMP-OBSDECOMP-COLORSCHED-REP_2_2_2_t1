@@ -1,0 +1,19 @@
+hostname : cph-c52.uncc.edu
+bounding: [-39;77]x[-159;148]x[0;5950]
+read 31478 observations
+res: 0.2 0.2 1 bw: 1 1 7
+voxsize: 581x1536x5951 size:20258.9707MB
+voxBW: 5 7
+decomposition time: 0.001233 seconds
+max load: 17177 avgloadperbox: 3934.75 avgloadpercore: 31478 total load: 31478
+most loaded: 1 1 1
+load based longest path:31478
+nb replication: 2
+total active blocks: 16
+schedule time: 0.000695 seconds
+Initialization time: 65.110101
+mem: 64
+compute: 0.112295 seconds
+reduction: 104.202036 seconds
+evaluations: 0
+time: 169.426704 seconds

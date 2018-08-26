@@ -1,0 +1,8 @@
+hostname : cph-c22.uncc.edu
+bounding: [-130;-65]x[20;50]x[5875;5958]
+read 588189 observations
+res: 0.1 0.1 1 bw: 2.5 2.5 7
+Decomp: 2 2 4
+naive: 67.21899211 speedup:4.710860203
+sumload:77.38520756 overhead:1.151240224
+partitioning time: 0.157612 seconds

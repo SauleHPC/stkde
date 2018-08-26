@@ -1,0 +1,8 @@
+hostname : cph-c11.uncc.edu
+bounding: [-130;-65]x[20;50]x[5875;5958]
+read 588189 observations
+res: 0.01 0.01 1 bw: 0.5 0.5 3
+Decomp: 8 8 4
+naive: 162.5264313 speedup:15.6371212
+sumload:180.2598179 overhead:1.109110785
+partitioning time: 1.773931 seconds

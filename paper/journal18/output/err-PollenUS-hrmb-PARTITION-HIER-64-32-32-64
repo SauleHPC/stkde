@@ -1,0 +1,8 @@
+hostname : cph-c51.uncc.edu
+bounding: [-130;-65]x[20;50]x[5875;5958]
+read 588189 observations
+res: 0.1 0.1 1 bw: 2.5 2.5 7
+box size: 651 x 301 x 84
+nbparts: 64
+max states: 3959296
+mem: 0.3539886475 GB (this is an order of magnitude)
