@@ -21,17 +21,68 @@ namespace stkde {
   void outputDecomposition(util::Compact3D<index>& load) {
 
     std::string prefix = "loadmap";
-    
-    std::ofstream out (prefix+"-3d-"+std::to_string(load.getSizeX())+"-"+std::to_string(load.getSizeY())+"-"+std::to_string(load.getSizeZ()));
-    for (int dx = 0; dx<load.getSizeX(); ++dx) {
-      for (int dy = 0; dy<load.getSizeY(); ++dy) {
-	for (int dt = 0; dt<load.getSizeZ(); ++dt) {
-	  out<<load(dx,dy,dt)<<" ";
+
+    //3D
+    {
+      std::ofstream out (prefix+"-3d-"+std::to_string(load.getSizeX())+"-"+std::to_string(load.getSizeY())+"-"+std::to_string(load.getSizeZ()));
+      for (int dx = 0; dx<load.getSizeX(); ++dx) {
+	for (int dy = 0; dy<load.getSizeY(); ++dy) {
+	  for (int dt = 0; dt<load.getSizeZ(); ++dt) {
+	    out<<load(dx,dy,dt)<<" ";
+	  }
+	  out<<"\n";
 	}
 	out<<"\n";
       }
-      out<<"\n";
     }
+
+    //2D
+    {
+      std::ofstream out (prefix+"-xy-"+std::to_string(load.getSizeX())+"-"+std::to_string(load.getSizeY()));
+      for (int dx = 0; dx<load.getSizeX(); ++dx) {
+	for (int dy = 0; dy<load.getSizeY(); ++dy) {
+	  index sumload = 0;
+	  for (int dt = 0; dt<load.getSizeZ(); ++dt) {
+	    sumload += load(dx,dy,dt);
+	  }
+	  out<<sumload<<" ";
+	  
+	}
+	out<<"\n";
+      }
+    }
+
+    {
+      std::ofstream out (prefix+"-yz-"+std::to_string(load.getSizeY())+"-"+std::to_string(load.getSizeZ()));
+      for (int dy = 0; dy<load.getSizeY(); ++dy) {
+	for (int dt = 0; dt<load.getSizeZ(); ++dt) {
+	  index sumload = 0;
+	  for (int dx = 0; dx<load.getSizeX(); ++dx) {
+	    sumload += load(dx,dy,dt);
+	  }
+	  out<<sumload<<" ";
+	  
+	}
+	out<<"\n";
+      }
+    }
+
+    {
+      std::ofstream out (prefix+"-xz-"+std::to_string(load.getSizeX())+"-"+std::to_string(load.getSizeZ()));
+      for (int dx = 0; dx<load.getSizeX(); ++dx) {
+	for (int dt = 0; dt<load.getSizeZ(); ++dt) {
+	  index sumload = 0;
+	  for (int dy = 0; dy<load.getSizeY(); ++dy) {
+	    sumload += load(dx,dy,dt);
+	  }
+	  out<<sumload<<" ";
+	  
+	}
+	out<<"\n";
+      }
+    }
+
+    
     
   }
 
