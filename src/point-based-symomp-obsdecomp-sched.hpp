@@ -21,6 +21,9 @@ namespace stkde {
   void outputDecomposition(util::Compact3D<index>& load) {
 
     std::string prefix = "loadmap";
+    if (getenv("LOADMAP") != NULL) {
+      prefix = std::string(getenv("LOADMAP"));
+    }
 
     //3D
     {
@@ -82,8 +85,7 @@ namespace stkde {
       }
     }
 
-    
-    
+    //exit(0);
   }
 
   
