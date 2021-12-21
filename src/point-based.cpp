@@ -24,6 +24,7 @@
 #include "point-based-symomp-obsdecomp.hpp"
 #include "point-based-symomp-obsdecomp-sched.hpp"
 #include "point-based-symomp-obsdecomp-colorsched.hpp"
+#include "point-based-symomp-obsdecomp-colorsched-fromfile.hpp"
 #include "point-based-symomp-obsdecomp-colorsched-rep.hpp"
 
 #endif
@@ -77,7 +78,7 @@ int main (int argc, char* argv[]) {
     std::cerr<<"Methods: POINTBASED,"<<std::endl
 	     <<"         POINTBASED-SYMDISK, POINTBASED-SYMBAR, POINTBASED-SYM"<<std::endl
 	     <<"         POINTBASED-SYMOMP, POINTBASED-SYMOMP-OBSDECOMP, POINTBASED-SYMOMP-OBSDECOMP-SCHED"<<std::endl
-	     <<"         POINTBASED-SYMOMP-OBSDECOMP-COLORSCHED, POINTBASED-SYMOMP-OBSDECOMP-COLORSCHED-REP"<<std::endl
+	     <<"         POINTBASED-SYMOMP-OBSDECOMP-COLORSCHED, POINTBASED-SYMOMP-OBSDECOMP-COLORSCHED-FROMFILE, POINTBASED-SYMOMP-OBSDECOMP-COLORSCHED-REP"<<std::endl
 	     <<"         POINTBASED-SYMOMP-POINTDECOMP"<<std::endl<<std::endl
 	     <<"         VOXELBASED, VOXELBASED-OMP"<<std::endl
 	     <<"         VOXELBASED-OBSDECOMP, VOXELBASED-OMP-OBSDECOMP"<<std::endl;
@@ -96,6 +97,7 @@ int main (int argc, char* argv[]) {
   if (method.compare("POINTBASED-SYMOMP") == 0
       || method.compare("POINTBASED-SYMOMP-OBSDECOMP") == 0
       || method.compare("POINTBASED-SYMOMP-OBSDECOMP-COLORSCHED") == 0
+      || method.compare("POINTBASED-SYMOMP-OBSDECOMP-COLORSCHED-FROMFILE") == 0
       || method.compare("POINTBASED-SYMOMP-OBSDECOMP-COLORSCHED-REP") == 0
       || method.compare("VOXELBASED-OBSDECOMP") == 0
       || method.compare("VOXELBASED-OMP-OBSDECOMP") == 0
@@ -193,6 +195,8 @@ int main (int argc, char* argv[]) {
     dens = stkde::stkde_pointbased_symomp_obsdecomp_sched (bb, inst, param, decompX, decompY, decompT);
   if (method.compare("POINTBASED-SYMOMP-OBSDECOMP-COLORSCHED") == 0)
     dens = stkde::stkde_pointbased_symomp_obsdecomp_colorsched (bb, inst, param, decompX, decompY, decompT);
+  if (method.compare("POINTBASED-SYMOMP-OBSDECOMP-COLORSCHED-FROMFILE") == 0)
+    dens = stkde::stkde_pointbased_symomp_obsdecomp_colorsched_fromfile (bb, inst, param, decompX, decompY, decompT);
   if (method.compare("POINTBASED-SYMOMP-OBSDECOMP-COLORSCHED-REP") == 0)
     dens = stkde::stkde_pointbased_symomp_obsdecomp_colorsched_rep (bb, inst, param, decompX, decompY, decompT);
   
