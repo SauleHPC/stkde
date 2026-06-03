@@ -1,0 +1,8 @@
+hostname : cph-gpu3.uncc.edu
+bounding: [-130;-65]x[20;50]x[5875;5958]
+read 588189 observations
+res: 0.01 0.01 1 bw: 0.5 0.5 3
+box size: 6501 x 3001 x 84
+nbparts: 64
+max states: 9605120
+mem: 0.8587646484 GB (this is an order of magnitude)

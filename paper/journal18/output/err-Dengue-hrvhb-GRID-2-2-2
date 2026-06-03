@@ -1,0 +1,8 @@
+hostname : cph-c47.uncc.edu
+bounding: [1053872.965;1068485.726]x[860186.8419;879395.9741]x[3;730]
+read 11056 observations
+res: 50 50 1 bw: 2500 2500 14
+Decomp: 2 2 2
+naive: 8.268027147 speedup:2.819741795
+sumload:8.28859403 overhead:1.00248752
+partitioning time: 0.001511 seconds

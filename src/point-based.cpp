@@ -80,6 +80,7 @@ int main (int argc, char* argv[]) {
 	     <<"         POINTBASED-SYMOMP, POINTBASED-SYMOMP-OBSDECOMP, POINTBASED-SYMOMP-OBSDECOMP-SCHED"<<std::endl
 	     <<"         POINTBASED-SYMOMP-OBSDECOMP-COLORSCHED, POINTBASED-SYMOMP-OBSDECOMP-COLORSCHED-FROMFILE, POINTBASED-SYMOMP-OBSDECOMP-COLORSCHED-REP"<<std::endl
 	     <<"         POINTBASED-SYMOMP-POINTDECOMP"<<std::endl<<std::endl
+	     <<"         POINTBASED-SYMOMP-BOXDECOMP"<<std::endl<<std::endl
 	     <<"         VOXELBASED, VOXELBASED-OMP"<<std::endl
 	     <<"         VOXELBASED-OBSDECOMP, VOXELBASED-OMP-OBSDECOMP"<<std::endl;
      
@@ -222,8 +223,8 @@ int main (int argc, char* argv[]) {
       stkde::index nbbox;
       
       partin>>nbbox;
-      decomp.reserve(nbbox);
       if (partin) {
+	decomp.reserve(nbbox);
 	for (int i=0; i<nbbox; ++i) {
 	  stkde::voxelbox vb;
 	  partin >> vb;

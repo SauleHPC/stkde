@@ -1,0 +1,20 @@
+hostname : cph-gpu1.uncc.edu
+bounding: [1053872.965;1068485.726]x[860186.8419;879395.9741]x[3;730]
+read 11056 observations
+res: 100 100 1 bw: 250 250 1
+32 96 32 96 0 256
+0 96 96 160 0 288
+96 148 0 160 0 288
+0 148 32 194 288 728
+0 148 160 194 0 288
+0 96 0 96 256 288
+32 96 0 32 0 256
+0 32 0 96 0 256
+0 148 0 32 288 728
+voxsize: 148x194x728 size:79.736084MB
+voxBW: 3 1
+Decomp size:9
+Initialization time: 0.010629
+compute: 0.003225 seconds
+evaluations: 1624413
+time: 0.015023 seconds

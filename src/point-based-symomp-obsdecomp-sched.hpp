@@ -17,6 +17,81 @@
 
 namespace stkde {
 
+
+  void outputDecomposition(util::Compact3D<index>& load) {
+
+    std::string prefix = "loadmap";
+    if (getenv("LOADMAP") != NULL) {
+      prefix = std::string(getenv("LOADMAP"));
+    }
+
+    //3D
+    {
+      std::ofstream out (prefix+"-3d-"+std::to_string(load.getSizeX())+"-"+std::to_string(load.getSizeY())+"-"+std::to_string(load.getSizeZ()));
+      for (int dx = 0; dx<load.getSizeX(); ++dx) {
+	for (int dy = 0; dy<load.getSizeY(); ++dy) {
+	  for (int dt = 0; dt<load.getSizeZ(); ++dt) {
+	    out<<load(dx,dy,dt)<<" ";
+	  }
+	  out<<"\n";
+	}
+	out<<"\n";
+      }
+    }
+
+    //2D
+    {
+      std::ofstream out (prefix+"-xy-"+std::to_string(load.getSizeX())+"-"+std::to_string(load.getSizeY()));
+      for (int dx = 0; dx<load.getSizeX(); ++dx) {
+	for (int dy = 0; dy<load.getSizeY(); ++dy) {
+	  index sumload = 0;
+	  for (int dt = 0; dt<load.getSizeZ(); ++dt) {
+	    sumload += load(dx,dy,dt);
+	  }
+	  out<<sumload<<" ";
+	  
+	}
+	out<<"\n";
+      }
+    }
+
+    {
+      std::ofstream out (prefix+"-yz-"+std::to_string(load.getSizeY())+"-"+std::to_string(load.getSizeZ()));
+      for (int dy = 0; dy<load.getSizeY(); ++dy) {
+	for (int dt = 0; dt<load.getSizeZ(); ++dt) {
+	  index sumload = 0;
+	  for (int dx = 0; dx<load.getSizeX(); ++dx) {
+	    sumload += load(dx,dy,dt);
+	  }
+	  out<<sumload<<" ";
+	  
+	}
+	out<<"\n";
+      }
+    }
+
+    {
+      std::ofstream out (prefix+"-xz-"+std::to_string(load.getSizeX())+"-"+std::to_string(load.getSizeZ()));
+      for (int dx = 0; dx<load.getSizeX(); ++dx) {
+	for (int dt = 0; dt<load.getSizeZ(); ++dt) {
+	  index sumload = 0;
+	  for (int dy = 0; dy<load.getSizeY(); ++dy) {
+	    sumload += load(dx,dy,dt);
+	  }
+	  out<<sumload<<" ";
+	  
+	}
+	out<<"\n";
+      }
+    }
+
+    //exit(0);
+  }
+
+  
+    
+  
+  
 std::shared_ptr<util::Compact3D<values>> stkde_pointbased_symomp_obsdecomp_sched(const bounding_box& bb,
 										 const instance& inst,
 										 const parameters& pa,
@@ -105,6 +180,9 @@ std::shared_ptr<util::Compact3D<values>> stkde_pointbased_symomp_obsdecomp_sched
    }
   std::cerr<<"max load: "<<mostloaded<<" avgloadperbox: "<<((double)inst.obsx.size())/(decompsizeX*decompsizeY*decompsizeT)<<" avgloadpercore: "<<((double)inst.obsx.size())/omp_get_max_threads()<<" total load: "<<totalload<<std::endl;
 
+  if (1)
+    outputDecomposition(load);
+  
   if (0) {
     std::ofstream out ("loadmap");
     for (int dt = 0; dt<decompsizeT; ++dt) {

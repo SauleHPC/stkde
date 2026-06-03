@@ -1,0 +1,18 @@
+hostname : cph-c54.uncc.edu
+bounding: [-130;-65]x[20;50]x[5875;5958]
+read 588189 observations
+res: 0.1 0.1 1 bw: 5 5 14
+256 416 32 288 0 84
+0 256 0 301 0 84
+416 512 128 301 0 84
+512 651 128 301 0 84
+416 651 0 128 0 84
+256 416 288 301 0 84
+256 416 0 32 0 84
+voxsize: 651x301x84 size:62.7894745MB
+voxBW: 50 14
+Decomp size:7
+Initialization time: 0.013378
+compute: 107.517314 seconds
+evaluations: 163279561815
+time: 107.544530 seconds

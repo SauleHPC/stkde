@@ -15,7 +15,7 @@
 #include "partition-over.hpp"
 #include "partition-jagged.hpp"
 #include "partition-jagged-over.hpp"
-
+#include "partition-octree.hpp"
 
 int main (int argc, char* argv[]) {
 
@@ -26,7 +26,8 @@ int main (int argc, char* argv[]) {
     std::cerr<<"Methods: PARTITION-JAGGED nbparts xstep ystep tstep"<<std::endl;
     std::cerr<<"Methods: PARTITION-HIER-OVERDECOMPOSE nbparts xstep ystep tstep loadratio"<<std::endl;
     std::cerr<<"Methods: PARTITION-JAGGED-OVERDECOMPOSE nbparts xstep ystep tstep loadratio"<<std::endl;
-     
+    std::cerr<<"Methods: PARTITION-OCTREE nbparts. (Note that nbparts is a lowerbound of what you'll get)"<<std::endl;
+    
     return -1;	
   }
     
@@ -78,6 +79,9 @@ int main (int argc, char* argv[]) {
     inst = stkde::filter_instance (inst, total, c);
   }
   
+
+  std::ofstream out (outfile); // Opening the outfile now to prevent recomputing if in case of timeout.
+
   util::timestamp begin;
 
   //
@@ -132,6 +136,12 @@ int main (int argc, char* argv[]) {
     parts = stkde::partition_jagged_overdecompose (bb, inst, param, nbparts, xstep, ystep, tstep, loadratio);
   }
 
+  if (method.compare("PARTITION-OCTREE") == 0) {
+    int nbparts = atoi(argv[6]);
+    
+    parts = stkde::partition_octree (bb, inst, param, nbparts);
+  }
+
  
   util::timestamp end;
 
@@ -163,12 +173,10 @@ int main (int argc, char* argv[]) {
   std::cerr<<"partitioning time: "<<end-begin<<" seconds"<<std::endl;
 
   
-  {
-    std::ofstream out (outfile);
-    out<<parts.size()<<std::endl;
-    for (auto vb : parts)
-      out<<vb<<std::endl;				   
-  }
+
+  out<<parts.size()<<std::endl;
+  for (auto vb : parts)
+    out<<vb<<std::endl;				   
     
   
   return 0;

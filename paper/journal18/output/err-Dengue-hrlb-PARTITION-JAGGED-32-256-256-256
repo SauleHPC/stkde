@@ -1,0 +1,19 @@
+hostname : cph-c53.uncc.edu
+bounding: [1053872.965;1068485.726]x[860186.8419;879395.9741]x[3;730]
+read 11056 observations
+res: 50 50 1 bw: 100 100 1
+box size: 294 x 386 x 728
+nbparts: 32
+mem: 1.430511475e-05 GB (this is an order of magnitude)
+1206 states processed
+solution: 0.0027556729 in 7 boxes.
+naive: 0.0053159259 speedup:1.929084508
+sumload:0.0053248575 overhead:1.001680159
+0 256 0 256 0 256 cost 0.0027556729
+0 256 256 386 0 728 cost 0.001424163
+0 256 0 256 256 728 cost 0.000836783
+256 294 0 256 0 256 cost 0.0002117343
+256 294 0 256 256 728 cost 8.2743e-05
+256 294 256 386 0 256 cost 9.392e-06
+256 294 256 386 256 728 cost 4.3693e-06
+partitioning time: 0.320889 seconds

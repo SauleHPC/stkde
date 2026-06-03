@@ -1,0 +1,1722 @@
+\documentclass{article}
+
+\usepackage{color}
+\usepackage{soul}
+
+%\documentclass[a4paper, UKenglish]{lipics}
+%\usepackage{amsmath}
+%\theoremstyle{plain}
+
+\usepackage{subfigure}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{times}
+\let\proof\relax % undefine the environment
+\let\endproof\relax
+\usepackage{amsthm}
+
+\usepackage{fullpage}
+
+\usepackage{xspace}
+\usepackage{algorithm}% http://ctan.org/pkg/algorithm
+\usepackage[noend]{algpseudocode}% http://ctan.org/pkg/algorithmicx
+
+\newcommand{\todo}[1]{\color{red}\textbf{\hl{\{ #1 \}}}\color{black}\xspace}
+\newcommand{\ceil}[1]{\left\lceil #1 \right\rceil}
+\newcommand{\floor}[1]{\left\lfloor #1 \right\rfloor}
+
+\newtheorem{theorem}{Theorem}[section]
+
+\begin{document}
+\title{Parallel Space-Time Kernel Density Estimation}
+
+
+\author{Erik  Saule$^\dag$, Dinesh Panchananam$^\dag$, Alexander Hohl$^\ddag$, Wenwu Tang$^\ddag$, Eric Delmelle$^\ddag$\\
+  $^\dag$ Dept. of Computer Science, $^\ddag$Dept. of Geography and Earth Sciences\\
+UNC Charlotte\\
+Email: {\it \{esaule,dpanchan,ahohl,wtang4,eric.delmelle\}@uncc.edu}
+}
+
+\maketitle
+
+
+\begin{abstract}
+  The exponential growth of available data has
+  increased the need for interactive exploratory analysis. Dataset
+  can no longer be understood through  manual crawling  and
+ simple statistics. In Geographical Information Systems
+  (GIS), the dataset is often composed of events localized in space
+  and time; and visualizing such a dataset involves building a map of
+  where the events occurred.
+
+  We focus in this paper on events that are localized among three
+  dimensions (latitude, longitude, and time), and on computing the
+  first step of the visualization pipeline, space-time kernel density
+  estimation (STKDE), which is most computationally expensive.  Starting from
+  a gold standard implementation, we show how algorithm design and
+  engineering, parallel decomposition, and scheduling can be applied
+  to bring near real-time computing to space-time kernel density
+  estimation. We validate our techniques on real world datasets
+  extracted from infectious disease, social media, and ornithology.
+\end{abstract}
+
+
+\maketitle
+
+\section{Introduction}
+
+The rapid propagation of infectious diseases (e.g. Zika, Ebola, H1N1,
+Dengue fever) is conducive to serious, epidemic outbreaks, posing a
+threat to vulnerable populations. Such diseases have complex
+transmission cycles, and effective public health responses require the
+ability to monitor outbreaks in a timely
+manner~\cite{eisen2011using}. Space-time statistics facilitate the
+discovery of disease dynamics including rate of spread, seasonal
+cyclic patterns, direction, intensity (i.e. clusters), and risk of
+diffusion to new regions.  However, obtaining accurate results from
+space-time statistics is computationally very demanding, which is
+problematic when public health interventions are promptly needed. The
+issues of computational efforts are exacerbated with spatiotemporal
+datasets of increasing size, diversity and
+availability~\cite{grubesic2014spatial}. High-performance computing
+reduces the effort required to identify these patterns, however
+heterogeneity in the data must be accounted for~\cite{Hohl16}. \looseness=-1
+
+
+Epidemiology is only one of the application domains where it is
+important to understand how events occurring at different locations and
+different times form clusters. Political analysis, social media
+analysis, or the study of animal migration also require the
+understanding of spatial and temporal locality of events. The massive
+amount of data we see nowadays is often analyzed using complex
+models. But before these can be constructed, data scientists  need to
+interactively visualize and explore the data to understand its
+structure. \looseness=-1
+
+%
+In this paper, we present the space-time kernel density estimation
+application which essentially builds a 3D density map of events
+located in space and time. This problem is computationally expensive
+using existing algorithms. That is why we developed better sequential
+algorithms for this problem that reduced the complexity by orders of
+magnitude. And to bring the runtime in the realm of near real-time, we
+designed parallel strategies for shared memory machines.
+
+Section~\ref{sec:stkde} presents the STKDE application along with a
+reference implementation that uses a voxel-based algorithm VB to
+compute STKDE. The problem resembles the spatial summation of radial
+basis function, however the functions we consider are not radially symmetric.
+
+In Section~\ref{sec:algo-seq}, we investigate the sequential problem
+and develop a point-based algorithm PB that significantly reduce the
+complexity compared to VB. We also identify invariants linked to the
+structure of the kernel density estimate function that allows to
+reduce the computational cost by an additional factor and build the
+PB-SYM algorithm based on that observation. These invariants do not
+exist in the problem of summing radial basis functions which makes the
+problem we address have different properties and optimizations.
+
+We develop a simple parallel strategy PB-SYM-DR in
+Section~\ref{sec:algo-pb-dr} which replicates the state of the
+problem, enables pleasingly parallel computation, and avoids a race
+conditions at the cost of performing a reduction at the end.
+
+To reduce the cost of this reduction, we then investigate decomposing
+the space in blocks that can be independently processed. The PB-SYM-DD
+is built on that principle and is described in
+Section~\ref{sec:pb-sym-dd}. It makes the the computation pleasingly
+parallel however it introduces overhead when the boundary of a block
+is too close to many events. We propose different methods to a space
+decomposition based on optimal hierarchical (Section~\ref{sec:hier})
+and jagged partitioning (Section~\ref{sec:jagged}), overdecomposition
+(Section~\ref{sec:overdecomposition}) and heuristic partitioning based
+on block and octree decompositions (Section~\ref{sec:heuristics}).
+
+
+Since both previous strategies may introduce a significant work
+overhead (due to the reduction and the overhead of the decomposition),
+we propose PB-SYM-PD in Section~\ref{sec:pb-sym-pd} that provide a
+work-efficient decomposition of the points. However that algorithm has
+internal dependencies which can induce a long critical path and cause
+load imbalance. Alternative ordering of the work can reduce the length
+of the critical path. However finding the optimal ordering is
+difficult problem for which we present complexity, approximation
+results, and a heuristic using to build PB-SYM-PD-SCHED in
+Section~\ref{sec:coloring}.  To reduce the critical path further, we
+propose the PB-SYM-PD-REP algorithm in Section~\ref{sec:pb-sym-pd-rep}
+which introduces some work overhead only where is needed to achieve a
+shorter critical path.
+
+Section~\ref{sec:experiments} presents experimental results on 4
+different datasets and 21 instances extracted from these datasets. The
+experiments highlights that the sequential strategies are
+efficient. The parallel strategies have their pros and cons and
+different strategies appear to be best in different
+scenarios.
+
+Section~\ref{sec:soa} discusses the applicability of related problems
+and techniques.
+
+A preliminary version of this paper has appeared
+in~\cite{Saule17-ICPP}. This paper extends the previous results by
+presenting a discussion of complex partitioning strategies for
+PB-SYM-DD (Sections~\ref{sec:workmodel},~\ref{sec:exactdecomposition},
+and~\ref{sec:heuristics}), the complexity and approximation result of
+work ordering for PB-SYM-PD (Section~\ref{sec:coloring}). This paper also presents
+more experimental results in Section~\ref{sec:experiments}.
+
+\section{Space-Time Kernel Density Estimation}
+\label{sec:stkde}
+
+\subsection{Description}
+
+Space-time kernel density (STKDE) is used for identifying
+spatiotemporal patterns in datasets. It is a temporal
+extension of the traditional 2D kernel density
+estimation~\cite{Silverman86} which generates density surface
+(``heatmap'') from a set of $n$ points located in a geographic space. The resulting density
+estimates are visualized within the space-time cube framework using two spatial $(x,
+y)$ and a temporal dimension $(t)$~\cite{Nakaya10}. STKDE creates a discretized 3D
+ volume where each voxel (3D equivalent of a pixel) is assigned a
+density estimate based on the surrounding points. The space-time
+density is estimated using (following the notations
+of~\cite{Hohl16}):
+
+$$ \hat{f} (x, y, t) = \frac{1}{n h_s^2 h_t} \sum_{i | d_i < h_s, t_i<h_t}
+k_s (\frac{x-x_i}{h_s},\frac{y-y_i}{h_s}) k_t(\frac{t-t_i}{h_t})$$
+
+Density $\hat{f} (x, y, t)$ of each voxel is determined by number and distance of events (points)
+$(x_i, y_i, t_i)$ within its vicinity, which is conceptualized by a
+cylinder. The spatial bandwidth $h_s$ forms a circle which, due to the
+orthogonal relationship between space and time, is extended to a
+cylinder by temporal bandwidth $h_t$. For every event inside the
+cylinder, the spatial ($d_i$) and temporal ($t_i$) distances are smaller
+than $h_s$ and $h_t$. Therefore, the event receives a weight based on the
+kernel functions $k_s$ and $k_t$ (distance decay):
+
+$$k_s (u,v) = \frac{\pi}{2} (1-u)^2 (1-v)^2$$
+$$k_t (w) = \frac{3}{4} (1-w)^2$$
+
+Figure~\ref{fig:stkde-ex} illustrates how varying the bandwidths used
+in STKDE helps focusing the graphical visualization of Dengue fever
+cases in Cali, Colombia~\cite{Delmelle14}. Figure~\ref{fig:stkde} shows the impact
+of a single point on the neighboring space.
+
+\begin{figure}
+%  \subfigure[$h_s = 2500m$, $h_t = 14 days$]{\includegraphics[page=1, width=.45\linewidth, trim={8cm 3.8cm 8cm 10cm}, clip]{figures/dengue-viz.pdf}}
+  \subfigure[$h_s = 2500m$, $h_t = 14 days$]{\includegraphics[width=.49\linewidth]{Dengue-2500-14.pdf}}
+%
+%  \subfigure[$h_s=750m$, $h_t = 7 days$]{\includegraphics[page=2, width=.45\linewidth, trim={8cm 3.8cm 8cm 10cm}, clip]{figures/dengue-viz.pdf}}
+\subfigure[$h_s=500m$, $h_t = 7 days$]{\includegraphics[width=.49\linewidth]{Dengue-500-7.pdf}}
+  \caption{Visualization of Dengue fever cases in Cali, Colombia in
+    2010 and 2011 for different spatial bandwidth and temporal bandwidth.}
+  \label{fig:stkde-ex}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=.5\linewidth]{stkde.pdf}
+  \caption{The computation of STKDE happens in a domain space of size
+    $g_x,g_y,g_t$. Each point impacts the neighboring space at a
+    distance $h_s$ in space and $h_t$ in time; forming a cylinder of
+    diameter $2 h_s$ and of height $2 h_t$.}
+  \label{fig:stkde}
+\end{figure}
+
+Computationally, the domain of size $g_x$, $g_y$, $g_t$ is discretized
+in voxels using a spatial resolution $sres$ and a temporal resolution
+$tres$. Therefore, the domain is represented by a grid of size
+$G_x=\ceil{\frac{g_x}{sres}}$, $G_y=\ceil{\frac{g_y}{sres}}$,
+$G_t=\ceil{\frac{g_t}{tres}}$. Each point causes a density increase in
+the voxels that are within a cylinder centered on the point, of
+radius equal to the spatial bandwidth in voxels
+$H_s=\ceil{\frac{h_s}{sres}}$, and of half height equal to the
+temporal bandwidth $H_t=\ceil{\frac{h_t}{tres}}$.
+
+All the notations are summarized in Table~\ref{tab:notation}. As a
+convention all uppercase notations denote quantities in voxels and all
+lowercase notations denote quantities in domain space.
+
+\begin{table}
+  \centering
+  \begin{tabular}{|l|l|}
+    \hline 
+    $n$ & Number of points\\
+    $s = (x,y,t)$ & A voxel and sampling coordinate\\
+    $(x_i, y_i, t_i)$ & Coordinate of point $i$\\
+    $h_s$, $h_t$ & Spatial and temporal bandwidth \\ 
+    $g_x, g_y, g_t$ & Real size of the domain (in meters) \\
+    \hline
+    $sres$, $tres$ & Resolution (in meters) \\
+    $s = (X,Y,T)$ & A voxel in voxel space\\
+    $(X_i, Y_i, T_i)$ & Voxel of point $i$\\
+    $G_x, G_y, G_t$ & Size of the domain (in voxels)\\
+    $H_s, H_t$ & Bandwidth (in voxels) \\
+    \hline 
+  \end{tabular}
+  \caption{Notations}
+  \label{tab:notation}
+\end{table}
+
+
+
+\subsection{Gold Standard Implementation}
+
+The gold standard implementation (for instance from~\cite{Hohl16}) follows the exact definition of STKDE
+as it is given above. It is a voxel-based algorithm we call VB. For
+each voxel, VB finds the points within the temporal and spatial bandwidths and calculates the contribution
+to the density of this voxel. The pseudo code is given in Algorithm~\ref{alg:vb}.
+
+\begin{algorithm}
+\caption{\textsc{VB}}
+\begin{algorithmic}
+\For{all voxels $s=(x,y,t)$}
+\State $sum = 0$
+  \For{all points $i$ at $x_i, y_i, t_i$}
+    \If{$\sqrt{(x_i-x)^2+(y_i-y)^2}< h_s$ and $|t_i-t| \leq h_t$}
+    \State $sum += k_s(\frac{x-x_i}{h_s},\frac{y-y_i}{h_s}) k_t(\frac{t-t_i}{h_t})$
+    \EndIf
+  \EndFor
+  \State $stkde[X][Y][T] = \frac{sum}{n h_s^2h_t}$
+\EndFor
+\end{algorithmic}
+\label{alg:vb}
+\end{algorithm}
+
+
+The algorithm performs $\theta(G_x G_y G_t n)$ distance tests and
+computes $\theta(n H_s^2 H_t )$ densities. Since $H_s$ is smaller than
+$G_x$ and $G_y$ and since $H_t$ is smaller than $G_t$, the complexity of the
+algorithm is $\theta(G_x G_y G_t n )$ and it requires $\theta(G_x G_y G_t)$
+memory.
+
+\section{Algorithm Design and Engineering}
+
+\label{sec:algo-seq}
+
+\subsection{Point-based Algorithm}
+The voxel-based algorithm suffers from a massive cost of computing
+distances. The gold implementation reduces the number of distance computation by 
+decomposing the domain, but that still incurs many distance calculations.
+Most of these calculations are unnecessary since we know
+where each point will radiate density. The point-based
+algorithm PB, given in Algorithm~\ref{alg:pb}, leverages that
+property.
+
+\begin{algorithm}
+\caption{\textsc{PB}}
+\begin{algorithmic}
+\For{all voxels $s=(x,y,t)$}
+  \State $stkde[X][Y][T] = 0$
+\EndFor
+%
+\For{each points $i$ at $x_i, y_i, t_i$}
+  \For{$X_i - H_s\leq X \leq X_i+H_s$}
+    \For{$Y_i - H_s\leq Y \leq Y_i+H_s$}
+      \For{$T_i - T_s\leq T \leq T_i+H_s$}
+        \If{$\sqrt{(x_i-x)^2+(y_i-y)^2}< h_s$ and $|t_i-t| \leq h_t$}
+        \State $stkde[X][Y][T] += \frac{k_s(\frac{x-x_i}{h_s},\frac{y-y_i}{h_s}) k_t(\frac{t-t_i}{h_t})}{n h_s^2h_t}$
+        \EndIf
+      \EndFor
+    \EndFor
+  \EndFor
+\EndFor
+\end{algorithmic}
+\label{alg:pb}
+\end{algorithm}
+
+The algorithm PB incurs mostly two costs. Initializing the memory which costs
+$\Theta(G_x G_y G_t)$ and computing the impact of each point
+$\Theta(n H_s^2 H_t)$. Note that it is possible that either of these
+two terms is significantly larger than the other. Therefore the
+complexity of the algorithm is $\Theta(G_x G_y G_t + n H_s^2 H_t)$.
+
+\subsection{Exploiting Symmetries}
+
+When the bandwidth is large, computing the density contribution of each
+point each for voxel in the bandwidth is the most expensive
+operation. Each of these $n (2  H_s)^2  2 H_t$ calculations costs
+approximately 40 floating point operations. (The exact cost is
+difficult to estimate since there are floating point additions,
+multiplications, divisions, and square root operations).
+
+One can remark that the calculation is mostly redundant since for one
+particular point, its contribution to the neighboring voxels can be
+decomposed in two components. $K_s(x,y)$  only depends on the
+spatial coordinate of the voxel with respect to the point and does not
+depend on its temporal coordinate. And $K_t(t)$  only depends on
+the temporal coordinate and not on the spatial coordinates. See
+Figure~\ref{fig:pb-sym-decomposition} for a graphical depiction.
+
+\begin{figure}
+  \centering
+  \includegraphics[width=.6\linewidth]{PB-SYM.pdf}
+  \caption{The contribution to the density estimate of each voxel of a
+    cylinder can be decomposed in two terms, one temporally invariant
+    $K_s(x,y)$ and one spatially invariant $K_t(t)$.}
+  \label{fig:pb-sym-decomposition}
+\end{figure}
+
+Therefore, we write an algorithm to leverage these symmetries in
+the problem. We present three variants, the PB-DISK variant ensures that
+the invariant on the spatial domain is only computed once. The PB-BAR
+variant ensures that the invariant on the temporal domain is only
+computed once. The PB-SYM variant computes independently the spatial
+invariant and the temporal invariant and then adds the density caused
+by the point by taking the product of the two invariants. (See pseudocode in Algorithm~\ref{alg:pb-sym}.) 
+Notice that leveraging the symmetries in the calculation does not change the
+complexity (PB-SYM still has a complexity of $\Theta(G_x 
+G_y  G_t + n  H_s^2  H_t)$) but reduces the number of flops.
+
+\begin{algorithm}
+\caption{\textsc{PB-SYM}}
+\begin{algorithmic}
+\For{all voxels $s=(x,y,t)$}
+  \State $stkde[X][Y][T] = 0$
+\EndFor
+%
+\For{each points $i$ at $x_i, y_i, t_i$}
+  \For{$X_i - H_s\leq X \leq X_i+H_s$}
+    \For{$Y_i - H_s\leq Y \leq Y_i+H_s$}
+      \If{$\sqrt{(x_i-x)^2+(y_i-y)^2}< h_s$ }
+        \State $K_s[X][Y] = \frac{k_s(\frac{x-x_i}{h_s},\frac{y-y_i}{h_s})}{n h_s^2h_t}$
+      \Else
+        \State $K_s[X][Y] = 0$
+      \EndIf
+    \EndFor
+  \EndFor
+  \For{$T_i - T_s\leq T \leq T_i+H_s$}
+    \If{$|t_i-t| \leq h_t$}
+      \State $K_t[T] = k_t(\frac{t-t_i}{h_t})$
+    \Else
+      \State $K_t[T] = 0$
+    \EndIf
+  \EndFor
+%
+  \For{$X_i - H_s\leq X \leq X_i+H_s$}
+    \For{$Y_i - H_s\leq Y \leq Y_i+H_s$}
+      \For{$T_i - T_s\leq T \leq T_i+H_s$}
+        \State $stkde[X][Y][T] +=  K_s[X][Y] K_t[T]$
+      \EndFor
+    \EndFor
+  \EndFor
+\EndFor
+\end{algorithmic}
+\label{alg:pb-sym}
+\end{algorithm}
+
+Notice that this exploitation of symmetries is not possible in a
+voxel-based algorithm.
+
+
+
+\section{Domain Replication}
+
+\label{sec:algo-pb-dr}
+
+
+The simplest way to parallelize this kind of computation is to split
+the points equally among the $P$ different computational
+units. Though, if two close-by points are computed
+simultaneously, the cylinders of density around them might intersect and
+there is a race condition.
+
+The PB-SYM-DR algorithm solves the data race issue by having each of
+the $P$ computational unit aggregate the result on a local copy of the
+domain. Once all the points have been processed, the $P$ copies need
+to be summed. The pseudo code of PB-SYM-DR is given in
+Algorithm~\ref{alg:pb-sym-dr}.
+
+This algorithm has a memory requirement of $\Theta (P  G_x  G_y  G_t)$
+and a parallel amount of work of $\Theta (P  G_x  G_y  G_t + n  H_s^2
+ H_t)$. Fortunately, the increase in work enables the computation to be
+pleasingly parallel. (There are actually in three pleasingly parallel phases:
+initializing the memory, processing the points, and reducing the partial results.)
+
+\begin{algorithm}
+\caption{\textsc{PB-SYM-DR}}
+\begin{algorithmic}
+\For{all processor $p \leq P$ in parallel}
+  \For{all voxels $s=(x,y,t)$}
+    \State $stkdel[p][X][Y][T] = 0$
+  \EndFor
+\EndFor
+%
+\For{each points $i$ at $x_i, y_i, t_i$ distributed among the $P$ processors}
+  \State Processor $p$ processes $i$ using PB-SYM and aggregate it in $stkdel[p]$
+\EndFor
+%
+\For{all voxels $s=(x,y,t)$ in parallel}
+  \State $stkde[X][Y][T] = 0$
+  \For{all processor $p \leq P$}
+    \State $stkde[X][Y][T] += stkdel[p][X][Y][T]$
+  \EndFor
+\EndFor
+\end{algorithmic}
+\label{alg:pb-sym-dr}
+\end{algorithm}
+
+\section{Domain Decomposition}
+\label{sec:pb-sym-dd}
+
+\subsection{Principles}
+
+Another strategy to avoid the data race is to compute 
+voxel intensity  independently for different subdomains. We call this method PB-SYM-DD (Algorithm~\ref{alg:pb-sym-dd}).
+It splits the domain in AxBxC subdomains and each subdomain is
+associated the points which cylinder intersects with a voxel of
+the subdomain. Then the algorithm proceeds with handling each
+subdomain independently by only considering the impact of the
+data-point on voxels within the subdomain.
+
+\begin{algorithm}
+\caption{\textsc{PB-SYM-DD}}
+\begin{algorithmic}
+\For{all points $i=(x_i,y_i,t_i)$}
+  \For{each subdomain $(a,b,c)$}
+        \If{$(X,Y,T) \pm (H_s,H_s,H_T)$ intersects \\$(\floor{\frac{a G_x}{A}}:\ceil{\frac{(a+1) G_x}{A}}, \floor{\frac{b G_y}{B}}:\ceil{\frac{(b+1) G_y}{B}}, \floor{\frac{c G_t}{C}}:\ceil{\frac{(c+1) G_t}{C}})$}
+          \State $localpoints[a][b][c].add(x_i,y_i,t_i)$
+        \EndIf
+  \EndFor
+\EndFor
+%
+\For{each subdomain $(a,b,c)$ in parallel}
+  \State Process subdomain $(a,b,c)$ using PB-SYM
+\EndFor
+\end{algorithmic}
+\label{alg:pb-sym-dd}
+\end{algorithm}
+
+The main problem with Domain Decomposition is that it requires some
+points to be replicated across multiple subdomain which incurs
+additional work. Indeed, if a point is replicated in multiple subdomains,
+its cylinder is split across multiple subdomains as well. Assuming the split is
+temporal, then using PB-SYM in each subdomain requires computing
+part of the temporal invariant, the entire spatial invariant, and part
+of the cylinder. Therefore both subdomains need to compute the entire
+spatial invariant. See Figure~\ref{fig:pb-sym-dd-overhead} for a
+graphical depiction of this phenomenon.
+
+\begin{figure}
+  \centering
+  \includegraphics[width=.6\linewidth]{PB-SYM-DD-overhead.pdf}
+  \caption{When a cylinder is split among two subdomains, PB-SYM-DD
+    causes an overhead because one of the invariant needs to be
+    recomputed. Here each subdomains compute part of the temporal
+    invariant $K_s$, but both need to compute the spatial invariant $K_t$.}
+  \label{fig:pb-sym-dd-overhead}
+\end{figure}
+
+If the algorithms keeps the number of subdomains small such that each
+point is replicated less than a constant number of times, then
+the work expressed in Big-Oh notation does not change.
+(This can be achieved by having subdomains larger than
+$H_s \times H_s \times H_t$.) However, the practical amount of work can
+increase by a non-negligable factor. 
+
+Another issue with Domain Decomposition is load imbalance. The
+points are unlikely to be equally distributed in the domain space, but
+more likely clustered around some locations. The subdomain containing
+a cluster will have a significantly higher work than other
+subdomains. And this work is not executed in parallel. One could
+decompose the domain more, but replicated point 
+will incur an even higher overhead which may end up nullifying
+the gain in load balance.
+
+There must exist decomposition that are provided better compromise
+between available parallelism and overhead. First to be able to find
+better decomposition, we need to have a model for the load of a box
+and we provide a model in Section~\ref{sec:workmodel}. Based on this
+model we investigate the problem of finding an optimal decomposition
+in Section~\label{sec:exactdecomposition} and because the problem is
+NP-Complete in general, we consider relatively general decomposition
+patterns for which we can find an optimal decomposition, namely
+Hierarchical decomposition in Section~\ref{sec:hier} and Jagged
+decomposition in Section~\ref{sec:jagged}. Finally we consider faster
+heuristic decomposition in Section~\ref{sec:heuristics}.
+
+\subsection{Work Inefficient Model}
+
+\label{sec:workmodel}
+
+The first thing needed for obtaining better decomposition is a model
+of the load for regions of the space so that we can evaluate the
+quality of the decomposition
+
+We model simply the work introduced by an observation $obs$ on a voxel
+box $vb$ as $Load(obs, vb)$. This function has three components, one
+represents the computation of $k_s$, one represents the computation of
+$k_t$, and the third represents the computation of the stkde
+array. $Load(obs, vb) = \alpha * ((Proj_{XY}(Cyl(obs)) \bigcap vb) +
+\beta * ((Proj_{T}(Cyl(obs)) \bigcap vb) + \gamma * (Cyl(obs) \bigcap
+vb)$. There are three parameters $\alpha$, $\beta$, and $\gamma$ which
+represents the architectural constant of the system. These constant
+will be estimated using a micro benchmark.
+
+The load of a box $Load(vb)$ is simply the sum of work introduced by
+all the observation that impact that box.
+
+    
+\subsection{Exact Decomposition}
+\label{sec:exactdecomposition}
+
+Once we have a model of the load of a particular set of voxels,
+decomposing the load becomes a combinatorial problem. It turns out
+that spatial decomposition have different complexities depending of
+the structure of decomposition one is looking for. Even for a problems
+where the load is work efficient, finding the optimal spatial
+decomposition of arbitrary structure is an NP-Hard
+problem~\cite{grigni96}. Rectilinear partitionings, which are checker board
+decomposition of varying square size, are also NP-Hard to optimize~\cite{grigni96,aspvall98}.
+
+However, other decomposition, such as jagged partitioning or any
+recursive partitioning based on boxes can be found optimally when the
+decomposition is work efficient~\cite{saule12-jpdc-spart}. 2D variants of such
+decompositions can be seen on Figure~\ref{fig:decomposition}. We show in this section
+how to discover optimal hierarchical partitioning and jagged
+partitioning when the decomposition is work inefficient.
+
+\begin{figure}
+  \subfigure[Jagged Partitioning]{\includegraphics[width=.49\linewidth]{figures/jagged_part_mway.pdf}}
+  \subfigure[Hierarchical Decomposition]{\includegraphics[width=.49\linewidth]{figures/hierar_part.pdf}}
+
+  \caption{ 2D representation of the two types of decomposition
+    addressed in this paper. Jagged partitioning form vertical stripes
+    which are then partitioned horizontally. Hierarchical
+    decomposition are defined recursively by cutting the domain in a
+    grid aligned manner.}
+  \label{fig:decomposition}
+\end{figure}
+
+\subsubsection{Hierarchical Decomposition}
+
+\label{sec:hier}
+
+By Hierarchical Decomposition, we actually mean generalized forms of
+Recursive Bisection~\cite{berger87}. That is to say, domains are
+recursively decomposed by applying a single grid aligned cut. Here we
+are looking at the 3D problem. So each box will be cut either by a
+grid aligned XY plane, or a grid aligned XT plane, or a grid aligned
+YT plane.
+
+This structure makes the problem particularly suited for Dynamic
+Programming. Indeed, a particular sub-domain can be decomposed
+independently from any other boxes, as long as the number of
+processors used to decomposed a box is known in advance. This leads
+to the dynamic programming presented in Figure~\ref{fig:hier-dp} for partitioning the box
+$X_{min}, X_{max}, Y_{min}, Y_{max}, T_{min}, T_{max}$ for $P$
+processors.
+
+\begin{figure*}
+  \begin{equation}
+    \begin{split}
+  Hier(X_{min}, X_{max}, Y_{min}, Y_{max}, T_{min}, T_{max}, P) = \min_{1 \leq p <P} (\\
+\min_{X_{min}<x<X_{max}}  ( \max& Hier(X_{min}, x, Y_{min}, Y_{max}, T_{min}, T_{max}, p),\\
+                         & Hier(x, X_{max}, Y_{min}, Y_{max}, T_{min}, T_{max}, P-p) ),\\
+\min_{Y_{min}<y<Y_{max}}  ( \max & Hier(X_{min}, X_{max}, Y_{min}, y, T_{min}, T_{max}, p),\\
+                          & Hier(X_{min}, X_{max}, y, Y_{max}, T_{min}, T_{max}, P-p) ),\\
+\min_{T_{min}<t<T_{max}}  ( \max &Hier(X_{min}, X_{max}, Y_{min}, Y_{max}, T_{min}, t, p),\\
+                    & Hier(X_{min}, X_{max}, Y_{min}, Y_{max}, t, T_{max}, P-p) ) )\\
+    \end{split}
+\end{equation}
+\begin{equation}
+Hier(X_{min}, X_{max}, Y_{min}, Y_{max}, T_{min}, T_{max}, 1 ) =\\
+Load(X_{min}, X_{max}, Y_{min}, Y_{max}, T_{min}, T_{max})
+\end{equation}
+\begin{equation}
+Hier(X_{min}, X_{min}+1, Y_{min}, Y_{min}+1, T_{min}, T_{min}+1, P ) =\\
+Load(X_{min}, X_{min}+1, Y_{min}, Y_{min}+1, T_{min}, T_{min}+1)
+\end{equation}
+
+\caption{Dynamic Programming formulation of the Hierarchical Partitioning method.}
+
+\label{fig:hier-dp}
+\end{figure*}
+
+This Dynamic Programming algorithm computes the optimal solution by
+exploring $O(G_x^2 G_y^2 G_t^2 P)$ states; each intermediate state
+being computed in $O((G_x +G_y+G_t) P )$, and each final state being
+an evaluation of the $Load$ function. Clearly this complexity is too
+high for the decomposition to be computed in a reasonable amount of
+time. In practice, one can obtain a reasonable approximation of the
+optimal solution by only authorizing cuts on voxel which X coordinate
+is a multiple of a parameter $Xstep$. Doing so reduces the number of
+state by a factor of $Xstep^2$. Similar parameters $Ystep$ and $Tstep$
+can be introduced.
+
+Implementing this Dynamic Programming algorithm is fairly straightforward.
+Not all the state will be reached in practice so it is better
+to implement the function the dynamic programming top down
+(recursively) with memoization; rather than bottom-up. This
+implementation becomes faster when realizing a few properties of the
+formulation. For instance, when evaluation the best $x$ position to
+cut the domain, if one already has a valid decomposition of the box
+and if the first term $Hier(X_{min}, x, Y_{min}, Y_{max}, T_{min},
+T_{max}, p)$ is higher than the value of the currently best known
+decomposition, one does not need to evaluate the best decomposition
+for the second term $Hier(x, X_{max}, Y_{min}, Y_{max}, T_{min},
+T_{max}, P-p)$.  Even better, the first term will only increase when
+$x$ increases and the second term will only decrease when $x$
+increases. So if a particular value of $x$ sees its first term leading
+to a sub-decomposition worst that the currently best known
+decomposition, then all subsequent values of $x$ which are all larger,
+will only lead to decomposition that won't be picked in practice. So
+the corresponding states of the dynamic programming do not need to be evaluated.
+
+\subsubsection{Jagged Decomposition}
+
+\label{sec:jagged}
+
+Jagged decompositions are a simpler pattern than hierarchical
+recursive decomposition. As such, they are expected to lead to simpler
+structures, but they should be faster to compute. A jagged
+decomposition first stripes the domain along the X dimension. Then
+each stripe is individually striped along the Y dimension. The remaining
+space is striped along the T dimension. This simpler pattern still allows
+many decompositions, but limits the combinatorial explosion compared
+to hierarchical patterns.
+
+In a work-efficient decomposition and in the one dimensional case, one
+can easily build an index of of the load which allows to quickly
+evaluate the cost of a particular sub-domain; and in particular, it is
+easy to chose the size of any sub-domain to expand up to the predicted
+optimal value of the decomposition. This was first used by
+Nicol~\cite{nicol94} and the technique was refined by
+Pinar~\cite{pinar04}. This was extended to deal with heterogeneous processors
+in~\cite{pinar08} and to handle jagged 2D decompositions in~\cite{saule12-jpdc-spart}
+
+Unfortunately in a work inefficient problem, there is no easy indexing
+that can be built and target value for the solution of the problem can
+not easily be leveraged to make similar types of optimization. This
+force us to use a more complex form of the problem which relies on a
+recursive dynamic programming formulation. At the highest level, the
+domain will be split along the X dimension at a particular
+location. The right part will processed with a jagged partitioning
+along the Y and Z axes. The left part will recursively be processed
+with a jagged partitioning along the X, Y, and Z axes. For each cut
+distributing the processors on either sides is necessary. The second
+level has a similar structure except the cuts will be along the Y axis
+and deeper partitioning will be along the Z axis. At the level of the
+Z cuts, the only difference is that there is no need to distribute the
+processors on either side of the cut, since one side will always take
+one processor. 
+
+\begin{figure*}
+  \begin{equation}
+    \begin{split}
+    JaggedX(X_{max}, P)= \min JaggedY(0,X_{max}, G_y, P), & \\
+                        \min_{0 < p < P} \min_{0<x<X_{max}} \max & JaggedX(x,p),\\
+                                                     & JaggedY(x,X_{max}, G_y, P-p)\\
+    \end{split}
+  \end{equation}
+  \begin{equation}
+    \begin{split}
+    JaggedY(X_{min}, X_{max}, Y_{max}, P)= \min JaggedT(X_{min},X_{max}, 0, & Y_{max}, G_t, P),  \\
+                        \min_{0 < p < P} \min_{0<y<Y_{max}} \max & JaggedY(X_{min}, X_{max}, y, p),\\
+                                                      & JaggedT(X_{min}, X_{max}, y,Y_{max}, G_t , P-p)\\
+    \end{split}
+  \end{equation}
+  \begin{equation}
+      \begin{split}
+    JaggedT(X_{min}, X_{max}, Y_{min}, Y_{max}, T_{max}, P)= \min_{0<t<T_{max}} \max & JaggedT(X_{min}, X_{max}, Y_{min}, Y_{max}, t, P-1),\\
+                                                                       & Load(X_{min}, X_{max}, Y_{min}, Y_{max}, t, T_{max})\\
+      \end{split}
+  \end{equation}
+
+  \begin{equation}
+    \begin{split}
+      JaggedT(X_{min}, X_{max}, Y_{min}, Y_{max}, T_{max}, 1) = Load (X_{min}, X_{max}, Y_{min}, Y_{max}, 0, T_{max})
+    \end{split}
+  \end{equation}
+      
+  \caption{Dynamic programming formulation of the Jagged Partitioning}
+  \label{fig:dp:jagged}
+\end{figure*}
+
+The complete formulation of the dynamic programming is provided in
+Figure~\ref{fig:dp:jagged}. Most of the cost of the formulation comes
+from the evaluation of all the possible $JaggedT$ states: there are
+$O(G_x^2 G_y^2 G_t P)$ of them and each cost $O(G_t)$ calls to $Load$
+to evaluate.
+
+This dynamic programming formulation also has similar optimization as
+the hierarchical dynamic programming allowing not to evaluate all the
+state based on current knowledge of what the best local solution
+is. It can also be made faster by limiting the decomposition to values
+of $x$, $y$, and $t$ which are multiples of parameters $Xstep$,
+$Ystep$, and $Tstep$.
+
+\subsubsection{Overdecomposition}
+\label{sec:overdecomposition}
+
+Despite having optimal exact decomposition, this may not lead to the
+best parallel performance in many practical cases. First obtaining the
+optimal decomposition assumed that one can have a perfect model of the
+execution of an application on a parallel platform. In practice, this
+can be really difficult as estimating the parameters of models
+accurately is difficult; in particular because lots of interference
+can make the model inaccurate.
+Also it is possible to find the best partitioning in, say, 16
+sub-domains. But it is possible that there is no good decomposition for
+this particular number of processors.
+
+A simple solution to solve the over-decomposition problem would eb to
+run the previously mentioned algorithms using number of
+sub-domains. However, in a work inefficient application, this could
+lead to a significant overhead. Indeed, these dynamic programming
+methods aim at minimizing the size of the largest sub-domain. However,
+in an over decomposition this may not be the only concern.
+
+The concern when over decomposing is to achieve an execution that is
+fast, but the size of a particular sub-domain may no longer be that
+relevant. It is difficult to predict precisely how an execution with
+many sub-domains will unfold. And even if we could, that formulation is
+unlikely to be easy to optimize.
+
+However, one can simply model the execution of sub-domains as
+independent tasks. Scheduling independent tasks has a wide
+literature~\cite{handbook}, but really early works of Graham~\cite{Graham66} are the
+most insightful for us. Graham showed that any greedy schedule of $n$
+tasks of processing time $p_i$ on $P$ processors will complete before
+$C_{max} \leq \frac{\sum p_i}{P} + \max p_i$. The two components of
+this formula are easily interpreted in terms of spatial decomposition,
+$p_{max} = \max p_i$ is the cost of the largest sub-domain and $\sum p_i$ is the
+total amount of work, including the overhead induced by the
+decomposition.
+
+The optimization problem of interest is then of minimizing the largest
+sub-domain while minimizing the total amount of work (linearly related
+to the overhead). When optimizing for a multi-objective problem, all
+the best trade-off solution, known as the Pareto Set, can be of
+interest. However that set can be exponentially large. Fortunately, it
+is possible to build a good approximation of this Pareto Set by
+solving a set of problems where one of the objective is constrained to
+be smaller than a parameter while the other parameter is
+optimized~\cite{papayanna2000:pareto}. Here we will chose to put a
+constraint on the largest sub-domain $p_{max} = \max p_i$ and minimize
+the total amount of work $\sum p_i$.
+
+It turns out that doing this new optimization problem can be solved by
+adapting the dynamic programming algorithms of the previous
+section. The cost of the solution implied by a cut in a domain becomes
+the sum of the of the cost of each side (instead of being the
+max). And the cost of an undivided sub-domain is still given by $Load$,
+except if that value is larger than the allowed cost of the sub-domain,
+in which case, the cost of that sub-domain is set to infinity.
+
+\subsection{Octree Decompositions}
+
+\label{sec:heuristics}
+
+The methods that we presented before are either trivial heuristics
+(such as regular block decompositions) or of high complexity (such as
+optimal recursive decompositions). These methods are likely to either
+lead to bad quality partitions or to be too expensive to compute in
+practical scenarios.
+
+We propose to use a classic idea to have an cheap yet adaptive
+decomposition inspired by octree decomposition of the space. The
+decomposition algorithm is initialized by having a single cuboid that
+covers the entire domain space. Then, iteratively, the cuboid of
+largest load (not necessarily of largest volume) is split in eight
+cuboid of identical volume. The process stops whenever the cuboid of
+largest load can not be divided, or a given number of cuboid is reached.
+
+These octree decompositions are inherently adaptive. They are unlikely
+to over decompose the parts of the domain that have low load. They are
+likely good at ensuring that the cuboid of highest load has a fairly
+low load. However this approach does not take the work inefficiency of
+the decomposition into account to make the decision. So, dense region
+of the domain could be naively partitioned, leading to a potential
+high work overhead.
+
+\section{Point Decomposition}
+\label{sec:pb-sym-pd}
+
+\subsection{Principles}
+
+Both of the previous strategies increase the amount of work
+significantly. We want to achieve parallelism without cutting a
+cylinder and without requiring each thread to have its own memory
+space. To achieve that goal, we propose the PB-SYM-PD algorithm that
+decomposes the points in sets that can be safely performed
+simultaneously.
+
+As long as two points are separated by $2 h_s$ in space
+dimension or by $2 h_t$ in time, the cylinders
+induced by the two points will not overlap. PB-SYM-PD decomposes
+the points in $A \times B \times C$ subdomain of identical
+size. As long as these subdomains are larger than $2 h_s$ in a spatial
+dimension and $2 h_t$ in the temporal dimension, the points
+in domain $(x, y, z)$ can be done concurently with the points in
+$(x + 2, y, z)$. See Figure~\ref{fig:PB-SYM-PD-str} for a graphical depiction.
+
+\begin{figure}
+  \centering
+  \includegraphics[width=.5\linewidth]{PB-SYM-PD-str.pdf}
+  \caption{Provided the subdomains are larger than twice the
+    bandwidth, the points contained in each blue boxes can be
+    performed simultaneously.}
+  \label{fig:PB-SYM-PD-str}
+\end{figure}
+
+We implemented the first version of this algorithm that organizes the
+subdomain in 8 sets where the first set is composed of the subdomains
+$(2i, 2j, 2k)$, the second of all the subdomains $(2 i + 1, 2 j, 2 k)$,
+the third of all the subdomains $(2 i, 2 j + 1, 2 k)$, etc.. The
+algorithm processes the sets the one after the other by doing each
+subdomain within a set in parallel. Two such sets are depicted in
+Figure~\ref{fig:PB-SYM-PD-str}. In practice, this is implemented using
+$8$ OpenMP parallel-for constructs.\looseness=-1
+
+\begin{algorithm}
+\caption{\textsc{PB-SYM-PD}}
+\begin{algorithmic}
+\For{all points $i=(x_i,y_i,t_i)$}
+  \State $localpoints[\floor{\frac{A X}{G_x}}][\floor{\frac{B Y}{G_y}}][\floor{\frac{C T}{G_t}}].add(x_i,y_i,t_i)$
+\EndFor
+%
+\For{$abase \in \{0;1\}$}
+  \For{$bbase \in \{0;1\}$}
+    \For{$cbase \in \{0;1\}$}
+      \State Do the work of the next three loops in parallel
+      \For{$a = abase; a \leq A; a+=2$}
+        \For{$b = bbase; b \leq B; b+=2$}
+          \For{$c = cbase; c \leq C; c+=2$}
+            \State Process points in $localpoints[a][b][c]$ using PB-SYM
+          \EndFor
+        \EndFor
+      \EndFor
+    \EndFor
+  \EndFor
+\EndFor
+\end{algorithmic}
+\label{alg:pb-sym-pd}
+\end{algorithm}
+
+
+\subsection{Coloring and Scheduling based Method}
+
+\subsubsection{Modeling as a Graph Coloring Problem}
+
+Note that such an implementation overconstrains the execution of the
+algorithm. Indeed, despite they are not in the same set, subdomain $(1,
+0, 0)$ and $(64, 64, 64)$ can be computed at the same time. The real
+constraint is that the points contained in a subdomain can be
+processed safely as long as none of the point contained in a
+neighboring subdomain is being processed. Using the OpenMP tasking
+construct with dependency introduced in OpenMP 4.0~\cite{OpenMP4}, one
+can precisely express this constraint, which is a 27-point stencil
+constraint.
+
+Formally speaking, this problem is a combination of multiple very
+classical graphs and scheduling problem. Modeling the subdomains as a
+27-point stencil graph, identifying sets of subdomains to perform in
+parallel is coloring the vertices of the graph so that no two
+neighboring vertices share the same color. It differs from classical
+graph coloring problems (surveyed in~\cite{GMP05}) in that the objective
+is not to minimize the number of colors or to balance the number of
+vertices of each color but to minimize the execution time of the
+implied schedule.
+
+The implied schedule is actually a scheduling of a graph of dependency
+which is extracted from the coloring. Each edge of the stencil graph
+is oriented from the vertex of the lowest color to the vertex with the
+highest color. Each vertex is associated with a processing time 
+proportional to the number of points inside the sub-domain
+the vertex represents and the neighboring subdomains. This
+construction is represented in Figure~\ref{fig:PB-SYM-PD-graph}.
+
+\begin{figure}
+  \centering
+  \includegraphics[width=.5\linewidth]{PB-SYM-PD-graph.pdf}
+  \caption{Dependency structure implied by a coloring of the
+    subdomain. (Shown for a 2D decomposition for simplicity.)}
+  \label{fig:PB-SYM-PD-graph}
+\end{figure}
+
+
+The OpenMP scheduler is not explicit in which order tasks that are
+available are performed. Though it is reasonable to assume that the
+tasks will be scheduled using a greedy algorithm. Therefore, the
+classic guarantee from Graham's List Scheduling~\cite{Graham69} is
+valid:
+$$T_P \leq \frac{T_1 - T_\infty}{P} + T_{\infty},$$
+where $T_1$ is the total amount of work to perform and $T_\infty$ is
+the length of the longest chain in the dependency graph.
+
+\subsubsection{Interval Coloring of a 27-point Stencil Graph}
+
+\label{sec:coloring}
+
+We propose to reduce the critical path by using a load-aware coloring
+of the subdomains. Let us consider this problem formally. This is a
+special case of the problem of coloring the vertices of a graph with
+intervals. Formally, we have an undirected graph $G=(V,E)$ with a
+weight function on the vertices $w: V \rightarrow \mathbb{N}$. The problem is
+to find a coloring of each vertex $v$ with $w(v)$ consecutive colors
+such that for each neighbor $(u,v) \in E$ the colors of $u$ and $v$
+are disjoint and such that the number of colors used is minimal. This
+general problem is NP-Complete since it is a generalization of the
+classic graph coloring problem~\cite{GareyJohnson79} and it appears in
+channel allocation in networking problems. This interval coloring
+problem is the dual of the edge orientation problem to extract an
+acyclic graph of minimal length; this result is known as the
+Gallai-Hasse-Roy-Vitaver theorem for unweighted
+graph~\cite{Nesetril12}.
+
+While the general problem is NP-Hard, the problem we have is a special case where the graph $G$ is
+a 3D mesh connected by a 27-point stencil. This could change the
+complexity of the problem. For instance, the traditional coloring
+problem (i.e., $\forall v, w(v)=1$) on such a 3D mesh is polynomial.
+The complexity of interval coloring on a 3D mesh with 27-point stencil
+is currently unknown to the authors of this paper. We show two
+results on this problem. If the graph was a 3D mesh with a 7-point stencil then the problem
+would be polynomial. Also, the naive coloring described above is a
+$4$-approximation of the optimal solution of the problem.
+
+\begin{theorem}
+  If $G$ is a bipartite graph, an optimal coloring can be found in
+  polynomial time.
+\end{theorem}
+
+\begin{proof}
+  A graph is bipartite if the vertices can be partitioned in two
+  groups $A$ and $B$ such that all edges $(u,v)$ of the graph have $u
+  \in A$ and $v \in B$ (or vice versa).
+
+  Consider the following coloring algorithm. All vertices $u \in A$
+  are colored $[1; w(u)]$. For each vertex of $v \in B$, will be
+  colored $[m(v) + 1; m(v) + w(u)]$ where $m(v)$ is the largest color
+  used by any of the neighbor of $v$.
+  
+  If the highest color used comes from vertex $a \in A$, then the
+  number of colors used is $w(a)$ which is a trivial lower bound on
+  the minimum number of colors. If the highest color used comes from
+  vertex $b \in B$, then it uses $w(a) + w(b)$ color which is caused
+  by an edge $(a,b)$ of the graph which is also a lower bound of the
+  minimum number of colors.
+\end{proof}
+
+Many structures are bipartite graphs, in particular 1D chains are
+bipartite, but also 2D 5-point stencils, and 3D 7-point stencils are
+also bipartite. Unfortunately 2D 9-point stencils and 3D 27-point
+stencils are not bipartite.
+
+\begin{theorem}
+  For a $d$-dimensional graph connected with a $3^d$-point stencil,
+  there exist an approximation algorithm of ratio $2^{d-1}$.
+\end{theorem}
+
+\begin{proof}
+  An algorithm is a $\rho$ approximation algorithm if it is guaranteed
+  to use a number of colors lesser than $\rho$ times the number of
+  colors used by the optimal solution~\cite{ApproxAlg}.
+  
+  The one dimensional case is bipartite, so obviously the algorithm
+  described in the previous theorem applies. For higher dimension the
+  proof is constructed by seeing a $d$-dimensional mesh as a chain of
+  $d-1$ dimensional meshes and applying the bipartite algorithm.
+
+  Let us present the rational in the 2D case. In the 2D case, for each
+  row of the instance, solve the 1D problem using the bipartite
+  algorithm. Each row $r$ uses a number of colors $c(r)$. See the 2D
+  problem has a 1D problem where each vertex is a row $r$ of weight
+  $w(r) = c(r)$ and solve it with the bipartite algorithm. The number
+  of colors used by this algorithm is $w(r) + w(r+1)$ for a particular
+  row $r$. The coloring of each row being optimal, both $w(r)$ and
+  $w(r+1)$ are lower bounds of the original coloring problem; which
+  proves that the derived coloring uses a number of color lesser than
+  $2$ times the optimal number of colors.
+  
+  A proof by induction on higher number of dimensions is easy derived
+  from this structure: a solution at dimension $d$ is constructed from
+  a chain where the weight of each vertex is a solution of the problem
+  of dimension $d-1$ for which a $2^{d-2}$ approximated solution is
+  known.
+\end{proof}
+
+Note that we proved the existence of a $2^{d-1}$ algorithm but the
+problem may still be polynomial.
+
+The naive coloring algorithm presented in the previous section that
+performs an unweighted coloring generate the same solution as the
+algorithm described in the proof once one shifts the coloring
+intervals of each vertex to be as soon as possible.
+
+In practice, we can use a greedy coloring algorithm which 
+considers the subdomains in a particular order and for each subdomain
+will color it with the smallest colors that does not conflict with the
+already colored neighbors. Such greedy coloring algorithm are commonly
+used in parallel computing applications~\cite{GMP05,Boman05-EuroPar,Deveci2016}. However, we will use
+an ordering that color the vertices in non-increasing order of the
+number of points contained in the subdomain. While this algorithm is a
+heuristic, it is likely to obtain a coloring that minimizes the
+critical path. We call this algorithm to compute STKDE:
+PB-SYM-PD-SCHED.
+
+Remark that while we expect this greedy algorithm to perform well, it
+is not optimal even on a 1D chain. Consider the graph composed of four
+vertices of weight $w(1)=10$, $w(2)=9$, $w(3)=8$, and $w(4)=10$. The
+greedy algorithm colors first vertices $1$ and $4$ with colors
+$[1;10]$; then it colors vertex $2$ with colors $[11;19]$; finally it
+colors vertex $3$ with colors $[20;27]$. Meanwhile, the optimal
+coloring only uses $18$ colors.
+
+
+\subsection{Hybrid algorithms}
+\label{sec:pb-sym-pd-rep}
+
+To decrease the critical path further, we propose an other algorithm
+PB-SYM-PD-REP which replicates the subdomains that are on the critical
+path (and its neighbors) of the task graph so that the points of a
+subdomain can be performed in parallel. As long as the critical path
+is longer than $\frac{n}{2P}$, the tasks on the path are replicated an
+additional time and the critical path is recomputed. Replication of
+subdomain causes to have to initialize additional subdomains and to
+reduce them which increases the work in a similar way
+PB-SYM-DR. However, the replication should be limited to a few chains
+in the graph and therefore should limit the overhead. Note that this
+problem is similar to scheduling a DAG of moldable tasks~\cite{Lepere02,Hunold13}.
+
+\section{Experiments}
+
+\label{sec:experiments}
+
+\subsection{Experimental Setting}
+
+\paragraph{Execution environment} The machine used to perform the experiments is
+composed of two Intel Xeon E5-2667 v3 processors for a total of
+16 cores clocked at 3.2Ghz. Despite each core is capable of hosting 2
+hyperthreads, hyperthreading was disabled. The machine is equipped with
+128GB of DDR4 clocked at 2.133 Ghz. The node uses RHEL 7.2
+and Linux 3.10. All codes are written in C++ and are compiled using GCC 5.3, which implements
+OpenMP 4.0, with optimization flags \texttt{-O3 -march=native -fopenmp
+  -DNDEBUG}. All reported execution times exclude all IOs.
+
+\paragraph{Dataset} Four datasets are used in our experiments. Their
+key attributes are summarized in Table~\ref{tab:instance}. 
+Out first dataset, Dengue, is of epidemiological nature and consists of the space-time
+locations of dengue fever cases reported to the “Sistema de Vigilancia
+en Salud P\'{u}blica” for the city of Cali, Colombia during 2010 and 2011. The
+system is updated on a daily basis with records of individuals that
+have been diagnosed with dengue fever, including patient address and
+the date of diagnosis. Addresses are standardized to a common address
+format, and spelling and other syntactical errors are manually
+corrected~\cite{delmelle2013spatio}; they are then geocoded and masked
+to the nearest street intersection level to maintain
+privacy~\cite{Kwan04}. In 2010, 9606 were successfully geocoded
+(11,760 reported cases, or 81.7\%), whereas in 2011, 1562 cases were
+successfully geocoded (1822 reported cases, or 85.7\%).
+
+The PollenUS dataset is composed of 588K tweets of US users from
+February 2016 to April 2016 related to Pollen (i.e., that mention
+keywords such as ``pollen'' and ``allergy''). Tweets that did not
+contain a precise localization were approximated by picking a random
+location in the approximated region provided by
+Gnip\footnote{\url{http://www.gnip.com/}}. Tweets are mostly located
+in the contiguous continental US. Therefore, this is the region we
+modeled with a spatial resolution ranging from $.2^\circ$ to $1^\circ$
+and a temporal resolution of 1 day.
+
+The Flu dataset was obtained from the Animal Surveillance
+database of the Influenza Research
+Database\footnote{\url{https://www.fludb.org/}}.
+The dataset contains observations of birds tested positive for
+carrying any strain the avian flu from 2001 to 2016. The birds were
+observed all over the world and the modeled region spans as West as
+Alaska and East as Japan, as South as the southern shore of Australia
+and as North as the Northern shore of Russia. The domain is modeled
+with spatial resolution from $.2^\circ$ to $1^\circ$ and a temporal
+resolution of 1 day.\looseness=-1
+
+The eBird\footnote{\url{http://ebird.org}} dataset is a collection of worldwide rare bird spotting
+obtained from a crowdsourcing effort managed by Cornell's Lab or
+Ornithology~\cite{ebird}. Despite the service was launched in 2002,
+the database contains many older entries of birds that are known to
+have been observed at the time. For our experiment, we use the last 20
+years of bird spotting and model the entire world with a temporal
+resolution of 3 days, and a spatial resolution of either $.1^\circ$ or
+$.5^\circ$.
+
+For all datasets, we created multiple instances of the problem coded
+Lr, Mr, Hr for low, medium, and high resolution and Lb, Hb, VHb for
+low, high and very high bandwidth. See details in Table~\ref{tab:instance}. 
+
+\begin{table}
+    \resizebox{\linewidth}{!}{\input{instance_table.tex}}
+  \caption{Properties of the datasets. The domain is expressed in voxels
+    and in MB. Bandwidth are expressed in voxels.}
+  \label{tab:instance}
+\end{table}
+
+\subsection{Algorithm design}
+
+
+\begin{table}
+  \resizebox{\linewidth}{!}{\input{seq_table.tex}}
+  \caption{Runtime of different algorithm. The speedup of PB-SYM over PB is given.  }
+  \label{tab:seq_table}
+\end{table}
+
+Table~\ref{tab:seq_table} presents the runtime of the point-based
+algorithms presented in Section~\ref{sec:algo-seq}. The runtime are
+given in seconds. As expected for each dataset, the runtime increases
+with resolution and bandwidth. Exploiting the disk invariant with
+PB-DISK provides a large reduction in the runtime, even more so when
+the temporal bandwidth is high. PB-BAR provides a more modest time
+reduction.
+
+PB-SYM combines the reductions of both PB-BAR and PB-DISK and achieves
+the best performance in most cases. PB-SYM provides improvements up to
+a factor of $6.969$ on the PollenUS\_Hr-Hb case. The cases where PB-SYM
+provides little improvement are explained either by the instance having a
+low bandwidth, and therefore there is little redundant computation to
+take advantange of, or by the fact that the runtime is dominated by
+initialization cost. The breakdown of the runtime of PB-SYM is given
+in Figure~\ref{fig:breakdown} and shows that PB-SYM is composed of two
+phases, initializing the memory to store the density estimation of the
+voxels, and computing the density cylinder surrounding the
+points. PB-SYM reduces the computation cost but initializes the memory
+in the same way as PB. Initialization is a predominant runtime cost in
+the Flu dataset since there were only 31K occurence of confirmed avian
+flu recorded in the last 15 years but they span most of the earth.
+
+\begin{figure}
+  \centering
+  \includegraphics[width=.8\linewidth]{seq_breakup.pdf}
+  \caption{Breakdown of the runtime of PB-SYM. Some instances are
+    mostly Initialization.}
+  \label{fig:breakdown}
+\end{figure}
+
+Comparing to the gold implementation would not be fair because it is
+in a different programming language. Though we implemented the VB
+algorithm, and also a variant, VB-DEC, that partitions the points in
+blocks of size equal to the bandwidth to only compute distances
+between voxels and points that have a chance to have an impact on
+it. The results are given in Table~\ref{tab:seq_table} and show that
+even VB-DEC is usually at least an order of magnitude larger than PB
+and typically two orders of magnitude larger than PB-SYM.
+
+\subsection{Domain-based parallelism with PB-SYM-DR}
+
+The performance of the PB-SYM-DR algorithm is given in
+Figure~\ref{fig:sym-dr-speedup}. Because it replicates the domain
+space, PB-SYM-DR was not able to complete the calculations for
+Flu\_Hr-Lb and Flu\_Hr-Hb when using 8 threads and 16 threads as the
+memory requirement exceeds the 128GB available on the machine. None of
+the high resolution eBird instances could have their domain
+replicated.
+
+\begin{figure}[tbh]
+  \centering
+  \includegraphics[width=1\linewidth]{SYM-DR-speedup.pdf}
+  \caption{Speedup of PB-SYM-DR for different number of threads
+    used. Some instances run out of memory.}
+  \label{fig:sym-dr-speedup}
+\end{figure}
+
+All the instances that have a high initialization cost get a speedup
+lesser than 1 since the threads spend their time allocating extra
+memory and reducing the content of that extra memory. The only
+instances to achieve a speedup higher than 8 when using 16 threads are 3 of 
+the PollenUS instances and one low resolution eBird instances. Not
+surprisingly, they are the instances with the largest fraction of
+computation. (See Figure~\ref{fig:breakdown} for reference.)
+
+
+\subsection{Domain-based parallelism with PB-SYM-DD}
+
+\subsubsection{With Regular Grid Partitioning}
+
+\begin{figure}[tbh]
+  \centering
+  \includegraphics[width=\linewidth]{SYM-DD-overhead.pdf}
+  \caption{Overhead of PB-SYM-DD: runtime of PB-SYM-DD with a single
+    thread normalized to PB-SYM. Some decomposition improve
+    performance dues to better cache fitting. Overdecomposition can
+    cause significant overhead.}
+  \label{fig:pb-sym-dd-speedup}
+\end{figure}
+
+The PB-SYM-DD algorithm (described in Section~\ref{sec:pb-sym-dd}) also has some
+overhead induced by cut cylinder surrounding a point. To measure the
+overhead beforehand, we run the decomposition algorithm using
+different number of subdomains ranging from a single subdomain (1x1x1)
+to a very fine grain decomposition in 64x64x64 subdomains (except on the eBird\_Hr\_Hb where such a test is computationally expensive). The results
+of that experiment is presented in
+Figure~\ref{fig:pb-sym-dd-speedup}. The figure presents the overhead
+of the decomposition relatively to PB-SYM. Two things are
+apparent. Some decomposition can actually reduce the runtime by
+providing better cache locality; for instance Flu\_Hr-Lb is 9.8\% faster
+using a 16x16x16 decomposition than PB-SYM.
+
+
+However, in most cases, the decomposition actually increases the
+runtime. For instance, a 16x16x16 decomposition increases the amount
+of work by 9\% in the Flu-Lr-Hb cases, and a 64x64x64 decomposition
+induces an overhead of 254\%. Even on the Dengue\_Lr-Hb, a simple
+4x4x4 decomposition already induces a 5\% overhead which grows to 69\%
+for a 16x16x16 decomposition.  Such large decomposition are likely to
+be necessary since the points in the datasets are often organized in
+clusters: a decomposition in 16 subdomains is unlikely to provide a
+load balanced execution. The PollenUS suffers from the highest overheads,
+with a 16x16x16 decomposition leading to a 74\% overhead on PollenUS-Hr-Mb,
+and a 495\% overhead for a 64x64x64 decomposition
+
+
+The speedup achieved by a parallel execution of PB-SYM-DD using 16
+threads is presented in Figure~\ref{fig:pb-sym-dd-16-speedup}. This
+algorithm achieves overall better speedup than PB-SYM-DR. It achieves a
+speedup greater than 8 on 9 instances. Let us note that a speedup of
+$14.9$ is achieved on Dengue\_Hr-VHb using a 16x16x16 decomposition
+and of $14.8$ on eBird\_Hr-Hb with a 32x32x32 decomposition.
+
+\begin{figure}[tbh]
+  \centering
+  \includegraphics[width=\linewidth]{SYM-DD-speedup16.pdf}
+  \caption{Speedup of PB-SYM-DD with 16 threads. While PB-SYM-DD achieves good
+    speedup in some cases, the overdecomposition overhead usually
+    hinders the performance.}
+  \label{fig:pb-sym-dd-16-speedup}
+\end{figure}
+
+
+
+Despite a significant overhead on the PollenUS\_Hr instances, a speedup
+of $10$ and $11.5$ can be observed on the Mb and Hb cases using 8x8x8
+decomposition. This speedup is relatively impressive provided the
+decomposition induces an overhead of 25\% and 23\% in these two
+cases. The 8x8x8 decomposition in that case is still imbalanced and a
+finer decomposition can reach perfect load balance; however the
+overhead induced by the decomposition prevents taking advantages of
+that better load balance. For PB-SYM-DD to be useful,
+it is important to pick the decomposition to ensure load
+balance without suffering from an unbearable computational overhead.
+
+
+A more modest speedup between $2$ and $4$ can be observed on the
+instances with higher initialization cost, such as on the Flu
+dataset. Indeed, most of the time is spent on initializing the memory
+to hold the density estimates. Even if the algorithm performs memory
+initialization in parallel, there is not much room for parallelism in
+memory operations. Even more so since the initialization touches the memory
+for the first time, which makes the operating system
+allocates the pages in physical memory. The speedup of the
+initialization phase using 16 threads is about the same for all
+instances and is at about $3$. The small speedup of PB-SYM-DD on
+instances with high initialization cost is completely explained by
+this phenomenon. Even if the compute phase was reduced to $0$, the
+speedup on the entire calculation would only be $3.7$. 
+
+
+\subsubsection{Considering better partitioning.}
+
+
+We computed partitionings for 16, 32, and 64 sub-domains. And using
+$Xstep$, $Ystep$, and $Tstep$ values of 4, 8, 16, 32, 64, 256, and
+512. For over-decomposition methods, we set the constraint by using the
+ratio between the largest allowed box and a perfect partitioning. We
+used ratios of 1.1, 1.5, 2, 3 and 4. Unfeasible partitioning were
+discarded. We also discarded all partitioning which took more than 2
+hours to compute.
+
+We report the quality of the partitioning in
+Figure~\ref{fig:jagged_res} for Jagged partitioning and in
+Figure~\ref{fig:hier_res}. On each figure, we are also showing a
+simple grid based over-decomposition that decomposed the space along
+each axis in 4, 8, 16, 32, and 64 blocks. On the x-axis, each plot
+shows normalized values for $1/p_{max}$. In other words, if $1/p_{max}
+= 16$, one would expect to see a speedup of 16 if there was only the
+largest sub-domain to process. On the y-axis, the plots show the
+normalized work overhead, a decomposition that introduces no
+additional work would have a work overhead of 0 (there are none of
+those reported) while a decomposition that double the amount of work
+would have an work overhead of 1. As such, one wants to achieve a
+partitioning with a high $1/p_{max}$ value and a low work overhead,
+and therefore wishes to be the most on the bottom right of the charts.
+
+\begin{figure*}
+  \subfigure[Dengue-Lr-Lb]{\includegraphics[width=.35\linewidth,page=2]{plots/part-Dengue-lrlb.pdf}}
+  \subfigure[Dengue-Lr-Hb]{\includegraphics[width=.35\linewidth,page=2]{plots/part-Dengue-lrhb.pdf}}
+  \subfigure[Dengue-Hr-Lb]{\includegraphics[width=.35\linewidth,page=2]{plots/part-Dengue-hrlb.pdf}}
+  \subfigure[Dengue-Hr-Hb]{\includegraphics[width=.35\linewidth,page=2]{plots/part-Dengue-hrhb.pdf}}
+  \subfigure[Dengue-Hr-VHb]{\includegraphics[width=.35\linewidth,page=2]{plots/part-Dengue-hrvhb.pdf}}
+
+  \subfigure[PollenUS-Lr-Lb]{\includegraphics[width=.35\linewidth,page=2]{plots/part-PollenUS-lrlb.pdf}}
+  \subfigure[PollenUS-Hr-Lb]{\includegraphics[width=.35\linewidth,page=2]{plots/part-PollenUS-hrlb.pdf}}
+  \subfigure[PollenUS-Hr-Mb]{\includegraphics[width=.35\linewidth,page=2]{plots/part-PollenUS-hrmb.pdf}}
+  \subfigure[PollenUS-Hr-Hb]{\includegraphics[width=.35\linewidth,page=2]{plots/part-PollenUS-hrhb.pdf}}
+  \subfigure[PollenUS-VHr-Lb]{\includegraphics[width=.35\linewidth,page=2]{plots/part-PollenUS-vhrlb.pdf}}
+  \subfigure[PollenUS-VHr-VLb]{\includegraphics[width=.35\linewidth,page=2]{plots/part-PollenUS-vhrvlb.pdf}}
+
+  \caption{Quality of partitioning generated by Jagged decomposition}
+  \label{fig:jagged_res}
+\end{figure*}
+
+\begin{figure*}
+  \subfigure[Dengue-Lr-Lb]{\includegraphics[width=.35\linewidth,page=3]{plots/part-Dengue-lrlb.pdf}}
+  \subfigure[Dengue-Lr-Hb]{\includegraphics[width=.35\linewidth,page=3]{plots/part-Dengue-lrhb.pdf}}
+  \subfigure[Dengue-Hr-Lb]{\includegraphics[width=.35\linewidth,page=3]{plots/part-Dengue-hrlb.pdf}}
+  \subfigure[Dengue-Hr-Hb]{\includegraphics[width=.35\linewidth,page=3]{plots/part-Dengue-hrhb.pdf}}
+  \subfigure[Dengue-Hr-VHb]{\includegraphics[width=.35\linewidth,page=3]{plots/part-Dengue-hrvhb.pdf}}
+
+  \subfigure[PollenUS-Lr-Lb]{\includegraphics[width=.35\linewidth,page=3]{plots/part-PollenUS-lrlb.pdf}}
+  \subfigure[PollenUS-Hr-Lb]{\includegraphics[width=.35\linewidth,page=3]{plots/part-PollenUS-hrlb.pdf}}
+  \subfigure[PollenUS-Hr-Mb]{\includegraphics[width=.35\linewidth,page=3]{plots/part-PollenUS-hrmb.pdf}}
+  \subfigure[PollenUS-Hr-Hb]{\includegraphics[width=.35\linewidth,page=3]{plots/part-PollenUS-hrhb.pdf}}
+  \subfigure[PollenUS-VHr-Lb]{\includegraphics[width=.35\linewidth,page=3]{plots/part-PollenUS-vhrlb.pdf}}
+  \subfigure[PollenUS-VHr-VLb]{\includegraphics[width=.35\linewidth,page=3]{plots/part-PollenUS-vhrvlb.pdf}}
+
+  \caption{Quality of Partitionings generated by Hierarchical Decomposition}
+  \label{fig:hier_res}
+\end{figure*}
+
+
+
+
+
+The first observation one can have is that a grid based partitioning
+consistently generates highly work-inefficient partitiong with over
+overheads often larger than 1. As a comparison most of the other
+methods tend to return partitioning with work overhead less than
+$.25$. The solutions computed by Jagged partitioning or Hierarchical
+decomposition that have a high work overhead and a low $1/p_{max}$ are
+derived from high $Xstep$, $Ystep$, and $Tstep$ values and therefore
+have lead to very inefficient partitioning.
+
+For Jagged partitioning, the over decomposition methods most of the
+time exposes more interesting trade-off than the partitioning
+generated by the exact decomposition methods; typically on
+Dengue-Hr-Hb. Few cases of the exact partitioning leading to more
+interesting trade-off than the over decomposition method can be seen,
+for instance on PollenUS-VHr-Lb. Upon analysis, these cases come from
+the exact method converging faster than the over decomposition method
+and returning a solution for smaller values of $Xstep$, $Ystep$, and
+$Tstep$, leading to a finer level of optimization. (The similar cases
+for the over decomposition timed out).
+
+The Hierarchical decomposition show a slightly different picture. In
+particular, more cases of the over decomposition timed out. This leads
+to fewer interesting cases of over-decomposition. Also, interestingly,
+the over decomposition returned the same solution as the exact
+decomposition in many cases; which did not happen for the Jagged
+decomposition. This makes some intuitive sense as hierarchical
+partitioning have more leeway to optimize the structure of the
+solution and is less likely to be forced to pick a decomposition that
+increase the amount of work significantly. In any cases, the work aware
+method presented in this manuscript lead to much better decomposition
+than the naive grid partitioning.
+
+Figure~\ref{fig:all_parts} introduces the octree-based decomposition
+presented in Section~\ref{sec:heuristics}. We removed the
+over-decomposed variants of Jagged and Hierarchical partitioning for
+clarity. On most instances, the octree decomposition is the
+decomposition that leads to the highest value of $1/p_{max}$. This
+make senses since this method greedily maximizes $1/p_{max}$.
+
+\begin{figure*}
+  \subfigure[Dengue-Lr-Lb]{\includegraphics[width=.35\linewidth,page=9]{plots/part-Dengue-lrlb.pdf}}
+  \subfigure[Dengue-Lr-Hb]{\includegraphics[width=.35\linewidth,page=9]{plots/part-Dengue-lrhb.pdf}}
+  \subfigure[Dengue-Hr-Lb]{\includegraphics[width=.35\linewidth,page=9]{plots/part-Dengue-hrlb.pdf}}
+  \subfigure[Dengue-Hr-Hb]{\includegraphics[width=.35\linewidth,page=9]{plots/part-Dengue-hrhb.pdf}}
+  \subfigure[Dengue-Hr-VHb]{\includegraphics[width=.35\linewidth,page=9]{plots/part-Dengue-hrvhb.pdf}}
+
+  \subfigure[PollenUS-Lr-Lb]{\includegraphics[width=.35\linewidth,page=9]{plots/part-PollenUS-lrlb.pdf}}
+  \subfigure[PollenUS-Hr-Lb]{\includegraphics[width=.35\linewidth,page=9]{plots/part-PollenUS-hrlb.pdf}}
+  \subfigure[PollenUS-Hr-Mb]{\includegraphics[width=.35\linewidth,page=9]{plots/part-PollenUS-hrmb.pdf}}
+  \subfigure[PollenUS-Hr-Hb]{\includegraphics[width=.35\linewidth,page=9]{plots/part-PollenUS-hrhb.pdf}}
+  \subfigure[PollenUS-VHr-Lb]{\includegraphics[width=.35\linewidth,page=9]{plots/part-PollenUS-vhrlb.pdf}}
+  \subfigure[PollenUS-VHr-VLb]{\includegraphics[width=.35\linewidth,page=9]{plots/part-PollenUS-vhrvlb.pdf}}
+
+  \caption{Quality of all Octree-based decomposition}
+  \label{fig:all_parts}
+\end{figure*}
+
+However when looking at the tradeoff between parallelism and work
+overhead, the octree partitioning does not consistently outperform the
+simple grid partitioning. And the jagged and hier partitioning lead to
+partitioning of much lower overhead than the octree
+decomposition. This is not necessarily surprising provided the octree
+decomposition does not attempt to minimize work overhead.
+
+
+\subsubsection{Real execution of decomposed domains}
+
+The partitioning generated by the different methods were plugged in a
+parallel code of STKDE to see how much speedup these improved
+partition would obtain. The results are presented in
+Figure~\ref{fig:part_all_res}. The y-axis shows the speedup obtained
+against the sequential PB-SYM. While the x-axis shows the expected
+speedup assuming 1) that the work load model is correct, 2) that the
+Graham bound~\cite{Graham66} (explained in Section~\ref{sec:overdecomposition}) applies, and 3) that the worst schedule
+is obtained.
+
+\begin{figure*}
+  \subfigure[Dengue-Lr-Lb]{\includegraphics[width=.35\linewidth,page=2]{plots/res_part-Dengue-lrlb.pdf}}
+  \subfigure[Dengue-Lr-Hb]{\includegraphics[width=.35\linewidth,page=2]{plots/res_part-Dengue-lrhb.pdf}}
+  \subfigure[Dengue-Hr-Lb]{\includegraphics[width=.35\linewidth,page=2]{plots/res_part-Dengue-hrlb.pdf}}
+  \subfigure[Dengue-Hr-Hb]{\includegraphics[width=.35\linewidth,page=2]{plots/res_part-Dengue-hrhb.pdf}}
+  \subfigure[Dengue-Hr-VHb]{\includegraphics[width=.35\linewidth,page=2]{plots/res_part-Dengue-hrvhb.pdf}}
+
+  \subfigure[PollenUS-Lr-Lb]{\includegraphics[width=.35\linewidth,page=2]{plots/res_part-PollenUS-lrlb.pdf}}
+  \subfigure[PollenUS-Hr-Lb]{\includegraphics[width=.35\linewidth,page=2]{plots/res_part-PollenUS-hrlb.pdf}}
+  \subfigure[PollenUS-Hr-Mb]{\includegraphics[width=.35\linewidth,page=2]{plots/res_part-PollenUS-hrmb.pdf}}
+  \subfigure[PollenUS-Hr-Hb]{\includegraphics[width=.35\linewidth,page=2]{plots/res_part-PollenUS-hrhb.pdf}}
+  \subfigure[PollenUS-VHr-Lb]{\includegraphics[width=.35\linewidth,page=2]{plots/res_part-PollenUS-vhrlb.pdf}}
+  \subfigure[PollenUS-VHr-VLb]{\includegraphics[width=.35\linewidth,page=2]{plots/res_part-PollenUS-vhrvlb.pdf}}
+
+  \caption{Actual run of all Partitionings. \todo{remove bound} \todo{better title}}
+  \label{fig:part_all_res}
+\end{figure*}
+
+Graham's result proves that List Scheduling is a 2-approximation
+algorithm. However, in practice, most instance are almost
+optimal. This can be seen on most of the result charts where the
+actual speedup is about twice the predicted speedup. This indicates
+that while the while the model may not be perfect, it is typically
+good enough to build meaningful decompositions. This behavior does not
+hold for Dengue-Lr-Lb, Dengue-Hr-Lb, and PollenUS-Lr-Lb which are
+three of the four instances with a sequential runtime of less than .5
+seconds.
+
+The hierarchical and jagged partitioning tend to give the best
+achieved speedup in cases where computing a good partitioning was
+possible (Dengue-Lr-Hb, Dengue-Hr-Hb, Dengue-Hr-VHb, PollenUS-Hr-Lb,
+PollenUS-Hr-Mb).
+
+There is a strange effect linked to over-decomposition has performed
+by the octree and grid decompositions. If there is a lot of work, and
+a large domain, over-decomposition induces a gain in locality and
+super linear speedup are observed (PollenUS-Hr-Hb, PollenUS-VHr-Lb, and
+PollenUS-VHr,VLb). Meanwhile, when the amount of work is not that
+large, over-decomposition causes the scheduling of many tiny tasks
+that induce overheads in the middleware and decreases the achieved
+speedup (Dengue-Lr,Hb, Dengue-Hr-Hb, PollenUS-Hr-Lb).
+
+\subsubsection{Which decomposition algorithm to choose?}
+
+Overall, we showed that complex decomposition algorithms can build
+better decompositions than heuristics like grid and octree
+decomposition. However the time it takes to generate such a
+decomposition is prohibitive: the runtime reduction obtained from
+having a better partitioning does not compensate the time cost of
+building the decomposition.
+
+Meanwhile it is not clear that an adaptive decomposition like the
+octree-based decomposition will outperform trivial regular blocking of
+the domain space. As such we will continue forward assuming a regular
+blocking decomposition.
+
+It could be worthwhile to investigate in the future decomposition
+techniques which are both heuristic but also workload aware.
+
+\subsection{Point-based parallelism}
+
+The
+performance of PB-SYM-PD is shown in Figure~\ref{fig:pb-sym-pd} for
+different decomposition. Note that there is a requirement in PB-SYM-PD
+that the subdomain be larger than twice the bandwidth (see details in
+Section~\ref{sec:pb-sym-pd}). Therefore if the number of subdomain
+leads to too small subdomains, the decomposition is adjusted to fit
+the required size.
+
+\begin{figure}
+  \centering
+  \includegraphics[width=\linewidth]{SYM-PD-speedup16.pdf}
+  \caption{Speedup of PB-SYM-PD using 16 threads. Note that decompositions of
+    subdomain smaller that twice the bandwidths are adjusted.}
+  \label{fig:pb-sym-pd}
+\end{figure}
+
+
+
+PB-SYM-PD does not scale well on all instances. The highest speedup achieved on
+PollenUS\_Lr-Lb is $2.6$. It is interesting to notice
+that the speedup usually increases with decomposition size. However,
+the speedup is limited because of load
+imbalance. Figure~\ref{fig:PB-SYM-PD-loadbalance} shows the implicit
+critical path within the PB-SYM-PD algorithm for the highest
+decomposition used in the experiment (64x64x64). Most instances have a
+critical path of about 10\% of the total work. If Graham's bound is
+reached, that implies a speedup lesser than $6.15$. 
+PollenUS\_Hr-Hb has a critical path of 55\% which implies a speedup
+lesser than $1.6$. However, the speedup is typically lower because of
+the limited scalability in the initialization phase.
+
+\begin{figure}
+  \centering
+  \includegraphics[width=\linewidth]{PB-SYM-PD-imbalance.pdf}
+  \caption{Length of the critical path of the parallel algorithms
+    PB-SYM-PD and PB-SYM-PD-SCHED for a 64x64x64 decomposition}
+  \label{fig:PB-SYM-PD-loadbalance}
+\end{figure}
+
+PB-SYM-PD-SCHED aims at improving the load balance by arranging the
+execution to process the most loaded subdomain
+first. Figure~\ref{fig:PB-SYM-PD-loadbalance} shows that
+PB-SYM-PD-SCHED marginally decreases the critical path in all but one
+case. Even if that decrease is marginal, PB-SYM-PD-SCHED ensures that
+the highest loaded subdomain are executed first which tends to
+construct a better execution in practice. And one can see from
+Figure~\ref{fig:PB-SYM-PD-SCHED-speedup} that this scheduling improves
+parallelism significantly for the PollenUS instance. A superlinear
+speedup occurs on PollenUS\_VHr-VLb: it is due to the decomposition of
+the points which improves the locality of the computation compared to
+the sequential execution.
+
+\begin{figure}
+  \centering
+  \includegraphics[width=\linewidth]{SYM-PD-COLOR-SCHED-speedup16.pdf}
+  \caption{Speedup of PB-SYM-PD-SCHED with 16 threads.}
+  \label{fig:PB-SYM-PD-SCHED-speedup}
+\end{figure}
+
+
+However, the parallelism is still constrained by load
+imbalance. PB-SYM-PD-REP performs domain decomposition on the
+subdomain of the most loaded chains in the dependency graph until the
+critical is small. Figure~\ref{fig:PB-SYM-PD-REP-speedup} shows the
+speedup achieved by PB-SYM-PD-REP. Using PB-SYM-PD-REP achieves a
+speedup larger than 8 on 8 instances. Though the speedup is close to 0
+for small decompositions and on certain instances. Indeed, when there
+is no (or little) decomposition, most of the domain is replicated and
+the execution has similar drawbacks as PB-SYM-DR.
+
+\begin{figure}
+  \centering
+  \includegraphics[width=\linewidth]{SYM-PD-COLOR-REP-speedup16.pdf}
+  \caption{Speedup of PB-SYM-PD-REP using 16 threads for different
+    decompositions. Flu\_Hr-Lb and Flu\_Hr-Hb run out of memory for
+    small decomposition.}
+  \label{fig:PB-SYM-PD-REP-speedup}
+\end{figure}
+
+\subsection{Summary and Discussion}
+
+Figure~\ref{fig:bestof} summarizes the performance of all our
+methods. It shows the performance achieved by the best configuration
+of each particular algorithm. On Dengue instances, PB-SYM-DD usually
+leads to the best performance because of its low overhead on that
+instance while maintaining a good load balance. On the PollenUS
+instances, the smart scheduling of PB-SYM-PD-SCHED-REP is
+necessary to reach the highest parallelism. The flu instances are
+mostly dominated to initialization overhead because it is very sparse,
+as such, PB-SYM-DR performs much worse than the other methods, and
+past that issue, the method leads to little performance
+difference. The eBird instances have a very small memory
+initialization overhead because they are dense in computation. This
+makes approaches that replicate the voxel space perform well at low
+resolution, but runs out of memory at high resolution there.
+
+\begin{figure*}
+  \centering
+  \includegraphics[width=\linewidth]{bestof.pdf}
+  
+  \caption{Best configurations}
+  
+  \label{fig:bestof}
+\end{figure*}
+
+What we need to do is to develop a parametric model for the problem
+that will take into account memory availability, cost of memory
+initialization, expected cost of computing the kernel density. Using
+that model finding the best execution strategy becomes a combinatorial
+problem.
+
+\section{Related Works}
+
+\label{sec:soa}
+
+The PhD Thesis of U. Lopez-Novoa~\cite{LopezNovoa} is on the topic of
+computing kernel density estimation for arbitrarily shaped
+kernels. The crop and chop method presented revolves around cropping
+the voxel space around a point with similar goal as PB, and compute
+the density estimates in parallel on a multi-core CPU or on a GPU
+before the data is aggregated back on the CPU. The arbitrarily shaped
+density considered does not expose the invariants leveraged by PB-SYM
+which makes their work inapplicable to STKDE. \cite{Eaglin17} considers
+the same variant of kernel density that we consider and expand the
+techniques of~\cite{LopezNovoa} by considering coalescing. However,
+they still use a voxel based algorithm which is very slow (on a
+resolution lower than our lowest resolution, the parallel computation
+takes .6 seconds on a GPU which is slower than our reported sequential
+time on a larger instance).
+
+The two most common spatial problems solved with parallel computing
+are N-body interactions~\cite{Aaseth03} and Particle in Cell
+simulations~\cite{karimabadi06}. STKDE is different in the sense that there
+is no iterating over the problem multiple times as we see in the
+timesteps of N-body or particle in cell, no direct interaction between
+points, and no field updates as in Particle in Cell (unless you
+consider a field discretized at a one voxel size which makes the
+analogy not quite useful).
+
+The summation of kernel function, in particular of radial basis
+function attracted some
+attention~\cite{MarchXiaoYuBiros2015,FornbergLarssonFlyer2011,YangDuraiswamiGumerovDavis2003}. While
+some method presented in these papers are similar to some of the
+decomposition we discuss here, the mathematical property of the kernel
+function are different. In particular the kernel functions that these
+papers consider do not have the grid-aligned symmetries that the
+space-time kernel density estimate have. That symmetry is what we
+leverage in PB-SYM to gain an order of magnitude of acceleration and
+that leads to a more complex management of parallelism we investigated.
+
+Spatial applications can use spatial partitioning techniques 
+such as recursive bisection~\cite{berger87}, jagged partition~\cite{ujaldon96,pinar97,DeveciRDC16}, or
+rectilinear partition~\cite{nicol94,manne96}. Depending on the algorithms used for
+STKDE, the objective function is different. A partitioning for
+PB-SYM-DD needs a good load balance, to minimize the number of cut
+cylinders. But PB-SYM-PD
+needs a decomposition where the subdomains have a minimum size and the load balance critirion is harder to express since
+neighboring subdomains can not be processed simultaneously.
+
+\section{Conclusion}
+
+We presented in this paper the space-time kernel density estimation
+problem which is useful in the visualization of events located in
+space and time. We proposed sequential algorithms to decrease the
+complexity of the problem. And we investigated four parallel
+algorithms, two of which are pleasingly parallel but at the cost of
+not being work efficient. We then designed a work-efficient parallel
+algorithm but the dependency structure tends to prevent high degree of
+parallelism. Using graph coloring and moldable scheduling techniques
+we made that latter parallel algorithm more parallel by adding some
+work-overhead.
+
+For each instance of the problem, one of the parallel algorithm
+achieved an interesting performance. However, it is clear that we need
+to model the instance and the platform to control the various overhead
+and be able to pick the parallel strategy that will derive the highest
+performance. It would also be interesting to look at distributed
+memory machines and accelerators to reduce the runtime further since
+real-time is desirable for interactive applications. In term of the
+application, we would like to investigate how these methods apply to a
+bandwidth that adapts to the density of population of the area is also
+of interest.
+
+\section*{Acknowledgment}
+
+The authors would like to thank Dr. Daniel Janies for pointing us to
+the Flu dataset and to thank Bora U\c{c}ar and Julien Hermann for some
+discussion on the partitioning and coloring problem.
+%
+Support from US NSF XSEDE Supercomputing Resource Allocation
+(SES170007) "Accelerating and enhancing multi-scale spatiotemporally
+explicit analysis and modeling of geospatial systems" is acknowledged.
+%
+This material is based upon work supported by the National Science Foundation under Grant No. 1652442.
+%
+
+
+\bibliographystyle{alpha}
+\bibliography{journal}
+
+
+\end{document}
+
+

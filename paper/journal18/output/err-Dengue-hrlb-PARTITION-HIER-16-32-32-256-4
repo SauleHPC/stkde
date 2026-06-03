@@ -1,0 +1,19 @@
+hostname : cph-c12.uncc.edu
+bounding: [1053872.965;1068485.726]x[860186.8419;879395.9741]x[3;730]
+read 11056 observations
+res: 50 50 1 bw: 100 100 1
+box size: 294 x 386 x 728
+nbparts: 16
+max states: 1543488
+mem: 0.1379985809 GB (this is an order of magnitude)
+315612 states processed
+solution: 0.0012713169 in 6 boxes.
+naive: 0.0053159259 speedup:4.181432576
+sumload:0.0053249412 overhead:1.001695904
+192 294 160 288 0 728 cost 0.0012713169
+0 192 160 224 0 728 cost 0.0012319782
+0 192 224 386 0 728 cost 0.0011433459
+0 224 0 160 0 728 cost 0.0011113644
+192 294 288 386 0 728 cost 0.000547389
+224 294 0 160 0 728 cost 1.95468e-05
+partitioning time: 53.163190 seconds

@@ -1,0 +1,19 @@
+hostname : cph-c8.uncc.edu
+bounding: [1053872.965;1068485.726]x[860186.8419;879395.9741]x[3;730]
+read 11056 observations
+res: 50 50 1 bw: 2500 2500 1
+box size: 294 x 386 x 728
+nbparts: 16
+max states: 1543488
+mem: 0.1379985809 GB (this is an order of magnitude)
+307361 states processed
+solution: 0.3766812091 in 6 boxes.
+naive: 2.038316503 speedup:5.411250823
+sumload:2.038683077 overhead:1.000179842
+96 160 160 288 0 728 cost 0.3766812091
+96 294 0 160 0 728 cost 0.3729193873
+160 294 160 224 0 728 cost 0.353924889
+160 294 224 288 0 728 cost 0.3313045819
+96 294 288 386 0 728 cost 0.311134301
+0 96 0 386 0 728 cost 0.2927187089
+partitioning time: 48.227971 seconds

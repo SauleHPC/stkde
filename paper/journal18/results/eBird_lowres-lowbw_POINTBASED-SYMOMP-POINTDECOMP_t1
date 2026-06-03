@@ -1,0 +1,11 @@
+hostname : cph-c52.uncc.edu
+bounding: [-89;89]x[-180;180]x[71836;79136]
+read 291990435 observations
+res: 0.5 0.5 3 bw: 1 1 7
+voxsize: 357x721x2435 size:2391MB
+voxBW: 2 3
+Initialization time: 0.5092
+compute: 163.1 seconds
+reduce: 0.6406 seconds
+evaluations: 49802029740
+time: 164.242211 seconds

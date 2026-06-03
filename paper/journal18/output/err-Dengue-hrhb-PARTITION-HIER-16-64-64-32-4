@@ -1,0 +1,19 @@
+hostname : cph-bm1.uncc.edu
+bounding: [1053872.965;1068485.726]x[860186.8419;879395.9741]x[3;730]
+read 11056 observations
+res: 50 50 1 bw: 2500 2500 1
+box size: 294 x 386 x 728
+nbparts: 16
+max states: 5390832
+mem: 0.4819779396 GB (this is an order of magnitude)
+1200898 states processed
+solution: 0.4935884135 in 6 boxes.
+naive: 2.038316503 speedup:4.129587419
+sumload:2.038598177 overhead:1.000138189
+128 294 192 256 0 728 cost 0.4935884135
+128 294 256 386 0 728 cost 0.4763189154
+128 294 0 192 0 728 cost 0.474662199
+0 128 0 256 0 480 cost 0.4666244293
+0 128 256 386 0 480 cost 0.0853468692
+0 128 0 386 480 728 cost 0.0420573501
+partitioning time: 194.024443 seconds

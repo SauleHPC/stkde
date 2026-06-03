@@ -1,0 +1,13 @@
+hostname : cph-c49.uncc.edu
+bounding: [-39;77]x[-159;148]x[0;5950]
+read 31478 observations
+res: 1 1 7 bw: 1 1 7
+voxsize: 117x308x851 size:116.983932MB
+voxBW: 1 1
+Initialization time: 0.012365
+intersect: 36719
+decomposition time: 0.002649 seconds
+max load: 2361 avgloadperbox: 61.4804688 avgloadpercore: 1967.375
+compute: 0.000908 seconds
+evaluations: 874506
+time: 0.016131 seconds

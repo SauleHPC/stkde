@@ -1,0 +1,19 @@
+hostname : cph-c50.uncc.edu
+bounding: [-130;-65]x[20;50]x[5875;5958]
+read 588189 observations
+res: 0.5 0.5 1 bw: 1 1 3
+box size: 131 x 61 x 84
+nbparts: 64
+max states: 832
+mem: 7.438659668e-05 GB (this is an order of magnitude)
+2034 states processed
+solution: 0.192251961 in 6 boxes.
+naive: 0.4197653131 speedup:2.183412387
+sumload:0.4417569915 overhead:1.052390414
+64 128 0 61 32 64 cost 0.192251961
+0 64 0 61 0 84 cost 0.1116679463
+64 131 0 61 0 32 cost 0.0708195742
+64 128 0 61 64 84 cost 0.0670157107
+128 131 0 61 32 64 cost 1.3895e-06
+128 131 0 61 64 84 cost 4.098e-07
+partitioning time: 12.104684 seconds

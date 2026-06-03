@@ -1,0 +1,20 @@
+hostname : cph-c14.uncc.edu
+bounding: [1053872.965;1068485.726]x[860186.8419;879395.9741]x[3;730]
+read 11056 observations
+res: 50 50 1 bw: 2500 2500 1
+box size: 294 x 386 x 728
+nbparts: 16
+max load allowed: 0.5095791257
+max states: 98783776
+mem: 8.831957817 GB (this is an order of magnitude)
+977918 states processed
+solution: 0.493811013 in 6 boxes.
+naive: 2.038316503 speedup:4.127725889
+sumload:2.03859268 overhead:1.000135493
+0 128 96 386 0 480 cost 0.493811013
+128 294 192 256 0 728 cost 0.4935884135
+128 294 256 386 0 728 cost 0.4763189154
+128 294 0 192 0 728 cost 0.474662199
+0 128 0 96 0 728 cost 0.0619731648
+0 128 96 386 480 728 cost 0.0382389747
+partitioning time: 2940.693299 seconds

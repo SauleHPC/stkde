@@ -1,0 +1,21 @@
+hostname : cph-gpu1.uncc.edu
+bounding: [1053872.965;1068485.726]x[860186.8419;879395.9741]x[3;730]
+read 11056 observations
+res: 100 100 1 bw: 500 500 7
+box size: 148 x 194 x 728
+nbparts: 16
+max load allowed: 0.01523063587
+max states: 5465456
+mem: 0.4886498451 GB (this is an order of magnitude)
+85627 states processed
+solution: 0.0149997392 in 7 boxes.
+naive: 0.0609225435 speedup:4.061573517
+sumload:0.0612396568 overhead:1.005205188
+64 128 96 128 0 728 cost 0.0149997392
+0 64 0 160 0 352 cost 0.0147241316
+64 128 128 194 0 728 cost 0.0136393925
+64 128 0 96 0 728 cost 0.0123137473
+128 148 0 194 0 728 cost 0.0036340626
+0 64 0 160 352 728 cost 0.0019142826
+0 64 160 194 0 728 cost 1.4301e-05
+partitioning time: 238.779258 seconds
